@@ -23,6 +23,9 @@
       <oxd-text class="orangehrm-main-title" tag="h6">
         {{ $t('performance.add_review') }}
       </oxd-text>
+      <oxd-text tag="p" class="orangehrm-input-hint">
+        {{ $t('performance.performance_modern_hint') }}
+      </oxd-text>
       <oxd-divider />
       <oxd-form ref="formRef" :loading="isLoading">
         <oxd-form-row>

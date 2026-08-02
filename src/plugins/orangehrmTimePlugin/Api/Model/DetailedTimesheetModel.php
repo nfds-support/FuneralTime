@@ -112,6 +112,8 @@ class DetailedTimesheetModel implements CollectionNormalizable
                     'date' => $date,
                     'comment' => $timesheetItem->getComment(),
                     'duration' => $duration,
+                    'startTime' => $timesheetItem->getStartTime()?->format('H:i'),
+                    'endTime' => $timesheetItem->getEndTime()?->format('H:i'),
                 ];
             }
             $timesheetRows[] = $row;

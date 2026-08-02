@@ -33,6 +33,7 @@ import dashboardPages from '@/orangehrmDashboardPlugin';
 import buzzPages from '@/orangehrmBuzzPlugin';
 import systemCheckPages from '@/orangehrmSystemCheckPlugin';
 import claimPages from '@/orangehrmClaimPlugin';
+import disciplinePages from '@/orangehrmDisciplinePlugin';
 import freeTrialPages from '@/orangehrmFreeTrialPlugin';
 
 export default {
@@ -55,4 +56,5 @@ export default {
   ...buzzPages,
   ...systemCheckPages,
   ...claimPages,
+  ...disciplinePages,
 };

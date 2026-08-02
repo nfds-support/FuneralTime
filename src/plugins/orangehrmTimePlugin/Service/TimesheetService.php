@@ -204,8 +204,11 @@ class TimesheetService
             }
 
             foreach ($row['dates'] as $date => $dateValue) {
-                if (!isset($dateValue['duration'])) {
-                    throw new LogicException('`duration` required attribute');
+                $hasStartEnd = isset($dateValue['startTime'], $dateValue['endTime'])
+                    && $dateValue['startTime'] !== ''
+                    && $dateValue['endTime'] !== '';
+                if (!isset($dateValue['duration']) && !$hasStartEnd) {
+                    throw new LogicException('`duration` or `startTime`/`endTime` required attributes');
                 }
                 $date = new DateTime($date);
                 $itemKey = $this->generateTimesheetItemKey(
@@ -220,7 +223,22 @@ class TimesheetService
                 $timesheetItem->getDecorator()->setProjectById($row['projectId']);
                 $timesheetItem->getDecorator()->setProjectActivityById($row['activityId']);
                 $timesheetItem->setDate($date);
-                $timesheetItem->setDuration(strtotime($dateValue['duration']) - strtotime('TODAY'));
+
+                if ($hasStartEnd) {
+                    $startTime = new DateTime($dateValue['startTime']);
+                    $endTime = new DateTime($dateValue['endTime']);
+                    $timesheetItem->setStartTime($startTime);
+                    $timesheetItem->setEndTime($endTime);
+                    $durationSeconds = $endTime->getTimestamp() - $startTime->getTimestamp();
+                    if ($durationSeconds < 0) {
+                        $durationSeconds += 86400;
+                    }
+                    $timesheetItem->setDuration($durationSeconds);
+                } else {
+                    $timesheetItem->setDuration(strtotime($dateValue['duration']) - strtotime('TODAY'));
+                    $timesheetItem->setStartTime(null);
+                    $timesheetItem->setEndTime(null);
+                }
                 $timesheetItems[$itemKey] = $timesheetItem;
             }
         }

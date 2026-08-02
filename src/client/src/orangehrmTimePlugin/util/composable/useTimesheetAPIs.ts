@@ -29,7 +29,24 @@ interface State {
   timesheetColumns: Columns | null;
   timesheetSubtotal: string | null;
   timesheetAllowedActions: AllowedAction[];
+  timesheetDays: TimesheetDayMeta[];
+  timesheetDeductions: TimesheetDeductionEntry[];
   date: string | null;
+}
+
+export interface TimesheetDayMeta {
+  date: string;
+  onCall: boolean;
+  isHoliday?: boolean;
+  holidayName?: string | null;
+}
+
+export interface TimesheetDeductionEntry {
+  id?: number | null;
+  date: string;
+  startTime: string;
+  endTime: string;
+  reason?: string;
 }
 
 export interface Project {
@@ -61,6 +78,8 @@ export interface Entry {
   date: string;
   comment?: string;
   duration: string;
+  startTime?: string;
+  endTime?: string;
 }
 
 export interface UpdatedEntry {
@@ -99,6 +118,10 @@ export interface Sum {
 export interface Columns {
   [date: string]: {
     total: Total;
+    deduction?: Total;
+    net?: Total;
+    isHoliday?: boolean;
+    onCall?: boolean;
   };
 }
 
@@ -123,6 +146,8 @@ export interface Meta {
   dates: string[];
   employee: Employee;
   allowedActions: AllowedAction[];
+  days?: TimesheetDayMeta[];
+  deductions?: TimesheetDeductionEntry[];
 }
 
 export interface Record {
@@ -163,6 +188,8 @@ export default function useTimesheetAPIs(http: APIService) {
     timesheetColumns: null,
     timesheetSubtotal: null,
     timesheetAllowedActions: [],
+    timesheetDays: [],
+    timesheetDeductions: [],
     date: null,
   });
 

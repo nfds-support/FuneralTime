@@ -1,3 +1,11 @@
+New & Changed Features for OrangeHRM ver 5.9.1
+    New Features/Changes
+    -----------
+    - Time - Weekly timesheets support start/end clock times, appointment deductions, on-call flags, and statutory holiday indicators (Sunday–Saturday default week)
+    - Discipline - New Discipline module for complaints and disciplinary cases
+    - Theme - Modern teal/navy default branding and refreshed page chrome
+    - Leave / Performance - Light UX polish on apply-leave and add-review screens
+
 New & Changed Features for OrangeHRM ver 5.9
     New Features/Changes
     -----------

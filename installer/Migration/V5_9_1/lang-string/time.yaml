@@ -1,0 +1,33 @@
+langStrings:
+  -
+    unitId: start_time
+    value: 'Start Time'
+    note: ''
+  -
+    unitId: end_time
+    value: 'End Time'
+    note: ''
+  -
+    unitId: deductions
+    value: 'Deductions'
+    note: ''
+  -
+    unitId: add_deduction
+    value: 'Add Deduction'
+    note: ''
+  -
+    unitId: deduction_reason
+    value: 'Reason (e.g. appointment)'
+    note: ''
+  -
+    unitId: on_call
+    value: 'On Call'
+    note: ''
+  -
+    unitId: statutory_holiday
+    value: 'Stat Holiday'
+    note: ''
+  -
+    unitId: net_hours
+    value: 'Net Hours'
+    note: ''

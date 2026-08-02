@@ -114,7 +114,7 @@ class TimesheetEntriesParamRule extends AbstractRule
 
             $validatedDates = [];
             foreach ($dates as $date => $dateValue) {
-                if (!isset($dateValue[EmployeeTimesheetItemAPI::PARAMETER_DURATION])) {
+                if (!is_array($dateValue)) {
                     return false;
                 }
                 if (!$this->getApiDateRule()->validate($date)) {
@@ -134,12 +134,39 @@ class TimesheetEntriesParamRule extends AbstractRule
                     return false;
                 }
 
-                // only duration allowed
-                if (count(array_keys($dateValue)) != 1) {
+                $allowedKeys = [
+                    EmployeeTimesheetItemAPI::PARAMETER_DURATION,
+                    EmployeeTimesheetItemAPI::PARAMETER_START_TIME,
+                    EmployeeTimesheetItemAPI::PARAMETER_END_TIME,
+                ];
+                foreach (array_keys($dateValue) as $key) {
+                    if (!in_array($key, $allowedKeys, true)) {
+                        return false;
+                    }
+                }
+
+                $hasDuration = isset($dateValue[EmployeeTimesheetItemAPI::PARAMETER_DURATION]);
+                $hasStart = isset($dateValue[EmployeeTimesheetItemAPI::PARAMETER_START_TIME])
+                    && $dateValue[EmployeeTimesheetItemAPI::PARAMETER_START_TIME] !== '';
+                $hasEnd = isset($dateValue[EmployeeTimesheetItemAPI::PARAMETER_END_TIME])
+                    && $dateValue[EmployeeTimesheetItemAPI::PARAMETER_END_TIME] !== '';
+
+                if (!$hasDuration && !($hasStart && $hasEnd)) {
                     return false;
                 }
-                // check format and duration should less than 24:00
-                if (!$this->getTimeRule()->validate($dateValue[EmployeeTimesheetItemAPI::PARAMETER_DURATION])) {
+                if ($hasDuration && !$this->getTimeRule()->validate(
+                    $dateValue[EmployeeTimesheetItemAPI::PARAMETER_DURATION]
+                )) {
+                    return false;
+                }
+                if ($hasStart && !$this->getTimeRule()->validate(
+                    $dateValue[EmployeeTimesheetItemAPI::PARAMETER_START_TIME]
+                )) {
+                    return false;
+                }
+                if ($hasEnd && !$this->getTimeRule()->validate(
+                    $dateValue[EmployeeTimesheetItemAPI::PARAMETER_END_TIME]
+                )) {
                     return false;
                 }
             }
