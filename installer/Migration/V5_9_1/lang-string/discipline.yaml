@@ -1,0 +1,81 @@
+langStrings:
+  -
+    unitId: discipline
+    value: 'Discipline'
+    note: ''
+  -
+    unitId: cases
+    value: 'Cases'
+    note: ''
+  -
+    unitId: my_cases
+    value: 'My Cases'
+    note: ''
+  -
+    unitId: complaint
+    value: 'Complaint'
+    note: ''
+  -
+    unitId: disciplinary_action
+    value: 'Disciplinary Action'
+    note: ''
+  -
+    unitId: case_type
+    value: 'Case Type'
+    note: ''
+  -
+    unitId: severity
+    value: 'Severity'
+    note: ''
+  -
+    unitId: incident_date
+    value: 'Incident Date'
+    note: ''
+  -
+    unitId: action_taken
+    value: 'Action Taken'
+    note: ''
+  -
+    unitId: add_case
+    value: 'Add Case'
+    note: ''
+  -
+    unitId: edit_case
+    value: 'Edit Case'
+    note: ''
+  -
+    unitId: case_subject
+    value: 'Subject'
+    note: ''
+  -
+    unitId: open
+    value: 'Open'
+    note: ''
+  -
+    unitId: under_review
+    value: 'Under Review'
+    note: ''
+  -
+    unitId: resolved
+    value: 'Resolved'
+    note: ''
+  -
+    unitId: closed
+    value: 'Closed'
+    note: ''
+  -
+    unitId: low
+    value: 'Low'
+    note: ''
+  -
+    unitId: medium
+    value: 'Medium'
+    note: ''
+  -
+    unitId: high
+    value: 'High'
+    note: ''
+  -
+    unitId: critical
+    value: 'Critical'
+    note: ''

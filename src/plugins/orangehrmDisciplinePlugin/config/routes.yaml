@@ -1,0 +1,48 @@
+apiv2_discipline_cases:
+  path: /api/v2/discipline/cases
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Discipline\Api\DisciplineCaseAPI
+
+apiv2_discipline_case:
+  path: /api/v2/discipline/cases/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Discipline\Api\DisciplineCaseAPI
+    _key: id
+  requirements:
+    id: '\d+'
+
+discipline_module:
+  path: /discipline/viewDisciplineModule
+  controller: OrangeHRM\Discipline\Controller\DisciplineModuleController::handle
+  methods: [ GET ]
+
+discipline_view_cases:
+  path: /discipline/viewDisciplineCases
+  controller: OrangeHRM\Discipline\Controller\DisciplineCaseController::handle
+  methods: [ GET ]
+
+discipline_save_case:
+  path: /discipline/saveDisciplineCase
+  controller: OrangeHRM\Discipline\Controller\SaveDisciplineCaseController::handle
+  methods: [ GET ]
+
+discipline_edit_case:
+  path: /discipline/editDisciplineCase/{id}
+  controller: OrangeHRM\Discipline\Controller\SaveDisciplineCaseController::handle
+  methods: [ GET ]
+  requirements:
+    id: '\d+'
+
+discipline_view_my_cases:
+  path: /discipline/viewMyDisciplineCases
+  controller: OrangeHRM\Discipline\Controller\MyDisciplineCaseController::handle
+  methods: [ GET ]
+
+discipline_save_my_case:
+  path: /discipline/saveMyDisciplineCase
+  controller: OrangeHRM\Discipline\Controller\SaveMyDisciplineCaseController::handle
+  methods: [ GET ]

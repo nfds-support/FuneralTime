@@ -1,0 +1,29 @@
+apiv2_discipline_cases:
+  description: 'API-v2 Discipline - Cases'
+  api: OrangeHRM\Discipline\Api\DisciplineCaseAPI
+  module: discipline
+  allowed: { read: true, create: true, update: true, delete: true }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false, self: false } }
+    - { role: ESS, permission: { read: true, create: true, update: false, delete: false, self: true } }
+
+apiv2_time_timesheet_days:
+  description: 'API-v2 Time - Timesheet Day Metadata (on-call, holidays)'
+  api: OrangeHRM\Time\Api\TimesheetDayAPI
+  module: time
+  allowed: { read: true, create: false, update: true, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: true, delete: false, self: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: true, delete: false, self: false } }
+    - { role: ESS, permission: { read: true, create: false, update: true, delete: false, self: true } }
+
+apiv2_time_timesheet_deductions:
+  description: 'API-v2 Time - Timesheet Deductions'
+  api: OrangeHRM\Time\Api\TimesheetDeductionAPI
+  module: time
+  allowed: { read: true, create: true, update: true, delete: true }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: true, self: false } }
+    - { role: ESS, permission: { read: true, create: true, update: true, delete: true, self: true } }

@@ -42,6 +42,7 @@ use OrangeHRM\Entity\Employee;
 use OrangeHRM\Entity\Timesheet;
 use OrangeHRM\ORM\Exception\TransactionException;
 use OrangeHRM\Pim\Api\Model\EmployeeModel;
+use OrangeHRM\Leave\Traits\Service\HolidayServiceTrait;
 use OrangeHRM\Time\Api\Model\DetailedTimesheetModel;
 use OrangeHRM\Time\Api\Model\TimesheetModel;
 use OrangeHRM\Time\Api\Model\TotalDurationModel;
@@ -59,6 +60,7 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
     use DateTimeHelperTrait;
     use NormalizerServiceTrait;
     use EntityManagerHelperTrait;
+    use HolidayServiceTrait;
 
     public const PARAMETER_TIMESHEET_ID = 'timesheetId';
     public const PARAMETER_ENTRIES = 'entries';
@@ -67,6 +69,8 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_ACTIVITY_ID = 'activityId';
     public const PARAMETER_DATES = 'dates';
     public const PARAMETER_DURATION = 'duration';
+    public const PARAMETER_START_TIME = 'startTime';
+    public const PARAMETER_END_TIME = 'endTime';
 
     public const META_PARAMETER_DATES = 'dates';
     public const META_PARAMETER_SUM = 'sum';
@@ -74,6 +78,8 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
     public const META_PARAMETER_TIMESHEET = 'timesheet';
     public const META_PARAMETER_EMPLOYEE = 'employee';
     public const META_PARAMETER_ALLOWED_ACTIONS = 'allowedActions';
+    public const META_PARAMETER_DAYS = 'days';
+    public const META_PARAMETER_DEDUCTIONS = 'deductions';
 
     /**
      * @OA\Get(
@@ -197,12 +203,51 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
         $dates = [];
         $columns = [];
         $sum = 0;
+        $deductionSecondsByDate = [];
+        $timesheetId = $detailedTimesheet->getTimesheet()->getId();
+        foreach ($this->getTimesheetService()->getTimesheetDao()->getTimesheetDeductionsByTimesheetId($timesheetId) as $deduction) {
+            $deductionDate = $this->getDateTimeHelper()->formatDateTimeToYmd($deduction->getDate());
+            $deductionSecondsByDate[$deductionDate] = ($deductionSecondsByDate[$deductionDate] ?? 0)
+                + $deduction->getDuration();
+        }
+
+        $onCallByDate = [];
+        foreach ($this->getTimesheetService()->getTimesheetDao()->getTimesheetDaysByTimesheetId($timesheetId) as $day) {
+            $onCallByDate[$this->getDateTimeHelper()->formatDateTimeToYmd($day->getDate())] = $day->isOnCall();
+        }
+
+        $daysMeta = [];
         foreach ($detailedTimesheet->getColumns() as $column) {
             $sum += $column->getTotal();
             $date = $this->getDateTimeHelper()->formatDateTimeToYmd($column->getDate());
             $dates[] = $date;
+            $dayDeduction = $deductionSecondsByDate[$date] ?? 0;
             $columns[$date] = [
                 'total' => $this->getNormalizedTotalDuration($column->getTotal()),
+                'deduction' => $this->getNormalizedTotalDuration($dayDeduction),
+                'net' => $this->getNormalizedTotalDuration(max(0, $column->getTotal() - $dayDeduction)),
+                'isHoliday' => $this->getHolidayService()->isHoliday($column->getDate())
+                    || $this->getHolidayService()->isHalfDayHoliday($column->getDate()),
+                'onCall' => $onCallByDate[$date] ?? false,
+            ];
+            $holiday = $this->getHolidayService()->getHolidayDao()->getHolidayByDate($column->getDate());
+            $daysMeta[] = [
+                'date' => $date,
+                'onCall' => $onCallByDate[$date] ?? false,
+                'isHoliday' => $columns[$date]['isHoliday'],
+                'holidayName' => $holiday?->getName(),
+            ];
+        }
+
+        $deductionsMeta = [];
+        foreach ($this->getTimesheetService()->getTimesheetDao()->getTimesheetDeductionsByTimesheetId($timesheetId) as $deduction) {
+            $deductionsMeta[] = [
+                'id' => $deduction->getId(),
+                'date' => $this->getDateTimeHelper()->formatDateTimeToYmd($deduction->getDate()),
+                'startTime' => $deduction->getStartTime()->format('H:i'),
+                'endTime' => $deduction->getEndTime()->format('H:i'),
+                'duration' => $this->getNormalizedTotalDuration($deduction->getDuration()),
+                'reason' => $deduction->getReason(),
             ];
         }
 
@@ -228,7 +273,9 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
             self::META_PARAMETER_EMPLOYEE => $this->getNormalizedEmployee(
                 $detailedTimesheet->getTimesheet()->getEmployee()
             ),
-            self::META_PARAMETER_ALLOWED_ACTIONS => $allowedActions
+            self::META_PARAMETER_ALLOWED_ACTIONS => $allowedActions,
+            self::META_PARAMETER_DAYS => $daysMeta,
+            self::META_PARAMETER_DEDUCTIONS => $deductionsMeta,
         ]);
     }
 

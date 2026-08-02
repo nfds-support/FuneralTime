@@ -21,6 +21,8 @@
   <div class="orangehrm-background-container">
     <timesheet
       v-model:records="timesheetRecords"
+      v-model:days-meta="timesheetDays"
+      v-model:deductions="timesheetDeductions"
       :editable="true"
       :loading="isLoading"
       :timesheet-id="timesheetId"
@@ -119,6 +121,8 @@ export default {
       state.isLoading = true;
       timesheetModal = [];
       state.timesheetRecords = [];
+      state.timesheetDays = [];
+      state.timesheetDeductions = [];
       fetchTimesheetEntries(props.timesheetId, !props.myTimesheet).then(
         (response) => {
           const {data, meta, timesheet, allowedActions} = response;
@@ -128,6 +132,17 @@ export default {
           state.timesheetSubtotal = meta.sum.label;
           state.timesheetStatus = timesheet.status.name;
           state.timesheetAllowedActions = allowedActions;
+          state.timesheetDays = (meta.days || []).map((day) => ({
+            ...day,
+            onCall: !!day.onCall,
+          }));
+          state.timesheetDeductions = (meta.deductions || []).map((item) => ({
+            id: item.id,
+            date: item.date,
+            startTime: item.startTime,
+            endTime: item.endTime,
+            reason: item.reason || '',
+          }));
           if (data.length > 0) {
             state.timesheetRecords = data;
             timesheetModal = JSON.parse(JSON.stringify(data));
@@ -176,10 +191,17 @@ export default {
         entries: state.timesheetRecords.map((record) => {
           const dates = {};
           for (const date in record.dates) {
-            const _duration = parseTimeInSeconds(record.dates[date].duration);
+            const entry = record.dates[date];
+            const _duration = parseTimeInSeconds(entry.duration);
             dates[date] = {
               duration: _duration > 0 ? secondsTohhmm(_duration) : '00:00',
             };
+            if (entry.startTime) {
+              dates[date].startTime = entry.startTime;
+            }
+            if (entry.endTime) {
+              dates[date].endTime = entry.endTime;
+            }
           }
           return {
             projectId: record.project.id,
@@ -203,7 +225,52 @@ export default {
             activityId: record.activity.id,
           })),
       };
+      const deductionsHttp = new APIService(
+        window.appGlobal.baseUrl,
+        `/api/v2/time/timesheets/${props.timesheetId}/deductions`,
+      );
       updateTimesheetEntries(props.timesheetId, payload, !props.myTimesheet)
+        .then(() =>
+          http.request({
+            method: 'PUT',
+            url: `/api/v2/time/timesheets/${props.timesheetId}/days`,
+            data: {
+              days: (state.timesheetDays || []).map((day) => ({
+                date: day.date,
+                onCall: !!day.onCall,
+              })),
+            },
+          }),
+        )
+        .then(async () => {
+          const existing = await deductionsHttp.getAll();
+          const existingIds = (existing.data?.data || [])
+            .map((item) => item.id)
+            .filter(Boolean);
+          const keepIds = (state.timesheetDeductions || [])
+            .map((item) => item.id)
+            .filter(Boolean);
+          const toDelete = existingIds.filter((id) => !keepIds.includes(id));
+          if (toDelete.length) {
+            await deductionsHttp.deleteAll({ids: toDelete});
+          }
+          for (const deduction of state.timesheetDeductions || []) {
+            if (!deduction.date || !deduction.startTime || !deduction.endTime) {
+              continue;
+            }
+            const body = {
+              date: deduction.date,
+              startTime: deduction.startTime,
+              endTime: deduction.endTime,
+              reason: deduction.reason || null,
+            };
+            if (deduction.id) {
+              await deductionsHttp.update(deduction.id, body);
+            } else {
+              await deductionsHttp.create(body);
+            }
+          }
+        })
         .then(() => {
           return saveSuccess();
         })

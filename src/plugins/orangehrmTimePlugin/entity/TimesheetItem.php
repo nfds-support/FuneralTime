@@ -58,6 +58,20 @@ class TimesheetItem
     private ?int $duration = null;
 
     /**
+     * @var DateTime|null
+     *
+     * @ORM\Column(name="start_time", type="time", nullable=true)
+     */
+    private ?DateTime $startTime = null;
+
+    /**
+     * @var DateTime|null
+     *
+     * @ORM\Column(name="end_time", type="time", nullable=true)
+     */
+    private ?DateTime $endTime = null;
+
+    /**
      * @var string|null
      *
      * @ORM\Column(name="comment", type="text", nullable=true)
@@ -142,6 +156,38 @@ class TimesheetItem
     public function setDuration(?int $duration): void
     {
         $this->duration = $duration;
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getStartTime(): ?DateTime
+    {
+        return $this->startTime;
+    }
+
+    /**
+     * @param DateTime|null $startTime
+     */
+    public function setStartTime(?DateTime $startTime): void
+    {
+        $this->startTime = $startTime;
+    }
+
+    /**
+     * @return DateTime|null
+     */
+    public function getEndTime(): ?DateTime
+    {
+        return $this->endTime;
+    }
+
+    /**
+     * @param DateTime|null $endTime
+     */
+    public function setEndTime(?DateTime $endTime): void
+    {
+        $this->endTime = $endTime;
     }
 
     /**

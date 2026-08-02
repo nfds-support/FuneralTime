@@ -24,6 +24,8 @@ use LogicException;
 use OrangeHRM\Core\Dao\BaseDao;
 use OrangeHRM\Entity\Timesheet;
 use OrangeHRM\Entity\TimesheetActionLog;
+use OrangeHRM\Entity\TimesheetDay;
+use OrangeHRM\Entity\TimesheetDeduction;
 use OrangeHRM\Entity\TimesheetItem;
 use OrangeHRM\ORM\ListSorter;
 use OrangeHRM\ORM\Paginator;
@@ -307,6 +309,8 @@ class TimesheetDao extends BaseDao
         foreach ($timesheetItems as $key => $timesheetItem) {
             if (isset($updatableTimesheetItems[$key])) {
                 $updatableTimesheetItems[$key]->setDuration($timesheetItem->getDuration());
+                $updatableTimesheetItems[$key]->setStartTime($timesheetItem->getStartTime());
+                $updatableTimesheetItems[$key]->setEndTime($timesheetItem->getEndTime());
                 // update
                 $this->getEntityManager()->persist($updatableTimesheetItems[$key]);
                 continue;
@@ -315,6 +319,99 @@ class TimesheetDao extends BaseDao
             $this->getEntityManager()->persist($timesheetItem);
         }
         $this->getEntityManager()->flush();
+    }
+
+    /**
+     * @param int $timesheetId
+     * @return TimesheetDay[]
+     */
+    public function getTimesheetDaysByTimesheetId(int $timesheetId): array
+    {
+        return $this->createQueryBuilder(TimesheetDay::class, 'timesheetDay')
+            ->andWhere('IDENTITY(timesheetDay.timesheet) = :timesheetId')
+            ->setParameter('timesheetId', $timesheetId)
+            ->addOrderBy('timesheetDay.date')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * @param TimesheetDay $timesheetDay
+     * @return TimesheetDay
+     */
+    public function saveTimesheetDay(TimesheetDay $timesheetDay): TimesheetDay
+    {
+        $this->persist($timesheetDay);
+        return $timesheetDay;
+    }
+
+    /**
+     * @param int $timesheetId
+     * @param DateTime $date
+     * @return TimesheetDay|null
+     */
+    public function getTimesheetDayByTimesheetIdAndDate(int $timesheetId, DateTime $date): ?TimesheetDay
+    {
+        return $this->createQueryBuilder(TimesheetDay::class, 'timesheetDay')
+            ->andWhere('IDENTITY(timesheetDay.timesheet) = :timesheetId')
+            ->andWhere('timesheetDay.date = :date')
+            ->setParameter('timesheetId', $timesheetId)
+            ->setParameter('date', $date)
+            ->getQuery()
+            ->getOneOrNullResult();
+    }
+
+    /**
+     * @param int $timesheetId
+     * @return TimesheetDeduction[]
+     */
+    public function getTimesheetDeductionsByTimesheetId(int $timesheetId): array
+    {
+        return $this->createQueryBuilder(TimesheetDeduction::class, 'deduction')
+            ->andWhere('IDENTITY(deduction.timesheet) = :timesheetId')
+            ->setParameter('timesheetId', $timesheetId)
+            ->addOrderBy('deduction.date')
+            ->addOrderBy('deduction.startTime')
+            ->getQuery()
+            ->execute();
+    }
+
+    /**
+     * @param TimesheetDeduction $deduction
+     * @return TimesheetDeduction
+     */
+    public function saveTimesheetDeduction(TimesheetDeduction $deduction): TimesheetDeduction
+    {
+        $this->persist($deduction);
+        return $deduction;
+    }
+
+    /**
+     * @param int $timesheetId
+     * @param int[] $ids
+     * @return int
+     */
+    public function deleteTimesheetDeductions(int $timesheetId, array $ids): int
+    {
+        if (empty($ids)) {
+            return 0;
+        }
+        $q = $this->createQueryBuilder(TimesheetDeduction::class, 'deduction')
+            ->delete()
+            ->andWhere('IDENTITY(deduction.timesheet) = :timesheetId')
+            ->andWhere('deduction.id IN (:ids)')
+            ->setParameter('timesheetId', $timesheetId)
+            ->setParameter('ids', $ids);
+        return $q->getQuery()->execute();
+    }
+
+    /**
+     * @param int $id
+     * @return TimesheetDeduction|null
+     */
+    public function getTimesheetDeductionById(int $id): ?TimesheetDeduction
+    {
+        return $this->getRepository(TimesheetDeduction::class)->find($id);
     }
 
     /**

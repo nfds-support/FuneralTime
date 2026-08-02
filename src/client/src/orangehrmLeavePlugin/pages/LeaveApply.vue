@@ -28,6 +28,9 @@
       <oxd-text tag="h6" class="orangehrm-main-title">
         {{ $t('leave.apply_leave') }}
       </oxd-text>
+      <oxd-text tag="p" class="orangehrm-input-hint">
+        {{ $t('leave.leave_modern_hint') }}
+      </oxd-text>
 
       <oxd-divider />
 

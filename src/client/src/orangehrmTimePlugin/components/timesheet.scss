@@ -211,3 +211,37 @@ $card-padding: $card-padding-top-bottom $card-padding-left-right;
 ::v-deep(.oxd-input) {
   min-width: 50px;
 }
+
+.orangehrm-timesheet-table-header-cell.--stat-holiday {
+  background: rgba(13, 148, 136, 0.12);
+  .--holiday-label {
+    display: block;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #0f766e;
+    margin-top: 0.15rem;
+  }
+}
+
+.orangehrm-timesheet-time-entry {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.orangehrm-timesheet-deductions {
+  padding: 1rem 1.2rem 1.4rem;
+  border-top: $oxd-border $oxd-interface-gray-lighten-2-color;
+}
+
+.orangehrm-timesheet-deduction-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
+  gap: 0.75rem;
+  align-items: end;
+  margin: 0.75rem 0;
+}
+
+.orangehrm-timesheet-table-body-row.--on-call {
+  background: rgba(30, 58, 95, 0.04);
+}

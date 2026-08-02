@@ -1,0 +1,45 @@
+'View Discipline Module':
+  module: discipline
+  url: viewDisciplineModule
+  permissions:
+    - { role: Admin, permission: { read: true } }
+    - { role: Supervisor, permission: { read: true } }
+    - { role: ESS, permission: { read: true, create: false, update: false, delete: false } }
+
+'Discipline Cases':
+  module: discipline
+  url: viewDisciplineCases
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
+
+'Save Discipline Case':
+  module: discipline
+  url: saveDisciplineCase
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
+
+'Edit Discipline Case':
+  module: discipline
+  url: editDisciplineCase/{id}
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
+
+'My Discipline Cases':
+  module: discipline
+  url: viewMyDisciplineCases
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: ESS, permission: { read: true, create: true, update: false, delete: false } }
+
+'Save My Discipline Case':
+  module: discipline
+  url: saveMyDisciplineCase
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: ESS, permission: { read: true, create: true, update: false, delete: false } }

@@ -22,6 +22,7 @@
 .orangehrm-main-title {
   font-size: 16px !important;
   font-weight: 700 !important;
+  letter-spacing: -0.01em;
 }
 
 .orangehrm-sub-title {
@@ -36,8 +37,10 @@
 
 .orangehrm-card-container {
   background-color: $oxd-white-color;
-  border-radius: 1.2rem;
+  border-radius: 1rem;
   padding: 25px;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.04);
 
   @media screen and (max-width: 400px) {
     .oxd-form-actions {
@@ -48,7 +51,7 @@
 }
 
 .orangehrm-container {
-  background-color: $oxd-interface-gray-lighten-2-color;
+  background-color: transparent;
   /*border-radius: 1.2rem;*/
   padding: 0.5rem;
 
@@ -67,7 +70,9 @@
 
 .orangehrm-paper-container {
   background-color: $oxd-white-color;
-  border-radius: 1.2rem;
+  border-radius: 1rem;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04), 0 8px 24px rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(15, 23, 42, 0.04);
 }
 
 .orangehrm-horizontal-padding {
@@ -115,6 +120,12 @@
 .orangehrm-background-container {
   padding: 1.5rem 0;
   flex: 1;
+  background:
+    radial-gradient(1200px 400px at 10% -10%, rgba(13, 148, 136, 0.12), transparent 55%),
+    radial-gradient(900px 360px at 100% 0%, rgba(30, 58, 95, 0.1), transparent 50%),
+    linear-gradient(180deg, #f4f7fb 0%, #eef2f7 100%);
+  min-height: calc(100vh - 120px);
+  padding-bottom: 1.5rem;
 }
 
 .orangehrm-input-hint {
