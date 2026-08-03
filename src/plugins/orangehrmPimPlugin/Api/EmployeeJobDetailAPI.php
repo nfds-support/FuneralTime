@@ -44,6 +44,7 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
     public const PARAMETER_JOB_CATEGORY_ID = 'jobCategoryId';
     public const PARAMETER_SUBUNIT_ID = 'subunitId';
     public const PARAMETER_LOCATION_ID = 'locationId';
+    public const PARAMETER_ON_CALL = 'onCall';
 
     /**
      * @OA\Get(
@@ -110,11 +111,12 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
      *             @OA\Property(property="joinedDate", type="string", format="date"),
      *             @OA\Property(property="jobTitleId", type="integer"),
      *             @OA\Property(property="empStatusId", type="integer"),
-     *             @OA\Property(property="jobCategoryId", type="integer"),
-     *             @OA\Property(property="subunitId", type="integer"),
-     *             @OA\Property(property="locationId", type="integer")
-     *         )
-     *     ),
+             *             @OA\Property(property="jobCategoryId", type="integer"),
+             *             @OA\Property(property="subunitId", type="integer"),
+             *             @OA\Property(property="locationId", type="integer"),
+             *             @OA\Property(property="onCall", type="boolean")
+             *         )
+             *     ),
      *     @OA\Response(response="200",
      *         description="Success",
      *         @OA\JsonContent(
@@ -162,6 +164,10 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_LOCATION_ID
         );
+        $onCall = $this->getRequestParams()->getBooleanOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_ON_CALL
+        );
 
         $currentJoinedDate = $employee->getJoinedDate();
         $employee->setJoinedDate($joinedDate);
@@ -170,6 +176,9 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
         $employee->getDecorator()->setJobCategoryById($jobCategoryId);
         $employee->getDecorator()->setSubunitById($subunitId);
         $employee->getDecorator()->setLocationById($locationId);
+        if (!is_null($onCall)) {
+            $employee->setOnCall($onCall);
+        }
 
         $this->getEmployeeService()->updateEmployeeJobDetails($employee);
 
@@ -224,6 +233,12 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
                 new ParamRule(
                     self::PARAMETER_LOCATION_ID,
                     new Rule(Rules::POSITIVE)
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_ON_CALL,
+                    new Rule(Rules::BOOL_VAL)
                 )
             ),
         );

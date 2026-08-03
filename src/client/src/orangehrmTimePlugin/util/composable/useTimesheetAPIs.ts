@@ -31,12 +31,16 @@ interface State {
   timesheetAllowedActions: AllowedAction[];
   timesheetDays: TimesheetDayMeta[];
   timesheetDeductions: TimesheetDeductionEntry[];
+  onCallEnabled: boolean;
+  defaultProjectId: number | null;
+  defaultActivityId: number | null;
   date: string | null;
 }
 
 export interface TimesheetDayMeta {
   date: string;
   onCall: boolean;
+  breakDuration?: string;
   isHoliday?: boolean;
   holidayName?: string | null;
 }
@@ -148,6 +152,9 @@ export interface Meta {
   allowedActions: AllowedAction[];
   days?: TimesheetDayMeta[];
   deductions?: TimesheetDeductionEntry[];
+  onCallEnabled?: boolean;
+  defaultProjectId?: number | null;
+  defaultActivityId?: number | null;
 }
 
 export interface Record {
@@ -190,6 +197,9 @@ export default function useTimesheetAPIs(http: APIService) {
     timesheetAllowedActions: [],
     timesheetDays: [],
     timesheetDeductions: [],
+    onCallEnabled: false,
+    defaultProjectId: null,
+    defaultActivityId: null,
     date: null,
   });
 

@@ -40,6 +40,8 @@ class ConfigService
     public const KEY_TIMESHEET_TIME_FORMAT = 'timesheet_time_format';
     public const KEY_TIMESHEET_PERIOD_AND_START_DATE = 'timesheet_period_and_start_date';
     public const KEY_TIMESHEET_PERIOD_SET = 'timesheet_period_set';
+    public const KEY_TIMESHEET_DEFAULT_PROJECT_ID = 'timesheet.default_project_id';
+    public const KEY_TIMESHEET_DEFAULT_ACTIVITY_ID = 'timesheet.default_activity_id';
     public const KEY_ADMIN_LOCALIZATION_DEFAULT_LANGUAGE = 'admin.localization.default_language';
     public const KEY_ADMIN_LOCALIZATION_USE_BROWSER_LANGUAGE = 'admin.localization.use_browser_language';
     public const KEY_ADMIN_LOCALIZATION_DEFAULT_DATE_FORMAT = 'admin.localization.default_date_format';
@@ -493,6 +495,24 @@ class ConfigService
     public function getTimesheetTimeFormatConfig(): ?string
     {
         return $this->_getConfigValue(self::KEY_TIMESHEET_TIME_FORMAT);
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getTimesheetDefaultProjectId(): ?int
+    {
+        $value = $this->_getConfigValue(self::KEY_TIMESHEET_DEFAULT_PROJECT_ID);
+        return $value === null || $value === '' ? null : (int) $value;
+    }
+
+    /**
+     * @return int|null
+     */
+    public function getTimesheetDefaultActivityId(): ?int
+    {
+        $value = $this->_getConfigValue(self::KEY_TIMESHEET_DEFAULT_ACTIVITY_ID);
+        return $value === null || $value === '' ? null : (int) $value;
     }
 
     /**

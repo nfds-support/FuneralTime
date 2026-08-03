@@ -91,6 +91,17 @@
                 :disabled="!hasUpdatePermissions"
               />
             </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="job.onCall"
+                type="checkbox"
+                :label="$t('pim.on_call')"
+                :option-label="$t('general.yes')"
+                :true-value="true"
+                :false-value="false"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
           </oxd-grid>
         </oxd-form-row>
         <oxd-divider />
@@ -215,6 +226,7 @@ const jobDetailsModel = {
   jobCategoryId: [],
   subunitId: [],
   locationId: [],
+  onCall: false,
 };
 
 const contractDetailsModel = {
@@ -392,6 +404,7 @@ export default {
             subunitId: this.job.subunitId?.id,
             empStatusId: this.job.empStatusId?.id,
             locationId: this.job.locationId?.id,
+            onCall: !!this.job.onCall,
           },
         })
         .then((response) => {
@@ -486,6 +499,7 @@ export default {
       this.job.locationId = this.locations.find(
         (item) => item.id === data.location?.id,
       );
+      this.job.onCall = !!data.onCall;
       this.termination = data.employeeTerminationRecord;
     },
   },

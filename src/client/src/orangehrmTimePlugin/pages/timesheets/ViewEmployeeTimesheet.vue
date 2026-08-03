@@ -25,6 +25,8 @@
       :records="timesheetRecords"
       :timesheet-id="timesheetId"
       :subtotal="timesheetSubtotal"
+      :days-meta="timesheetDays"
+      :on-call-enabled="onCallEnabled"
     >
       <template #header-title>
         <oxd-text tag="h6" class="orangehrm-main-title">
