@@ -111,12 +111,12 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
      *             @OA\Property(property="joinedDate", type="string", format="date"),
      *             @OA\Property(property="jobTitleId", type="integer"),
      *             @OA\Property(property="empStatusId", type="integer"),
-             *             @OA\Property(property="jobCategoryId", type="integer"),
-             *             @OA\Property(property="subunitId", type="integer"),
-             *             @OA\Property(property="locationId", type="integer"),
-             *             @OA\Property(property="onCall", type="boolean")
-             *         )
-             *     ),
+     *             @OA\Property(property="jobCategoryId", type="integer"),
+     *             @OA\Property(property="subunitId", type="integer"),
+     *             @OA\Property(property="locationId", type="integer"),
+     *             @OA\Property(property="onCall", type="boolean")
+     *         )
+     *     ),
      *     @OA\Response(response="200",
      *         description="Success",
      *         @OA\JsonContent(

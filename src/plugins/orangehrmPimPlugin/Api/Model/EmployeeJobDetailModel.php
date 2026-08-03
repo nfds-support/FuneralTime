@@ -51,17 +51,18 @@ use OrangeHRM\Entity\Employee;
  *         @OA\Property(property="name", type="string"),
  *         @OA\Property(property="unitId", type="integer")
  *     ),
-     *     @OA\Property(property="location", type="object",
-     *         @OA\Property(property="id", type="integer"),
-     *         @OA\Property(property="name", type="string")
-     *     ),
-     *     @OA\Property(property="onCall", type="boolean"),
-     *     @OA\Property(property="employeeTerminationRecord", type="object",
-     *         @OA\Property(property="id", type="integer"),
-     *         @OA\Property(property="date", type="string", format="date")
-     *     )
-     * )
-     */
+ *     @OA\Property(property="location", type="object",
+ *         @OA\Property(property="id", type="integer"),
+ *         @OA\Property(property="name", type="string")
+ *     ),
+ *     @OA\Property(property="onCall", type="boolean"),
+ *     @OA\Property(property="employeeTerminationRecord", type="object",
+ *         @OA\Property(property="id", type="integer"),
+ *         @OA\Property(property="date", type="string", format="date")
+ *     )
+ * )
+ */
+
 class EmployeeJobDetailModel implements Normalizable
 {
     use ModelTrait;
