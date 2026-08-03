@@ -96,16 +96,47 @@ class HolidayDao extends BaseDao
 
     /**
      * @param DateTime $date
+     * @param int|null $unionId When set, prefer a holiday scoped to this union; otherwise use company-wide holidays.
      * @return Holiday|null
      */
-    public function getHolidayByDate(DateTime $date): ?Holiday
+    public function getHolidayByDate(DateTime $date, ?int $unionId = null): ?Holiday
+    {
+        if ($unionId !== null) {
+            $unionHoliday = $this->findHolidayByDateAndUnionScope($date, $unionId);
+            if ($unionHoliday instanceof Holiday) {
+                return $unionHoliday;
+            }
+        }
+
+        return $this->findHolidayByDateAndUnionScope($date, null);
+    }
+
+    /**
+     * @param DateTime $date
+     * @param int|null $unionId null means company-wide (union_id IS NULL)
+     * @return Holiday|null
+     */
+    private function findHolidayByDateAndUnionScope(DateTime $date, ?int $unionId): ?Holiday
     {
         $q = $this->createQueryBuilder(Holiday::class, 'holiday');
-        $q->andWhere($q->expr()->eq($q->expr()->substring('holiday.date', 6), ':datePortion'))
-            ->setParameter('datePortion', $date->format('m') . '-' . $date->format('d'));
-        $q->andWhere('holiday.recurring = :recurring')
-            ->setParameter('recurring', true);
-        $q->orWhere('holiday.date = :date')
+        if ($unionId === null) {
+            $q->andWhere('holiday.laborUnion IS NULL');
+        } else {
+            $q->andWhere('IDENTITY(holiday.laborUnion) = :unionId')
+                ->setParameter('unionId', $unionId);
+        }
+
+        $q->andWhere(
+            $q->expr()->orX(
+                $q->expr()->andX(
+                    $q->expr()->eq($q->expr()->substring('holiday.date', 6), ':datePortion'),
+                    'holiday.recurring = :recurring'
+                ),
+                'holiday.date = :date'
+            )
+        )
+            ->setParameter('datePortion', $date->format('m') . '-' . $date->format('d'))
+            ->setParameter('recurring', true)
             ->setParameter('date', $date);
 
         return $this->fetchOne($q);

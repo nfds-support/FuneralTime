@@ -19,12 +19,15 @@
 
 namespace OrangeHRM\Entity\Decorator;
 
+use OrangeHRM\Core\Traits\ORM\EntityManagerHelperTrait;
 use OrangeHRM\Core\Traits\Service\DateTimeHelperTrait;
 use OrangeHRM\Entity\Holiday;
+use OrangeHRM\Entity\LaborUnion;
 
 class HolidayDecorator
 {
     use DateTimeHelperTrait;
+    use EntityManagerHelperTrait;
 
     /**
      * @var Holiday
@@ -62,5 +65,19 @@ class HolidayDecorator
     public function getLengthName(): ?string
     {
         return Holiday::HOLIDAY_LENGTH_MAP[$this->getHoliday()->getLength()] ?? null;
+    }
+
+    /**
+     * @param int|null $unionId
+     */
+    public function setLaborUnionById(?int $unionId): void
+    {
+        if ($unionId === null) {
+            $this->getHoliday()->setLaborUnion(null);
+            return;
+        }
+        /** @var LaborUnion $union */
+        $union = $this->getReference(LaborUnion::class, $unionId);
+        $this->getHoliday()->setLaborUnion($union);
     }
 }

@@ -79,6 +79,12 @@
                 />
               </oxd-input-group>
             </oxd-grid-item>
+            <oxd-grid-item>
+              <union-dropdown
+                v-model="holiday.union"
+                :label="$t('union.union_holiday_scope')"
+              />
+            </oxd-grid-item>
           </oxd-grid>
         </oxd-form-row>
 
@@ -108,15 +114,20 @@ import {
 } from '@ohrm/core/util/validation/rules';
 import {yearRange} from '@ohrm/core/util/helper/year-range';
 import useDateFormat from '@/core/util/composable/useDateFormat';
+import UnionDropdown from '@/orangehrmUnionPlugin/components/UnionDropdown';
 
 const holidayModel = {
   name: '',
   date: '',
   recurring: false,
   length: {id: 0, label: 'Full Day'},
+  union: null,
 };
 
 export default {
+  components: {
+    'union-dropdown': UnionDropdown,
+  },
   props: {
     holidayLengthList: {
       type: Array,
@@ -173,7 +184,11 @@ export default {
       .then((response) => {
         const {data} = response.data;
         this.rules.date.push((v) => {
-          const index = data.findIndex((item) => item.date == v);
+          const unionId = this.holiday.union?.id ?? null;
+          const index = data.findIndex(
+            (item) =>
+              item.date == v && (item.union?.id ?? null) === unionId,
+          );
           return index === -1 || this.$t('general.already_exists');
         });
       })
@@ -191,6 +206,7 @@ export default {
           date: this.holiday.date,
           recurring: this.holiday.recurring,
           length: this.holiday.length.id,
+          unionId: this.holiday.union?.id ?? null,
         })
         .then(() => {
           return this.$toast.saveSuccess();

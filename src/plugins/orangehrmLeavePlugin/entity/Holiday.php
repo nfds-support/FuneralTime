@@ -91,6 +91,14 @@ class Holiday
     private ?OperationalCountry $operationalCountry = null;
 
     /**
+     * @var LaborUnion|null
+     *
+     * @ORM\ManyToOne(targetEntity="OrangeHRM\Entity\LaborUnion")
+     * @ORM\JoinColumn(name="union_id", referencedColumnName="id", nullable=true)
+     */
+    private ?LaborUnion $laborUnion = null;
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -184,5 +192,21 @@ class Holiday
     public function setOperationalCountry(?OperationalCountry $operationalCountry): void
     {
         $this->operationalCountry = $operationalCountry;
+    }
+
+    /**
+     * @return LaborUnion|null
+     */
+    public function getLaborUnion(): ?LaborUnion
+    {
+        return $this->laborUnion;
+    }
+
+    /**
+     * @param LaborUnion|null $laborUnion
+     */
+    public function setLaborUnion(?LaborUnion $laborUnion): void
+    {
+        $this->laborUnion = $laborUnion;
     }
 }

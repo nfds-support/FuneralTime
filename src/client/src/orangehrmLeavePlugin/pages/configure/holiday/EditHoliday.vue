@@ -79,6 +79,12 @@
                 />
               </oxd-input-group>
             </oxd-grid-item>
+            <oxd-grid-item>
+              <union-dropdown
+                v-model="holiday.union"
+                :label="$t('union.union_holiday_scope')"
+              />
+            </oxd-grid-item>
           </oxd-grid>
         </oxd-form-row>
 
@@ -109,6 +115,7 @@ import {
 } from '@ohrm/core/util/validation/rules';
 import {yearRange} from '@/core/util/helper/year-range';
 import useDateFormat from '@/core/util/composable/useDateFormat';
+import UnionDropdown from '@/orangehrmUnionPlugin/components/UnionDropdown';
 
 const holidayModel = {
   id: '',
@@ -116,9 +123,13 @@ const holidayModel = {
   date: '',
   recurring: false,
   length: 0,
+  union: null,
 };
 
 export default {
+  components: {
+    'union-dropdown': UnionDropdown,
+  },
   props: {
     holidayId: {
       type: Number,
@@ -165,6 +176,9 @@ export default {
         this.holiday.name = data.name;
         this.holiday.date = data.date;
         this.holiday.recurring = data.recurring;
+        this.holiday.union = data.union
+          ? {id: data.union.id, label: data.union.name}
+          : null;
         if (data.length !== '' && data.length !== null) {
           this.holiday.length = this.holidayLengthList.find((h) => {
             return h.id === data.length;
@@ -195,7 +209,11 @@ export default {
       .then((response) => {
         const {data} = response.data;
         this.rules.date.push((v) => {
-          const index = data.findIndex((item) => item.date === v);
+          const unionId = this.holiday.union?.id ?? null;
+          const index = data.findIndex(
+            (item) =>
+              item.date === v && (item.union?.id ?? null) === unionId,
+          );
           if (index > -1) {
             const id = data[index].id;
             return id != this.holidayId
@@ -220,6 +238,7 @@ export default {
           date: this.holiday.date,
           recurring: this.holiday.recurring,
           length: this.holiday.length.id,
+          unionId: this.holiday.union?.id ?? null,
         })
         .then(() => {
           return this.$toast.updateSuccess();

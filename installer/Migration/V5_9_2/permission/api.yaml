@@ -1,0 +1,32 @@
+apiv2_union_unions:
+  description: 'API-v2 Union - Unions'
+  api: OrangeHRM\Union\Api\UnionAPI
+  module: union
+  allowed: { read: true, create: true, update: true, delete: true }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
+
+apiv2_union_employee_unions:
+  description: 'API-v2 Union - Employee Union Assignments'
+  api: OrangeHRM\Union\Api\EmployeeUnionAPI
+  module: union
+  allowed: { read: true, create: true, update: true, delete: true }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
+    - { role: ESS, permission: { read: true, create: false, update: false, delete: false, self: true } }
+
+apiv2_union_leave_rules:
+  description: 'API-v2 Union - Leave Entitlement Rules'
+  api: OrangeHRM\Union\Api\UnionLeaveRuleAPI
+  module: union
+  allowed: { read: true, create: true, update: true, delete: true }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
+
+apiv2_union_leave_entitlement_generation:
+  description: 'API-v2 Union - Generate Leave Entitlements from Rules'
+  api: OrangeHRM\Union\Api\UnionLeaveEntitlementGenerationAPI
+  module: union
+  allowed: { read: false, create: true, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: false, create: true, update: false, delete: false, self: false } }

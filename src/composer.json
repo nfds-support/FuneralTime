@@ -83,6 +83,7 @@
             "OrangeHRM\\Mobile\\": "./plugins/orangehrmMobilePlugin",
             "OrangeHRM\\Claim\\": "./plugins/orangehrmClaimPlugin",
             "OrangeHRM\\Discipline\\": "./plugins/orangehrmDisciplinePlugin",
+            "OrangeHRM\\Union\\": "./plugins/orangehrmUnionPlugin",
             "OrangeHRM\\WorkspaceNotifications\\": "./plugins/orangehrmWorkspaceNotificationsPlugin",
             "OrangeHRM\\Installer\\": "../installer",
             "OrangeHRM\\Entity\\": [
@@ -102,6 +103,7 @@
                 "./plugins/orangehrmBuzzPlugin/entity",
                 "./plugins/orangehrmClaimPlugin/entity",
                 "./plugins/orangehrmDisciplinePlugin/entity",
+                "./plugins/orangehrmUnionPlugin/entity",
                 "./plugins/orangehrmOpenidAuthenticationPlugin/entity",
                 "./plugins/orangehrmWorkspaceNotificationsPlugin/entity"
             ]
@@ -131,6 +133,7 @@
             "OrangeHRM\\Tests\\Mobile\\": "./plugins/orangehrmMobilePlugin/test",
             "OrangeHRM\\Tests\\Claim\\": "./plugins/orangehrmClaimPlugin/test",
             "OrangeHRM\\Tests\\Discipline\\": "./plugins/orangehrmDisciplinePlugin/test",
+            "OrangeHRM\\Tests\\Union\\": "./plugins/orangehrmUnionPlugin/test",
             "OrangeHRM\\Tests\\OpenidAuthentication\\": "./plugins/orangehrmOpenidAuthenticationPlugin/test",
             "OrangeHRM\\Tests\\WorkspaceNotifications\\": "./plugins/orangehrmWorkspaceNotificationsPlugin/test"
         }

@@ -1,0 +1,113 @@
+apiv2_union_unions:
+  path: /api/v2/union/unions
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Union\Api\UnionAPI
+
+apiv2_union_union:
+  path: /api/v2/union/unions/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Union\Api\UnionAPI
+    _key: id
+  requirements:
+    id: '\d+'
+
+apiv2_union_employee_unions:
+  path: /api/v2/union/employee-unions
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Union\Api\EmployeeUnionAPI
+
+apiv2_union_employee_union:
+  path: /api/v2/union/employee-unions/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Union\Api\EmployeeUnionAPI
+    _key: id
+  requirements:
+    id: '\d+'
+
+apiv2_union_leave_rules:
+  path: /api/v2/union/leave-rules
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Union\Api\UnionLeaveRuleAPI
+
+apiv2_union_leave_rule:
+  path: /api/v2/union/leave-rules/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Union\Api\UnionLeaveRuleAPI
+    _key: id
+  requirements:
+    id: '\d+'
+
+apiv2_union_leave_entitlement_generation:
+  path: /api/v2/union/leave-entitlement-generation
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ POST ]
+  defaults:
+    _api: OrangeHRM\Union\Api\UnionLeaveEntitlementGenerationAPI
+
+union_module:
+  path: /union/viewUnionModule
+  controller: OrangeHRM\Union\Controller\UnionModuleController::handle
+  methods: [ GET ]
+
+union_view_unions:
+  path: /union/viewUnions
+  controller: OrangeHRM\Union\Controller\UnionController::handle
+  methods: [ GET ]
+
+union_save_union:
+  path: /union/saveUnion
+  controller: OrangeHRM\Union\Controller\SaveUnionController::handle
+  methods: [ GET ]
+
+union_edit_union:
+  path: /union/editUnion/{id}
+  controller: OrangeHRM\Union\Controller\SaveUnionController::handle
+  methods: [ GET ]
+  requirements:
+    id: '\d+'
+
+union_view_leave_rules:
+  path: /union/viewUnionLeaveRules
+  controller: OrangeHRM\Union\Controller\UnionLeaveRuleController::handle
+  methods: [ GET ]
+
+union_save_leave_rule:
+  path: /union/saveUnionLeaveRule
+  controller: OrangeHRM\Union\Controller\SaveUnionLeaveRuleController::handle
+  methods: [ GET ]
+
+union_edit_leave_rule:
+  path: /union/editUnionLeaveRule/{id}
+  controller: OrangeHRM\Union\Controller\SaveUnionLeaveRuleController::handle
+  methods: [ GET ]
+  requirements:
+    id: '\d+'
+
+union_view_employee_unions:
+  path: /union/viewEmployeeUnions
+  controller: OrangeHRM\Union\Controller\EmployeeUnionController::handle
+  methods: [ GET ]
+
+union_save_employee_union:
+  path: /union/saveEmployeeUnion
+  controller: OrangeHRM\Union\Controller\SaveEmployeeUnionController::handle
+  methods: [ GET ]
+
+union_edit_employee_union:
+  path: /union/editEmployeeUnion/{id}
+  controller: OrangeHRM\Union\Controller\SaveEmployeeUnionController::handle
+  methods: [ GET ]
+  requirements:
+    id: '\d+'
