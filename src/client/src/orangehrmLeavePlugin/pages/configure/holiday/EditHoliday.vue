@@ -176,7 +176,7 @@ export default {
         this.holiday.name = data.name;
         this.holiday.date = data.date;
         this.holiday.recurring = data.recurring;
-        this.holiday.union = data.union
+        this.holiday.union = data.union?.id
           ? {id: data.union.id, label: data.union.name}
           : null;
         if (data.length !== '' && data.length !== null) {

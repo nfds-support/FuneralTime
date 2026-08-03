@@ -148,7 +148,7 @@ export default {
           date: formatDate(parseDate(item.date), jsDateFormat, {locale}),
           recurring: item.recurring ? 'Yes' : 'No',
           length: item.lengthName,
-          union: item.union?.name || '-',
+          union: item.union?.id ? item.union.name : '-',
         };
       });
     };

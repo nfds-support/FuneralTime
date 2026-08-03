@@ -131,10 +131,10 @@ export default {
       .get(this.ruleId)
       .then(({data}) => {
         const row = data.data;
-        this.form.union = row.union
+        this.form.union = row.union?.id
           ? {id: row.union.id, label: row.union.name}
           : null;
-        this.form.leaveType = row.leaveType
+        this.form.leaveType = row.leaveType?.id
           ? {id: row.leaveType.id, label: row.leaveType.name}
           : null;
         this.form.minYears = String(row.minYears);

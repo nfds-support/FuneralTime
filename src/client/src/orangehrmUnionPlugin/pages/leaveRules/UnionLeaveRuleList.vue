@@ -147,7 +147,7 @@ export default {
       normalizer: (data) =>
         data.map((item) => ({
           id: item.id,
-          union: item.union?.name || 'Company Default',
+          union: item.union?.id ? item.union.name : 'Company Default',
           leaveType: item.leaveType?.name,
           minYears: item.minYears,
           maxYears: item.maxYears ?? '∞',
