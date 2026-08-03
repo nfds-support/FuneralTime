@@ -148,6 +148,7 @@ export default {
           date: formatDate(parseDate(item.date), jsDateFormat, {locale}),
           recurring: item.recurring ? 'Yes' : 'No',
           length: item.lengthName,
+          union: item.union?.id ? item.union.name : '-',
         };
       });
     };
@@ -216,6 +217,11 @@ export default {
         {
           name: 'recurring',
           title: this.$t('leave.repeats_annually'),
+          style: {flex: 2},
+        },
+        {
+          name: 'union',
+          title: this.$t('union.union'),
           style: {flex: 2},
         },
         {

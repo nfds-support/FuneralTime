@@ -1,0 +1,81 @@
+langStrings:
+  -
+    unitId: union
+    value: 'Union'
+    note: ''
+  -
+    unitId: unions
+    value: 'Unions'
+    note: ''
+  -
+    unitId: leave_rules
+    value: 'Leave Rules'
+    note: ''
+  -
+    unitId: employee_unions
+    value: 'Employee Unions'
+    note: ''
+  -
+    unitId: seniority_date
+    value: 'Seniority Date'
+    note: ''
+  -
+    unitId: seniority_rank
+    value: 'Seniority Rank'
+    note: ''
+  -
+    unitId: years_of_service
+    value: 'Years of Service'
+    note: ''
+  -
+    unitId: min_years
+    value: 'Min Years'
+    note: ''
+  -
+    unitId: max_years
+    value: 'Max Years'
+    note: ''
+  -
+    unitId: entitlement_days
+    value: 'Entitlement Days'
+    note: ''
+  -
+    unitId: company_default
+    value: 'Company Default (Non-Union)'
+    note: ''
+  -
+    unitId: primary_union
+    value: 'Primary Union'
+    note: ''
+  -
+    unitId: generate_entitlements
+    value: 'Generate Entitlements'
+    note: ''
+  -
+    unitId: add_union
+    value: 'Add Union'
+    note: ''
+  -
+    unitId: edit_union
+    value: 'Edit Union'
+    note: ''
+  -
+    unitId: add_leave_rule
+    value: 'Add Leave Rule'
+    note: ''
+  -
+    unitId: edit_leave_rule
+    value: 'Edit Leave Rule'
+    note: ''
+  -
+    unitId: assign_employee_union
+    value: 'Assign Employee Union'
+    note: ''
+  -
+    unitId: union_holiday_scope
+    value: 'Union (blank = all employees)'
+    note: ''
+  -
+    unitId: leave_rule_hint
+    value: 'Vacation and holiday entitlements can differ by union and seniority band.'
+    note: ''

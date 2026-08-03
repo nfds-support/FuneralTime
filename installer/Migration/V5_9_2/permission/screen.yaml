@@ -1,0 +1,59 @@
+'View Union Module':
+  module: union
+  url: viewUnionModule
+  permissions:
+    - { role: Admin, permission: { read: true } }
+
+'Unions':
+  module: union
+  url: viewUnions
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+
+'Save Union':
+  module: union
+  url: saveUnion
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true } }
+
+'Edit Union':
+  module: union
+  url: editUnion/{id}
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true } }
+
+'Union Leave Rules':
+  module: union
+  url: viewUnionLeaveRules
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+
+'Save Union Leave Rule':
+  module: union
+  url: saveUnionLeaveRule
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true } }
+
+'Edit Union Leave Rule':
+  module: union
+  url: editUnionLeaveRule/{id}
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true } }
+
+'Employee Unions':
+  module: union
+  url: viewEmployeeUnions
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+
+'Save Employee Union':
+  module: union
+  url: saveEmployeeUnion
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true } }
+
+'Edit Employee Union':
+  module: union
+  url: editEmployeeUnion/{id}
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true } }

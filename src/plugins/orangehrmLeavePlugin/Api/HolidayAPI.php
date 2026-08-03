@@ -46,6 +46,7 @@ class HolidayAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_DATE = 'date';
     public const PARAMETER_RECURRING = 'recurring';
     public const PARAMETER_LENGTH = 'length';
+    public const PARAMETER_UNION_ID = 'unionId';
 
     public const FILTER_FROM_DATE = 'fromDate';
     public const FILTER_TO_DATE = 'toDate';
@@ -247,6 +248,9 @@ class HolidayAPI extends Endpoint implements CrudEndpoint
             $this->getRequestParams()->getBoolean(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_RECURRING)
         );
         $holiday->setLength($this->getRequestParams()->getInt(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_LENGTH));
+        $holiday->getDecorator()->setLaborUnionById(
+            $this->getRequestParams()->getIntOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_UNION_ID)
+        );
     }
 
     /**
@@ -280,6 +284,9 @@ class HolidayAPI extends Endpoint implements CrudEndpoint
             new ParamRule(
                 self::PARAMETER_LENGTH,
                 new Rule(Rules::IN, [array_keys(Holiday::HOLIDAY_LENGTH_MAP)])
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(self::PARAMETER_UNION_ID, new Rule(Rules::POSITIVE))
             ),
         );
     }

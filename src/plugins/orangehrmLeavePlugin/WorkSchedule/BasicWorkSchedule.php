@@ -27,6 +27,7 @@ use OrangeHRM\Entity\EmployeeWorkShift;
 use OrangeHRM\Leave\Traits\Service\HolidayServiceTrait;
 use OrangeHRM\Leave\Traits\Service\WorkWeekServiceTrait;
 use OrangeHRM\Pim\Traits\Service\EmployeeServiceTrait;
+use OrangeHRM\Union\Service\UnionService;
 
 class BasicWorkSchedule implements WorkScheduleInterface
 {
@@ -34,6 +35,11 @@ class BasicWorkSchedule implements WorkScheduleInterface
     use WorkWeekServiceTrait;
     use HolidayServiceTrait;
     use ConfigServiceTrait;
+
+    /**
+     * @var UnionService|null
+     */
+    private ?UnionService $unionService = null;
 
     /**
      * @var int|null
@@ -118,7 +124,7 @@ class BasicWorkSchedule implements WorkScheduleInterface
      */
     public function isHalfDay(DateTime $day): bool
     {
-        return $this->getHolidayService()->isHalfDay($day);
+        return $this->getHolidayService()->isHalfDay($day, $this->resolveUnionId());
     }
 
     /**
@@ -126,7 +132,7 @@ class BasicWorkSchedule implements WorkScheduleInterface
      */
     public function isHoliday(DateTime $day): bool
     {
-        return $this->getHolidayService()->isHoliday($day);
+        return $this->getHolidayService()->isHoliday($day, $this->resolveUnionId());
     }
 
     /**
@@ -134,6 +140,19 @@ class BasicWorkSchedule implements WorkScheduleInterface
      */
     public function isHalfDayHoliday(DateTime $day): bool
     {
-        return $this->getHolidayService()->isHalfDayHoliday($day);
+        return $this->getHolidayService()->isHalfDayHoliday($day, $this->resolveUnionId());
+    }
+
+    private function getUnionService(): UnionService
+    {
+        return $this->unionService ??= new UnionService();
+    }
+
+    private function resolveUnionId(): ?int
+    {
+        if ($this->getEmpNumber() === null) {
+            return null;
+        }
+        return $this->getUnionService()->getUnionDao()->getPrimaryUnionIdByEmpNumber($this->getEmpNumber());
     }
 }

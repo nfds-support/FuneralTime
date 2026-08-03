@@ -177,11 +177,12 @@ class HolidayService
 
     /**
      * @param DateTime $day
+     * @param int|null $unionId
      * @return bool
      */
-    public function isHoliday(DateTime $day): bool
+    public function isHoliday(DateTime $day, ?int $unionId = null): bool
     {
-        $holiday = $this->getHolidayDao()->getHolidayByDate($day);
+        $holiday = $this->getHolidayDao()->getHolidayByDate($day, $unionId);
         if ($holiday != null && $holiday->getLength() == Holiday::HOLIDAY_FULL_DAY_LENGTH) {
             return true;
         }
@@ -190,11 +191,12 @@ class HolidayService
 
     /**
      * @param DateTime $day
+     * @param int|null $unionId
      * @return bool
      */
-    public function isHalfDay(DateTime $day): bool
+    public function isHalfDay(DateTime $day, ?int $unionId = null): bool
     {
-        $holiday = $this->getHolidayDao()->getHolidayByDate($day);
+        $holiday = $this->getHolidayDao()->getHolidayByDate($day, $unionId);
         if ($holiday != null &&
             $holiday->getLength() >= WorkWeek::WORKWEEK_LENGTH_HALF_DAY &&
             $holiday->getLength() < $this->getConfigService()->getDefaultWorkShiftLength()) {
@@ -205,11 +207,12 @@ class HolidayService
 
     /**
      * @param DateTime $day
+     * @param int|null $unionId
      * @return bool
      */
-    public function isHalfDayHoliday(DateTime $day): bool
+    public function isHalfDayHoliday(DateTime $day, ?int $unionId = null): bool
     {
-        $holiday = $this->getHolidayDao()->getHolidayByDate($day);
+        $holiday = $this->getHolidayDao()->getHolidayByDate($day, $unionId);
         if ($holiday != null && $holiday->getLength() == Holiday::HOLIDAY_HALF_DAY_LENGTH) {
             return true;
         }

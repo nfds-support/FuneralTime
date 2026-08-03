@@ -1,3 +1,10 @@
+New & Changed Features for OrangeHRM ver 5.9.2
+    New Features/Changes
+    -----------
+    - Union - New Union module for labor unions, employee seniority assignments, and seniority-based leave entitlement rules
+    - Leave - Holidays can be scoped to a specific union (blank = company-wide); leave calendars prefer union holidays then company defaults
+    - Leave - Generate entitlements from union/seniority leave rules (Admin)
+
 New & Changed Features for OrangeHRM ver 5.9.1
     New Features/Changes
     -----------
