@@ -198,12 +198,12 @@ claim_employee_claim:
   methods: [ GET ]
 
 claim_employee_expense_limits:
-  path: /claim/employeeExpenseLimits
+  path: /claim/viewEmployeeExpenseLimits
   controller: OrangeHRM\Claim\Controller\EmployeeExpenseLimitsController::handle
   methods: [ GET ]
 
 claim_monthly_expense_report:
-  path: /claim/monthlyExpenseReport
+  path: /claim/viewMonthlyExpenseReport
   controller: OrangeHRM\Claim\Controller\MonthlyExpenseReportController::handle
   methods: [ GET ]
 

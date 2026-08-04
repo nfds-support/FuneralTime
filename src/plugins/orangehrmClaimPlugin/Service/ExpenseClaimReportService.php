@@ -199,10 +199,7 @@ class ExpenseClaimReportService
                 sprintf('=SUM(%s%d:%s%d)', $col, self::TEMPLATE_DATA_START_ROW, $col, $dataEndRow)
             );
         }
-        $sheet->setCellValue(
-            'L' . $totalsRow,
-            sprintf('=SUM(C%d:K%d)', $totalsRow, $totalsRow)
-        );
+        $sheet->setCellValue('L' . $totalsRow, null);
 
         return $this->spreadsheetToString($spreadsheet);
     }

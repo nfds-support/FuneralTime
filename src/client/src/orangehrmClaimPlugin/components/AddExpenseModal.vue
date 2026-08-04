@@ -49,7 +49,15 @@
               required
             />
           </oxd-grid-item>
-          <oxd-grid-item>
+          <oxd-grid-item v-if="isMileage">
+            <oxd-input-field
+              v-model="expense.quantityKm"
+              :label="$t('claim.quantity_km')"
+              :rules="rules.quantityKm"
+              required
+            />
+          </oxd-grid-item>
+          <oxd-grid-item v-else>
             <oxd-input-field
               v-model="expense.amount"
               :label="$t('general.amount')"
@@ -105,6 +113,7 @@ const expenseModel = {
   type: null,
   date: null,
   amount: null,
+  quantityKm: null,
   note: null,
 };
 
@@ -156,26 +165,42 @@ export default {
           maxCurrency(10000000000),
           digitsOnlyWithTwoDecimalPoints,
         ],
+        quantityKm: [required, digitsOnlyWithTwoDecimalPoints],
       },
     };
+  },
+
+  computed: {
+    isMileage() {
+      return this.expense.type?.reportColumn === 'mileage';
+    },
   },
 
   methods: {
     onSave() {
       this.isLoading = true;
+      const payload = {
+        expenseTypeId: this.expense.type.id,
+        date: this.expense.date,
+        note: this.expense.note,
+      };
+      if (this.isMileage) {
+        payload.quantityKm = Number(this.expense.quantityKm);
+        payload.amount = 0;
+      } else {
+        payload.amount = Number(this.expense.amount).toFixed(2);
+      }
       this.http
-        .create({
-          expenseTypeId: this.expense.type.id,
-          date: this.expense.date,
-          amount: Number(this.expense.amount).toFixed(2),
-          note: this.expense.note,
-        })
+        .create(payload)
         .then(() => {
           return this.$toast.saveSuccess();
         })
         .then(() => {
           this.expense = {...expenseModel};
           this.onCancel();
+        })
+        .catch(() => {
+          this.isLoading = false;
         });
     },
     onCancel() {

@@ -49,6 +49,7 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
     public const PARAMETER_OVERTIME_THRESHOLD_HOURS = 'overtimeThresholdHours';
     public const PARAMETER_FD_LICENSE_CLASS = 'fdLicenseClass';
     public const PARAMETER_FD_LICENSE_NUMBER = 'fdLicenseNumber';
+    public const PARAMETER_MILEAGE_REIMBURSEMENT_RATE = 'mileageReimbursementRate';
 
     public const PAY_TYPES = ['salaried', 'hourly'];
     public const FD_LICENSE_CLASSES = ['none', 'class_1', 'class_2', 'tssr', 'pre_need'];
@@ -190,6 +191,10 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_FD_LICENSE_NUMBER
         );
+        $mileageRate = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_MILEAGE_REIMBURSEMENT_RATE
+        );
 
         $currentJoinedDate = $employee->getJoinedDate();
         $employee->setJoinedDate($joinedDate);
@@ -203,6 +208,7 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
         $employee->setOvertimeThresholdHours($overtimeThreshold);
         $employee->setFdLicenseClass($fdLicenseClass);
         $employee->setFdLicenseNumber($fdLicenseNumber);
+        $employee->setMileageReimbursementRate($mileageRate);
 
         $this->getEmployeeService()->updateEmployeeJobDetails($employee);
 
@@ -290,6 +296,13 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
                     self::PARAMETER_FD_LICENSE_NUMBER,
                     new Rule(Rules::STRING_TYPE),
                     new Rule(Rules::LENGTH, [null, 50])
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_MILEAGE_REIMBURSEMENT_RATE,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::LENGTH, [null, 12])
                 )
             ),
         );
