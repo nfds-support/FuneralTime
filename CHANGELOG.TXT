@@ -1,3 +1,13 @@
+New & Changed Features for OrangeHRM ver 5.9.2
+    New Features/Changes
+    -----------
+    - Performance - BambooHR-style side-by-side self vs manager assessment and KPI rating rubrics
+    - Time - Administrators without a supervisor can approve their own timesheets
+    - PIM - Pay type (salaried/hourly), contracted weekly hours, OT threshold, funeral director license class and number
+    - Time - P# payroll fill-sheet report (salaried contract cap and banked hours, hourly OT over threshold, vacation/sick/on-call) with CSV export
+    - Time - Excess salaried hours credit Banked Time leave entitlements when timesheets are approved
+    - Leave - Entitlement transaction history (additions, deductions, corrections, usage) for managers and employees
+
 New & Changed Features for OrangeHRM ver 5.9.1
     New Features/Changes
     -----------

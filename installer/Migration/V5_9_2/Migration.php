@@ -41,6 +41,8 @@ class Migration extends AbstractMigration
         $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
         $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
 
+        $this->insertReportMenus();
+
         $groups = ['pim', 'time', 'leave', 'performance'];
         foreach ($groups as $group) {
             if (is_file(__DIR__ . '/lang-string/' . $group . '.yaml')) {
@@ -308,5 +310,159 @@ class Migration extends AbstractMigration
                     ->executeQuery();
             }
         }
+    }
+
+    private function insertReportMenus(): void
+    {
+        $timeMenuId = $this->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_menu_item')
+            ->where('menu_title = :time')
+            ->andWhere('level = 1')
+            ->setParameter('time', 'Time')
+            ->executeQuery()
+            ->fetchOne();
+
+        $timeReportsParentId = null;
+        if ($timeMenuId) {
+            $timeReportsParentId = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :reports')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('reports', 'Reports')
+                ->setParameter('parent', $timeMenuId)
+                ->executeQuery()
+                ->fetchOne();
+        }
+
+        if ($timeReportsParentId) {
+            $exists = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :title')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('title', 'Payroll Fill Sheet')
+                ->setParameter('parent', $timeReportsParentId)
+                ->executeQuery()
+                ->fetchOne();
+            if (!$exists) {
+                $this->insertMenuItem(
+                    'Payroll Fill Sheet',
+                    $this->getScreenId('Payroll Fill Sheet Report'),
+                    (int) $timeReportsParentId,
+                    3,
+                    400
+                );
+            }
+        }
+
+        $leaveMenuId = $this->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_menu_item')
+            ->where('menu_title = :leave')
+            ->andWhere('level = 1')
+            ->setParameter('leave', 'Leave')
+            ->executeQuery()
+            ->fetchOne();
+
+        $leaveReportsParentId = null;
+        if ($leaveMenuId) {
+            $leaveReportsParentId = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :reports')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('reports', 'Reports')
+                ->setParameter('parent', $leaveMenuId)
+                ->executeQuery()
+                ->fetchOne();
+            if (!$leaveReportsParentId) {
+                $leaveReportsParentId = $leaveMenuId;
+            }
+        }
+
+        if ($leaveReportsParentId) {
+            $exists = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :title')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('title', 'Entitlement History')
+                ->setParameter('parent', $leaveReportsParentId)
+                ->executeQuery()
+                ->fetchOne();
+            if (!$exists) {
+                $this->insertMenuItem(
+                    'Entitlement History',
+                    $this->getScreenId('Leave Entitlement History Report'),
+                    (int) $leaveReportsParentId,
+                    $leaveReportsParentId == $leaveMenuId ? 2 : 3,
+                    500
+                );
+            }
+
+            $existsMy = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :title')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('title', 'My Entitlement History')
+                ->setParameter('parent', $leaveReportsParentId)
+                ->executeQuery()
+                ->fetchOne();
+            if (!$existsMy) {
+                $this->insertMenuItem(
+                    'My Entitlement History',
+                    $this->getScreenId('My Leave Entitlement History Report'),
+                    (int) $leaveReportsParentId,
+                    $leaveReportsParentId == $leaveMenuId ? 2 : 3,
+                    600
+                );
+            }
+        }
+    }
+
+    private function getScreenId(string $name): ?int
+    {
+        $id = $this->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_screen')
+            ->where('name = :name')
+            ->setParameter('name', $name)
+            ->executeQuery()
+            ->fetchOne();
+
+        return $id === false || $id === null ? null : (int) $id;
+    }
+
+    private function insertMenuItem(
+        string $menuTitle,
+        ?int $screenId,
+        int $parentId,
+        int $level,
+        int $orderHint
+    ): void {
+        $this->createQueryBuilder()
+            ->insert('ohrm_menu_item')
+            ->values([
+                'menu_title' => ':menu_title',
+                'screen_id' => ':screen_id',
+                'parent_id' => ':parent_id',
+                'level' => ':level',
+                'order_hint' => ':order_hint',
+                'status' => ':status',
+                'additional_params' => ':additional_params',
+            ])
+            ->setParameters([
+                'menu_title' => $menuTitle,
+                'screen_id' => $screenId,
+                'parent_id' => $parentId,
+                'level' => $level,
+                'order_hint' => $orderHint,
+                'status' => 1,
+                'additional_params' => null,
+            ])
+            ->executeQuery();
     }
 }

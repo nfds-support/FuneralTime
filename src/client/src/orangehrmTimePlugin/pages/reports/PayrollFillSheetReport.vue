@@ -36,8 +36,51 @@
           </oxd-grid>
         </oxd-form-row>
         <oxd-divider />
+        <oxd-form-row>
+          <oxd-text tag="p" class="orangehrm-form-hint">
+            {{ $t('time.payroll_periods') }}
+          </oxd-text>
+        </oxd-form-row>
+        <oxd-form-row>
+          <oxd-grid :cols="4" class="orangehrm-full-width-grid">
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="newPeriod.periodNumber"
+                :label="$t('time.period_number')"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="newPeriod.startDate"
+                :label="$t('general.from')"
+                placeholder="YYYY-MM-DD"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="newPeriod.endDate"
+                :label="$t('general.to')"
+                placeholder="YYYY-MM-DD"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="newPeriod.label"
+                :label="$t('general.name')"
+              />
+            </oxd-grid-item>
+          </oxd-grid>
+        </oxd-form-row>
+        <oxd-divider />
         <oxd-form-actions>
           <required-text />
+          <oxd-button
+            type="button"
+            display-type="ghost"
+            :label="$t('general.save')"
+            :disabled="!canSavePeriod"
+            @click="onSavePeriod"
+          />
           <oxd-button
             type="submit"
             display-type="secondary"
@@ -69,7 +112,7 @@
 </template>
 
 <script>
-import {onBeforeMount, ref} from 'vue';
+import {computed, onBeforeMount, ref} from 'vue';
 import {required} from '@/core/util/validation/rules';
 import {APIService} from '@/core/util/services/api.service';
 import usei18n from '@/core/util/composable/usei18n';
@@ -81,6 +124,12 @@ export default {
     const rows = ref([]);
     const periodOptions = ref([]);
     const filters = ref({period: null});
+    const newPeriod = ref({
+      periodNumber: '',
+      startDate: '',
+      endDate: '',
+      label: '',
+    });
     const rules = {period: [required]};
 
     const headers = [
@@ -110,14 +159,50 @@ export default {
       '/api/v2/time/reports/payroll-fill-sheet',
     );
 
-    onBeforeMount(() => {
-      periodsHttp.getAll({limit: 0}).then(({data}) => {
+    const loadPeriods = () => {
+      return periodsHttp.getAll({limit: 0}).then(({data}) => {
         periodOptions.value = (data.data || []).map((p) => ({
           id: p.id,
           label: p.label || `P${p.periodNumber}: ${p.startDate} – ${p.endDate}`,
         }));
       });
+    };
+
+    onBeforeMount(() => {
+      loadPeriods();
     });
+
+    const canSavePeriod = computed(() => {
+      return (
+        !!newPeriod.value.periodNumber &&
+        !!newPeriod.value.startDate &&
+        !!newPeriod.value.endDate
+      );
+    });
+
+    const onSavePeriod = () => {
+      if (!canSavePeriod.value) return;
+      isLoading.value = true;
+      periodsHttp
+        .create({
+          periodNumber: Number(newPeriod.value.periodNumber),
+          startDate: newPeriod.value.startDate,
+          endDate: newPeriod.value.endDate,
+          label: newPeriod.value.label || null,
+        })
+        .then(() => {
+          newPeriod.value = {
+            periodNumber: '',
+            startDate: '',
+            endDate: '',
+            label: '',
+          };
+          return loadPeriods();
+        })
+        .finally(() => {
+          isLoading.value = false;
+        });
+    };
 
     const onGenerate = () => {
       if (!filters.value.period?.id) return;
@@ -170,6 +255,9 @@ export default {
       filters,
       rules,
       periodOptions,
+      newPeriod,
+      canSavePeriod,
+      onSavePeriod,
       onGenerate,
       exportCsv,
     };
