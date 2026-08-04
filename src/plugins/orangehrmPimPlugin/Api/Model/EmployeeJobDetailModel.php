@@ -55,6 +55,11 @@ use OrangeHRM\Entity\Employee;
  *         @OA\Property(property="id", type="integer"),
  *         @OA\Property(property="name", type="string")
  *     ),
+ *     @OA\Property(property="payType", type="string", nullable=true),
+ *     @OA\Property(property="contractedHoursPerWeek", type="number", nullable=true),
+ *     @OA\Property(property="overtimeThresholdHours", type="number", nullable=true),
+ *     @OA\Property(property="fdLicenseClass", type="string", nullable=true),
+ *     @OA\Property(property="fdLicenseNumber", type="string", nullable=true),
  *     @OA\Property(property="employeeTerminationRecord", type="object",
  *         @OA\Property(property="id", type="integer"),
  *         @OA\Property(property="date", type="string", format="date")
@@ -86,6 +91,11 @@ class EmployeeJobDetailModel implements Normalizable
                 ['getSubDivision', 'getUnitId'],
                 ['getDecorator', 'getLocation', 'getId'],
                 ['getDecorator', 'getLocation', 'getName'],
+                'payType',
+                'contractedHoursPerWeek',
+                'overtimeThresholdHours',
+                'fdLicenseClass',
+                'fdLicenseNumber',
                 ['getEmployeeTerminationRecord', 'getId'],
                 ['getEmployeeTerminationRecord', 'getDecorator', 'getDate'],
             ]
@@ -108,6 +118,11 @@ class EmployeeJobDetailModel implements Normalizable
                 ['subunit', 'unitId'],
                 ['location', 'id'],
                 ['location', 'name'],
+                'payType',
+                'contractedHoursPerWeek',
+                'overtimeThresholdHours',
+                'fdLicenseClass',
+                'fdLicenseNumber',
                 ['employeeTerminationRecord', 'id'],
                 ['employeeTerminationRecord', 'date'],
             ]

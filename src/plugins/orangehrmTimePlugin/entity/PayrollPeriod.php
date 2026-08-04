@@ -22,59 +22,53 @@ namespace OrangeHRM\Entity;
 use DateTime;
 use Doctrine\ORM\Mapping as ORM;
 use OrangeHRM\Entity\Decorator\DecoratorTrait;
-use OrangeHRM\Entity\Decorator\TimesheetDecorator;
+use OrangeHRM\Entity\Decorator\PayrollPeriodDecorator;
 
 /**
- * @method TimesheetDecorator getDecorator()
+ * @method PayrollPeriodDecorator getDecorator()
  *
- * @ORM\Table(name="ohrm_timesheet")
+ * @ORM\Table(name="ohrm_payroll_period")
  * @ORM\Entity
  */
-class Timesheet
+class PayrollPeriod
 {
     use DecoratorTrait;
-
-    public const STATE_INITIAL = "INITIAL";
-    public const STATE_APPROVED = "APPROVED";
-    public const RESET_ACTION = "RESET";
-
     /**
      * @var int
      *
-     * @ORM\Column(name="timesheet_id", type="integer")
+     * @ORM\Column(name="id", type="integer")
      * @ORM\Id
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private int $id;
 
     /**
-     * @var string
+     * @var int
      *
-     * @ORM\Column(name="state", type="string", length=255, nullable=false)
+     * @ORM\Column(name="period_number", type="integer")
      */
-    private string $state;
+    private int $periodNumber;
 
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="start_date", type="date", nullable=false)
+     * @ORM\Column(name="start_date", type="date")
      */
     private DateTime $startDate;
 
     /**
      * @var DateTime
      *
-     * @ORM\Column(name="end_date", type="date", nullable=false)
+     * @ORM\Column(name="end_date", type="date")
      */
     private DateTime $endDate;
 
     /**
-     * @var Employee
+     * @var string|null
      *
-     * @ORM\ManyToOne(targetEntity="OrangeHRM\Entity\Employee")
-     * @ORM\JoinColumn(name="employee_id", referencedColumnName="emp_number")
+     * @ORM\Column(name="label", type="string", length=100, nullable=true)
      */
-    private Employee $employee;
+    private ?string $label = null;
 
     /**
      * @return int
@@ -93,19 +87,19 @@ class Timesheet
     }
 
     /**
-     * @return string
+     * @return int
      */
-    public function getState(): string
+    public function getPeriodNumber(): int
     {
-        return $this->state;
+        return $this->periodNumber;
     }
 
     /**
-     * @param string $state
+     * @param int $periodNumber
      */
-    public function setState(string $state): void
+    public function setPeriodNumber(int $periodNumber): void
     {
-        $this->state = $state;
+        $this->periodNumber = $periodNumber;
     }
 
     /**
@@ -141,18 +135,18 @@ class Timesheet
     }
 
     /**
-     * @return Employee
+     * @return string|null
      */
-    public function getEmployee(): Employee
+    public function getLabel(): ?string
     {
-        return $this->employee;
+        return $this->label;
     }
 
     /**
-     * @param Employee $employee
+     * @param string|null $label
      */
-    public function setEmployee(Employee $employee): void
+    public function setLabel(?string $label): void
     {
-        $this->employee = $employee;
+        $this->label = $label;
     }
 }

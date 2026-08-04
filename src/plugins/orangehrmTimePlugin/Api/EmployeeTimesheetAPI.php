@@ -50,8 +50,11 @@ use OrangeHRM\Time\Api\Traits\TimesheetPermissionTrait;
 use OrangeHRM\Time\Api\ValidationRules\MyTimesheetActionRule;
 use OrangeHRM\Time\Api\ValidationRules\TimesheetDateRule;
 use OrangeHRM\Time\Dto\TimesheetSearchFilterParams;
+use OrangeHRM\Time\Service\BankedTimeService;
 use OrangeHRM\Time\Service\TimesheetService;
 use OrangeHRM\Time\Traits\Service\TimesheetServiceTrait;
+use OrangeHRM\Framework\Services;
+use OrangeHRM\Core\Traits\ServiceContainerTrait;
 
 class EmployeeTimesheetAPI extends Endpoint implements CrudEndpoint
 {
@@ -61,6 +64,7 @@ class EmployeeTimesheetAPI extends Endpoint implements CrudEndpoint
     use UserRoleManagerTrait;
     use EntityManagerHelperTrait;
     use TimesheetPermissionTrait;
+    use ServiceContainerTrait;
 
     public const PARAMETER_DATE = 'date';
     public const PARAMETER_ACTION = 'action';
@@ -433,6 +437,9 @@ class EmployeeTimesheetAPI extends Endpoint implements CrudEndpoint
             $this->getTimesheetService()->getTimesheetDao()->saveTimesheet($timesheet);
             $timesheetActionState = $actionKey == WorkflowStateMachine::TIMESHEET_ACTION_RESET ? Timesheet::RESET_ACTION : $state;
             $this->setTimesheetActionLog($timesheetActionState, $comment, $timesheet);
+            if ($state === Timesheet::STATE_APPROVED) {
+                $this->getBankedTimeService()->creditBankedTimeForApprovedTimesheet($timesheet);
+            }
             $this->commitTransaction();
 
             return new EndpointResourceResult(TimesheetModel::class, $timesheet);
@@ -485,5 +492,13 @@ class EmployeeTimesheetAPI extends Endpoint implements CrudEndpoint
         $timesheetActionLog->setDate($this->getDateTimeHelper()->getNow());
         $timesheetActionLog->getDecorator()->setUserId($this->getAuthUser()->getUserId());
         $this->getTimesheetService()->getTimesheetDao()->saveTimesheetActionLog($timesheetActionLog);
+    }
+
+    /**
+     * @return BankedTimeService
+     */
+    protected function getBankedTimeService(): BankedTimeService
+    {
+        return $this->getContainer()->get(Services::BANKED_TIME_SERVICE);
     }
 }

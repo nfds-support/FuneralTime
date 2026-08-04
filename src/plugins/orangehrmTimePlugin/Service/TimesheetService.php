@@ -27,7 +27,9 @@ use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\Employee;
 use OrangeHRM\Entity\Timesheet;
 use OrangeHRM\Entity\TimesheetItem;
+use OrangeHRM\Entity\UserRole;
 use OrangeHRM\Entity\WorkflowStateMachine;
+use OrangeHRM\Pim\Traits\Service\EmployeeServiceTrait;
 use OrangeHRM\Time\Dao\TimesheetDao;
 use OrangeHRM\Time\Dto\DetailedTimesheet;
 use OrangeHRM\Time\Dto\TimesheetColumn;
@@ -37,6 +39,7 @@ class TimesheetService
 {
     use DateTimeHelperTrait;
     use UserRoleManagerTrait;
+    use EmployeeServiceTrait;
 
     public const TIMESHEET_ACTION_MAP = [
         '0' => 'VIEW',
@@ -281,9 +284,14 @@ class TimesheetService
         Timesheet $timesheet
     ): array {
         $includeRoles = [];
-        if ($loggedInEmpNumber == $timesheet->getEmployee()->getEmpNumber()
-            && $this->getUserRoleManager()->essRightsToOwnWorkflow()) {
-            $includeRoles = ['ESS'];
+        $isOwnTimesheet = $loggedInEmpNumber == $timesheet->getEmployee()->getEmpNumber();
+        if ($isOwnTimesheet && $this->getUserRoleManager()->essRightsToOwnWorkflow()) {
+            // Admins without a supervisor may approve their own timesheets.
+            if ($this->canAdminSelfApproveTimesheet($loggedInEmpNumber)) {
+                $includeRoles = [];
+            } else {
+                $includeRoles = ['ESS'];
+            }
         }
 
         return $this->getUserRoleManager()->getAllowedActions(
@@ -293,5 +301,47 @@ class TimesheetService
             $includeRoles,
             [Employee::class => $timesheet->getEmployee()->getEmpNumber()]
         );
+    }
+
+    /**
+     * @param int $empNumber
+     * @return bool
+     */
+    public function canAdminSelfApproveTimesheet(int $empNumber): bool
+    {
+        if (!$this->authUserHasAdminRole()) {
+            return false;
+        }
+        $supervisors = $this->getEmployeeService()->getSupervisorIdListBySubordinateId($empNumber, false);
+        return empty($supervisors);
+    }
+
+    /**
+     * @return bool
+     */
+    private function authUserHasAdminRole(): bool
+    {
+        foreach ($this->getUserRoleManager()->getUserRolesForAuthUser() as $role) {
+            if ($role instanceof UserRole && $role->getName() === 'Admin') {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * Total recorded duration (seconds) for a timesheet.
+     *
+     * @param Timesheet $timesheet
+     * @return int
+     */
+    public function getTimesheetTotalDurationSeconds(Timesheet $timesheet): int
+    {
+        $items = $this->getTimesheetDao()->getTimesheetItemsByTimesheetId($timesheet->getId());
+        $total = 0;
+        foreach ($items as $item) {
+            $total += (int) ($item->getDuration() ?? 0);
+        }
+        return $total;
     }
 }
