@@ -27,9 +27,11 @@ use OrangeHRM\Claim\Dto\ClaimRequestSearchFilterParams;
 use OrangeHRM\Claim\Dto\PartialClaimAttachment;
 use Doctrine\DBAL\LockMode;
 use OrangeHRM\Core\Dao\BaseDao;
+use DateTime;
 use OrangeHRM\Entity\ClaimAttachment;
 use OrangeHRM\Entity\ClaimEvent;
 use OrangeHRM\Entity\ClaimExpense;
+use OrangeHRM\Entity\ClaimExpenseLimit;
 use OrangeHRM\Entity\ClaimRequest;
 use OrangeHRM\Entity\ExpenseType;
 use OrangeHRM\ORM\Paginator;
@@ -659,5 +661,167 @@ class ClaimDao extends BaseDao
         $qb->andWhere('claimExpense.expenseType = :expenseTypeId');
         $qb->setParameter('expenseTypeId', $expenseTypeId);
         return $this->getPaginator($qb)->count() > 0;
+    }
+
+    /**
+     * @param ClaimExpenseLimit $claimExpenseLimit
+     * @return ClaimExpenseLimit
+     */
+    public function saveClaimExpenseLimit(ClaimExpenseLimit $claimExpenseLimit): ClaimExpenseLimit
+    {
+        $this->persist($claimExpenseLimit);
+        return $claimExpenseLimit;
+    }
+
+    /**
+     * @param int $id
+     * @return ClaimExpenseLimit|null
+     */
+    public function getClaimExpenseLimitById(int $id): ?ClaimExpenseLimit
+    {
+        return $this->getRepository(ClaimExpenseLimit::class)->find($id);
+    }
+
+    /**
+     * @param int $empNumber
+     * @return ClaimExpenseLimit[]
+     */
+    public function getClaimExpenseLimitsByEmpNumber(int $empNumber): array
+    {
+        return $this->getRepository(ClaimExpenseLimit::class)->findBy(
+            ['employee' => $empNumber],
+            ['id' => 'ASC']
+        );
+    }
+
+    /**
+     * @param int[] $ids
+     * @return int
+     */
+    public function deleteClaimExpenseLimitsByIds(array $ids): int
+    {
+        if (empty($ids)) {
+            return 0;
+        }
+        $q = $this->createQueryBuilder(ClaimExpenseLimit::class, 'claimExpenseLimit');
+        $q->delete()
+            ->where($q->expr()->in('claimExpenseLimit.id', ':ids'))
+            ->setParameter('ids', $ids);
+        return $q->getQuery()->execute();
+    }
+
+    /**
+     * @param int $empNumber
+     * @param int $expenseTypeId
+     * @return ClaimExpenseLimit|null
+     */
+    public function getClaimExpenseLimit(int $empNumber, int $expenseTypeId): ?ClaimExpenseLimit
+    {
+        return $this->getRepository(ClaimExpenseLimit::class)->findOneBy([
+            'employee' => $empNumber,
+            'expenseType' => $expenseTypeId,
+        ]);
+    }
+
+    /**
+     * Sum amounts for an expense category in a calendar month.
+     * Counts expenses on claims that are still pending or approved
+     * (INITIATED, SUBMITTED, APPROVED, PAID). Excludes cancelled/rejected.
+     *
+     * @param int $empNumber
+     * @param int $expenseTypeId
+     * @param int $year
+     * @param int $month
+     * @param int|null $excludeExpenseId
+     * @return float
+     */
+    public function getMonthlyCategoryExpenseTotal(
+        int $empNumber,
+        int $expenseTypeId,
+        int $year,
+        int $month,
+        ?int $excludeExpenseId = null
+    ): float {
+        $fromDate = new DateTime(sprintf('%04d-%02d-01 00:00:00', $year, $month));
+        $toDate = (clone $fromDate)->modify('last day of this month')->setTime(23, 59, 59);
+
+        $q = $this->createQueryBuilder(ClaimExpense::class, 'claimExpense');
+        $q->select('SUM(claimExpense.amount)')
+            ->leftJoin('claimExpense.claimRequest', 'claimRequest')
+            ->andWhere('claimExpense.isDeleted = :isDeleted')
+            ->andWhere('IDENTITY(claimExpense.expenseType) = :expenseTypeId')
+            ->andWhere('IDENTITY(claimRequest.employee) = :empNumber')
+            ->andWhere($q->expr()->in('claimRequest.status', ':statuses'))
+            ->andWhere($q->expr()->gte('claimExpense.date', ':fromDate'))
+            ->andWhere($q->expr()->lte('claimExpense.date', ':toDate'))
+            ->setParameter('isDeleted', false)
+            ->setParameter('expenseTypeId', $expenseTypeId)
+            ->setParameter('empNumber', $empNumber)
+            ->setParameter('statuses', [
+                ClaimRequest::REQUEST_STATUS_INITIATED,
+                ClaimRequest::REQUEST_STATUS_SUBMITTED,
+                ClaimRequest::REQUEST_STATUS_APPROVED,
+                ClaimRequest::REQUEST_STATUS_PAID,
+            ])
+            ->setParameter('fromDate', $fromDate)
+            ->setParameter('toDate', $toDate);
+
+        if ($excludeExpenseId !== null) {
+            $q->andWhere('claimExpense.id != :excludeExpenseId')
+                ->setParameter('excludeExpenseId', $excludeExpenseId);
+        }
+
+        $result = $q->getQuery()->getSingleScalarResult();
+        return $result === null ? 0.0 : (float) $result;
+    }
+
+    /**
+     * @param int $empNumber
+     * @param int $year
+     * @param int $month
+     * @return ClaimExpense[]
+     */
+    public function getApprovedExpensesForMonth(int $empNumber, int $year, int $month): array
+    {
+        $fromDate = new DateTime(sprintf('%04d-%02d-01 00:00:00', $year, $month));
+        $toDate = (clone $fromDate)->modify('last day of this month')->setTime(23, 59, 59);
+
+        $q = $this->createQueryBuilder(ClaimExpense::class, 'claimExpense');
+        $q->leftJoin('claimExpense.claimRequest', 'claimRequest')
+            ->leftJoin('claimExpense.expenseType', 'expenseType')
+            ->andWhere('claimExpense.isDeleted = :isDeleted')
+            ->andWhere('IDENTITY(claimRequest.employee) = :empNumber')
+            ->andWhere($q->expr()->in('claimRequest.status', ':statuses'))
+            ->andWhere($q->expr()->gte('claimExpense.date', ':fromDate'))
+            ->andWhere($q->expr()->lte('claimExpense.date', ':toDate'))
+            ->setParameter('isDeleted', false)
+            ->setParameter('empNumber', $empNumber)
+            ->setParameter('statuses', [
+                ClaimRequest::REQUEST_STATUS_APPROVED,
+                ClaimRequest::REQUEST_STATUS_PAID,
+            ])
+            ->setParameter('fromDate', $fromDate)
+            ->setParameter('toDate', $toDate)
+            ->orderBy('claimExpense.date', 'ASC')
+            ->addOrderBy('claimExpense.id', 'ASC');
+
+        return $q->getQuery()->execute();
+    }
+
+    /**
+     * @param int[] $requestIds
+     * @return ClaimAttachment[]
+     */
+    public function getAttachmentsForRequestIds(array $requestIds): array
+    {
+        if (empty($requestIds)) {
+            return [];
+        }
+        $q = $this->createQueryBuilder(ClaimAttachment::class, 'claimAttachment');
+        $q->andWhere($q->expr()->in('claimAttachment.requestId', ':requestIds'))
+            ->setParameter('requestIds', $requestIds)
+            ->orderBy('claimAttachment.requestId', 'ASC')
+            ->addOrderBy('claimAttachment.attachId', 'ASC');
+        return $q->getQuery()->execute();
     }
 }

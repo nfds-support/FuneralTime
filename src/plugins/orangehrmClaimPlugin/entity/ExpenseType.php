@@ -79,6 +79,15 @@ class ExpenseType
     private bool $isDeleted = false;
 
     /**
+     * Report column key for monthly expense form: mileage|gas|vehicle|wellness|cellular|office|meal|travelling|other
+     *
+     * @var string|null
+     *
+     * @ORM\Column(name="report_column", type="string", length=20, nullable=true)
+     */
+    private ?string $reportColumn = null;
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -172,5 +181,21 @@ class ExpenseType
     public function setIsDeleted(bool $isDeleted): void
     {
         $this->isDeleted = $isDeleted;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getReportColumn(): ?string
+    {
+        return $this->reportColumn;
+    }
+
+    /**
+     * @param string|null $reportColumn
+     */
+    public function setReportColumn(?string $reportColumn): void
+    {
+        $this->reportColumn = $reportColumn;
     }
 }

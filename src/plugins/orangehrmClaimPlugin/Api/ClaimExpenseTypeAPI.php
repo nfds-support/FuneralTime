@@ -49,9 +49,22 @@ class ClaimExpenseTypeAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_DESCRIPTION = 'description';
     public const PARAMETER_EXPENSE_TYPE_ID = 'expenseTypeId';
     public const PARAMETER_STATUS = 'status';
+    public const PARAMETER_REPORT_COLUMN = 'reportColumn';
     public const DESCRIPTION_MAX_LENGTH = 1000;
     public const NAME_MAX_LENGTH = 100;
     public const PARAMETER_CAN_EXPENSE_TYPE_EDIT = 'canEdit';
+
+    public const ALLOWED_REPORT_COLUMNS = [
+        'mileage',
+        'gas',
+        'vehicle',
+        'wellness',
+        'cellular',
+        'office',
+        'meal',
+        'travelling',
+        'other',
+    ];
 
     /**
      * @OA\Get(
@@ -219,6 +232,14 @@ class ClaimExpenseTypeAPI extends Endpoint implements CrudEndpoint
                 self::PARAMETER_STATUS,
                 new Rule(Rules::BOOL_VAL)
             ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_REPORT_COLUMN,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::IN, [self::ALLOWED_REPORT_COLUMNS])
+                ),
+                true
+            ),
         );
     }
 
@@ -256,6 +277,9 @@ class ClaimExpenseTypeAPI extends Endpoint implements CrudEndpoint
         );
         $expenseType->setStatus(
             $this->getRequestParams()->getBoolean(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_STATUS, true)
+        );
+        $expenseType->setReportColumn(
+            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_REPORT_COLUMN)
         );
 
         $expenseType->getDecorator()->setUserByUserId($this->getAuthUser()->getUserId());
@@ -437,6 +461,14 @@ class ClaimExpenseTypeAPI extends Endpoint implements CrudEndpoint
             ),
             $this->getValidationDecorator()->notRequiredParamRule(
                 $this->getNameRule($uniqueOption),
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_REPORT_COLUMN,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::IN, [self::ALLOWED_REPORT_COLUMNS])
+                ),
+                true
             ),
         );
     }

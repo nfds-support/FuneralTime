@@ -35,6 +35,11 @@ class ClaimRequest
     use DecoratorTrait;
 
     public const REQUEST_STATUS_INITIATED = 'INITIATED';
+    public const REQUEST_STATUS_SUBMITTED = 'SUBMITTED';
+    public const REQUEST_STATUS_APPROVED = 'APPROVED';
+    public const REQUEST_STATUS_REJECTED = 'REJECTED';
+    public const REQUEST_STATUS_CANCELLED = 'CANCELLED';
+    public const REQUEST_STATUS_PAID = 'PAID';
 
     /**
      * @var int

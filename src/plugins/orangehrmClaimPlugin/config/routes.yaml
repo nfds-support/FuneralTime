@@ -109,6 +109,25 @@ apiv2_claim_claim_request_action:
   defaults:
     _api: OrangeHRM\Claim\Api\ClaimRequestActionAPI
 
+apiv2_claim_employee_expense_limits:
+  path: /api/v2/claim/employees/{empNumber}/expense-limits
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Claim\Api\EmployeeExpenseLimitAPI
+  requirements:
+    empNumber: '\d+'
+
+apiv2_claim_employee_expense_limit:
+  path: /api/v2/claim/employees/{empNumber}/expense-limits/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Claim\Api\EmployeeExpenseLimitAPI
+  requirements:
+    empNumber: '\d+'
+    id: '\d+'
+
 ##########################
 #        Screens
 ##########################
@@ -178,6 +197,16 @@ claim_employee_claim:
   controller: OrangeHRM\Claim\Controller\ViewAssignClaimController::handle
   methods: [ GET ]
 
+claim_employee_expense_limits:
+  path: /claim/employeeExpenseLimits
+  controller: OrangeHRM\Claim\Controller\EmployeeExpenseLimitsController::handle
+  methods: [ GET ]
+
+claim_monthly_expense_report:
+  path: /claim/monthlyExpenseReport
+  controller: OrangeHRM\Claim\Controller\MonthlyExpenseReportController::handle
+  methods: [ GET ]
+
 ##########################
 #        Files
 ##########################
@@ -185,4 +214,9 @@ claim_employee_claim:
 claim_attachment:
   path: /claim/requests/{requestId}/attachId/{attachId}
   controller: OrangeHRM\Claim\Controller\ClaimAttachmentController::handle
+  methods: [ GET ]
+
+claim_download_monthly_expense_report:
+  path: /claim/downloadMonthlyExpenseReport
+  controller: OrangeHRM\Claim\Controller\MonthlyExpenseReportDownloadController::handle
   methods: [ GET ]

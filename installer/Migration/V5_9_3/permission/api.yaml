@@ -1,0 +1,18 @@
+apiv2_claim_employee_expense_limits:
+  description: 'API-v2 Claim - Employee Expense Category Limits'
+  api: OrangeHRM\Claim\Api\EmployeeExpenseLimitAPI
+  module: claim
+  allowed: { read: true, create: true, update: true, delete: true }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false, self: false } }
+
+apiv2_claim_monthly_expense_report:
+  description: 'API-v2 Claim - Monthly Expense Report'
+  api: OrangeHRM\Claim\Api\MonthlyExpenseReportAPI
+  module: claim
+  allowed: { read: true, create: false, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false, self: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false, self: false } }
+    - { role: ESS, permission: { read: true, create: false, update: false, delete: false, self: true } }
