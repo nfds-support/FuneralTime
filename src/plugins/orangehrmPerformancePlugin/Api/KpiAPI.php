@@ -50,6 +50,7 @@ class KpiAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_MIN_RATING = 'minRating';
     public const PARAMETER_MAX_RATING = 'maxRating';
     public const PARAMETER_DEFAULT_KPI = 'isDefault';
+    public const PARAMETER_RATING_RUBRIC = 'ratingRubric';
     public const PARAMETER_EDITABLE = 'editable';
 
     public const FILTER_JOB_TITLE_ID = 'jobTitleId';
@@ -193,27 +194,38 @@ class KpiAPI extends Endpoint implements CrudEndpoint
      *             type="object",
      *             @OA\Property(property="title", type="string"),
      *             @OA\Property(property="jobTitleId", type="integer", description="Should be an existing Job title Id"),
-     *             @OA\Property(property="minRating", type="integer"),
-     *             @OA\Property(property="maxRating", type="integer"),
-     *             @OA\Property(property="isDefault", type="boolean"),
-     *             required={"title", "jobTitleId", "minRating", "maxRating"}
-     *         )
-     *     ),
-     *     @OA\Response(response="200",
-     *         description="Success",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 ref="#/components/schemas/Performance-KpiModel"
-     *             ),
-     *             @OA\Property(property="meta", type="object")
-     *         )
-     *     ),
-     * )
-     *
-     * @inheritDoc
-     * @throws BadRequestException|TransactionException
-     */
+ *             @OA\Property(property="minRating", type="integer"),
+ *             @OA\Property(property="maxRating", type="integer"),
+ *             @OA\Property(property="isDefault", type="boolean"),
+ *             @OA\Property(
+ *                 property="ratingRubric",
+ *                 type="array",
+ *                 nullable=true,
+ *                 @OA\Items(
+ *                     type="object",
+ *                     @OA\Property(property="rating", type="integer"),
+ *                     @OA\Property(property="label", type="string"),
+ *                     @OA\Property(property="description", type="string")
+ *                 )
+ *             ),
+ *             required={"title", "jobTitleId", "minRating", "maxRating"}
+ *         )
+ *     ),
+ *     @OA\Response(response="200",
+ *         description="Success",
+ *         @OA\JsonContent(
+ *             @OA\Property(
+ *                 property="data",
+ *                 ref="#/components/schemas/Performance-KpiModel"
+ *             ),
+ *             @OA\Property(property="meta", type="object")
+ *         )
+ *     ),
+ * )
+ *
+ * @inheritDoc
+ * @throws BadRequestException|TransactionException
+ */
     public function create(): EndpointResult
     {
         $kpi = new Kpi();
@@ -267,6 +279,14 @@ class KpiAPI extends Endpoint implements CrudEndpoint
                 self::PARAMETER_DEFAULT_KPI
             )
         );
+
+        if ($this->getRequestParams()->has(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_RATING_RUBRIC)) {
+            $ratingRubric = $this->getRequestParams()->getArrayOrNull(
+                RequestParams::PARAM_TYPE_BODY,
+                self::PARAMETER_RATING_RUBRIC
+            );
+            $kpi->setRatingRubric(empty($ratingRubric) ? null : $ratingRubric);
+        }
     }
 
     /**
@@ -310,7 +330,14 @@ class KpiAPI extends Endpoint implements CrudEndpoint
                     self::PARAMETER_DEFAULT_KPI,
                     new Rule(Rules::BOOL_TYPE)
                 )
-            )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_RATING_RUBRIC,
+                    new Rule(Rules::ARRAY_TYPE)
+                ),
+                true
+            ),
         ];
     }
 
@@ -329,28 +356,39 @@ class KpiAPI extends Endpoint implements CrudEndpoint
      *             type="object",
      *             @OA\Property(property="title", type="string"),
      *             @OA\Property(property="jobTitleId", type="integer", description="Should be an existing Job title Id"),
-     *             @OA\Property(property="minRating", type="integer"),
-     *             @OA\Property(property="maxRating", type="integer"),
-     *             @OA\Property(property="isDefault", type="boolean"),
-     *             required={"title", "jobTitleId", "minRating", "maxRating"}
-     *         )
-     *     ),
-     *     @OA\Response(response="200",
-     *         description="Success",
-     *         @OA\JsonContent(
-     *             @OA\Property(
-     *                 property="data",
-     *                 ref="#/components/schemas/Performance-KpiModel"
-     *             ),
-     *             @OA\Property(property="meta", type="object")
-     *         )
-     *     ),
-     *     @OA\Response(response="404", ref="#/components/responses/RecordNotFound")
-     * )
-     *
-     * @inheritDoc
-     * @throws BadRequestException|TransactionException
-     */
+ *             @OA\Property(property="minRating", type="integer"),
+ *             @OA\Property(property="maxRating", type="integer"),
+ *             @OA\Property(property="isDefault", type="boolean"),
+ *             @OA\Property(
+ *                 property="ratingRubric",
+ *                 type="array",
+ *                 nullable=true,
+ *                 @OA\Items(
+ *                     type="object",
+ *                     @OA\Property(property="rating", type="integer"),
+ *                     @OA\Property(property="label", type="string"),
+ *                     @OA\Property(property="description", type="string")
+ *                 )
+ *             ),
+ *             required={"title", "jobTitleId", "minRating", "maxRating"}
+ *         )
+ *     ),
+ *     @OA\Response(response="200",
+ *         description="Success",
+ *         @OA\JsonContent(
+ *             @OA\Property(
+ *                 property="data",
+ *                 ref="#/components/schemas/Performance-KpiModel"
+ *             ),
+ *             @OA\Property(property="meta", type="object")
+ *         )
+ *     ),
+ *     @OA\Response(response="404", ref="#/components/responses/RecordNotFound")
+ * )
+ *
+ * @inheritDoc
+ * @throws BadRequestException|TransactionException
+ */
     public function update(): EndpointResult
     {
         $id = $this->getRequestParams()->getInt(RequestParams::PARAM_TYPE_ATTRIBUTE, CommonParams::PARAMETER_ID);

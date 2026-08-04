@@ -242,6 +242,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 2,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -255,6 +256,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -268,6 +270,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": false
       },
@@ -281,6 +284,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 55,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": false
       },
@@ -294,6 +298,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 40,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -307,6 +312,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 20,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -320,6 +326,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 50,
+        "ratingRubric": null,
         "isDefault": true,
         "deletable": true
       },
@@ -333,6 +340,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -346,6 +354,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 25,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": true
       },
@@ -359,6 +368,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 5,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -372,6 +382,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -385,6 +396,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       }
@@ -410,6 +422,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 2,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -423,6 +436,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -436,6 +450,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": false
       },
@@ -449,6 +464,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 55,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": false
       },
@@ -462,6 +478,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 40,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -475,6 +492,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 20,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -488,6 +506,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 50,
+        "ratingRubric": null,
         "isDefault": true,
         "deletable": true
       },
@@ -501,6 +520,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -514,6 +534,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 25,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": true
       },
@@ -527,6 +548,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 5,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -540,6 +562,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -553,6 +576,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       }
@@ -578,6 +602,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -591,6 +616,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -604,6 +630,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 5,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -617,6 +644,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 25,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": true
       },
@@ -630,6 +658,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -643,6 +672,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 50,
+        "ratingRubric": null,
         "isDefault": true,
         "deletable": true
       },
@@ -656,6 +686,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 20,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -669,6 +700,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 40,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -682,6 +714,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 55,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": false
       },
@@ -695,6 +728,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": false
       },
@@ -708,6 +742,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -721,6 +756,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 2,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       }
@@ -746,6 +782,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 25,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": true
       },
@@ -759,6 +796,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 20,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -772,6 +810,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -785,6 +824,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -798,6 +838,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 40,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -811,6 +852,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 5,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -824,6 +866,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 50,
+        "ratingRubric": null,
         "isDefault": true,
         "deletable": true
       },
@@ -837,6 +880,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       }
@@ -850,6 +894,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": false
       },
@@ -863,6 +908,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 55,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": false
       },
@@ -876,6 +922,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 2,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -889,6 +936,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       }
@@ -914,6 +962,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 2,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -927,6 +976,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -940,6 +990,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": false
       },
@@ -953,6 +1004,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 55,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": false
       },
@@ -966,6 +1018,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 50,
+        "ratingRubric": null,
         "isDefault": true,
         "deletable": true
       },
@@ -979,6 +1032,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       }
@@ -992,6 +1046,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 40,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1005,6 +1060,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 5,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1018,6 +1074,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1031,6 +1088,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 20,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1044,6 +1102,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1057,6 +1116,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 25,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": true
       }
@@ -1081,6 +1141,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 2,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1094,6 +1155,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 100,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1107,6 +1169,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": false
       },
@@ -1120,6 +1183,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 55,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": false
       },
@@ -1133,6 +1197,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 40,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       }
@@ -1158,6 +1223,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 20,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1171,6 +1237,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 50,
+        "ratingRubric": null,
         "isDefault": true,
         "deletable": true
       },
@@ -1184,6 +1251,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1197,6 +1265,7 @@ GetAll:
         },
         "minRating": 5,
         "maxRating": 25,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": true
       },
@@ -1210,6 +1279,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 5,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1237,6 +1307,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 50,
+        "ratingRubric": null,
         "isDefault": true,
         "deletable": true
       },
@@ -1250,6 +1321,7 @@ GetAll:
         },
         "minRating": 0,
         "maxRating": 20,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1263,6 +1335,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 40,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": true
       },
@@ -1276,6 +1349,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 55,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": false
       },
@@ -1289,6 +1363,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": false
       }
@@ -1313,6 +1388,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 10,
+        "ratingRubric": null,
         "isDefault": 1,
         "deletable": false
       },
@@ -1326,6 +1402,7 @@ GetAll:
         },
         "minRating": 1,
         "maxRating": 55,
+        "ratingRubric": null,
         "isDefault": null,
         "deletable": false
       }

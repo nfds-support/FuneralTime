@@ -40,6 +40,17 @@ use OrangeHRM\Performance\Traits\Service\KpiServiceTrait;
  *     @OA\Property(property="minRating", type="integer"),
  *     @OA\Property(property="maxRating", type="integer"),
  *     @OA\Property(property="isDefault", type="boolean"),
+ *     @OA\Property(
+ *         property="ratingRubric",
+ *         type="array",
+ *         nullable=true,
+ *         @OA\Items(
+ *             type="object",
+ *             @OA\Property(property="rating", type="integer"),
+ *             @OA\Property(property="label", type="string"),
+ *             @OA\Property(property="description", type="string")
+ *         )
+ *     ),
  *     @OA\Property(property="deletable", type="boolean")
  * )
  */
@@ -63,6 +74,7 @@ class KpiModel implements Normalizable
                 'minRating',
                 'maxRating',
                 ['isDefaultKpi'],
+                'ratingRubric',
             ]
         );
         $this->setAttributeNames(
@@ -75,6 +87,7 @@ class KpiModel implements Normalizable
                 'minRating',
                 'maxRating',
                 'isDefault',
+                'ratingRubric',
             ]
         );
     }

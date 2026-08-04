@@ -52,6 +52,10 @@ class KpiTest extends EntityTestCase
         $kpi->setMaxRating(100);
         $kpi->setDefaultKpi(true);
         $kpi->setDeletedAt(null);
+        $kpi->setRatingRubric([
+            ['rating' => 1, 'label' => 'Needs Improvement'],
+            ['rating' => 5, 'label' => 'Meets Expectations', 'description' => 'Solid delivery'],
+        ]);
         $this->persist($kpi);
 
         /** @var Kpi $kpi */
@@ -63,5 +67,13 @@ class KpiTest extends EntityTestCase
         $this->assertEquals(100, $kpi->getMaxRating());
         $this->assertTrue($kpi->isDefaultKpi());
         $this->assertNull($kpi->getDeletedAt());
+        $this->assertEquals(
+            [
+                ['rating' => 1, 'label' => 'Needs Improvement'],
+                ['rating' => 5, 'label' => 'Meets Expectations', 'description' => 'Solid delivery'],
+            ],
+            $kpi->getRatingRubric()
+        );
     }
 }
+

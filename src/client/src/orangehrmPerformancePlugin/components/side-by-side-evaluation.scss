@@ -1,0 +1,131 @@
+// OrangeHRM is a comprehensive Human Resource Management (HRM) System that captures
+// all the essential functionalities required for any enterprise.
+// Copyright (C) 2006 OrangeHRM Inc., http://www.orangehrm.com
+//
+// OrangeHRM is free software: you can redistribute it and/or modify it under the terms of
+// the GNU General Public License as published by the Free Software Foundation, either
+// version 3 of the License, or (at your option) any later version.
+//
+// OrangeHRM is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License along with OrangeHRM.
+// If not, see <https://www.gnu.org/licenses/>.
+
+.orangehrm-side-by-side {
+  &-header {
+    display: grid;
+    gap: 1rem;
+    margin-bottom: 1rem;
+
+    @include oxd-respond-to('md') {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+
+  &-column-title {
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+  }
+
+  &-reviewer {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+
+    &-profile-image {
+      width: 40px;
+      height: 40px;
+      border-radius: 100%;
+      display: flex;
+      flex-shrink: 0;
+      justify-content: center;
+      box-sizing: border-box;
+    }
+
+    &-name {
+      margin-left: 1rem;
+      word-break: break-word;
+    }
+  }
+
+  &-status {
+    margin-top: 0.25rem;
+  }
+
+  &-kpi {
+    padding: 1rem 0;
+    border-top: $oxd-border $oxd-interface-gray-lighten-2-color;
+
+    &-title {
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+
+    &-minmax {
+      font-size: 0.75rem;
+    }
+
+    &-rubric {
+      margin: 0.35rem 0 0.75rem;
+      font-size: 0.75rem;
+      color: $oxd-interface-gray-color;
+
+      &-item {
+        display: block;
+      }
+    }
+
+    &-columns {
+      display: grid;
+      gap: 1rem;
+
+      @include oxd-respond-to('md') {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    &-side {
+      min-width: 0;
+    }
+
+    &-placeholder {
+      padding: 1rem 0.75rem;
+      font-style: italic;
+      color: $oxd-interface-gray-color;
+      background-color: $oxd-background-light-gray-color;
+      border-radius: 0.65rem;
+    }
+  }
+
+  &-general {
+    padding-top: 1rem;
+    border-top: $oxd-border $oxd-interface-gray-lighten-2-color;
+
+    &-label {
+      font-weight: 700;
+      margin-bottom: 0.75rem;
+    }
+
+    &-columns {
+      display: grid;
+      gap: 1rem;
+
+      @include oxd-respond-to('md') {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  }
+
+  ::v-deep(.oxd-textarea) {
+    min-height: unset;
+    height: 58px;
+  }
+
+  ::v-deep(.oxd-input) {
+    text-align: center;
+    font-size: 1.2rem;
+    height: 58px;
+  }
+}
