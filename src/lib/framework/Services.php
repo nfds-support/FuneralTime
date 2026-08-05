@@ -302,6 +302,21 @@ final class Services
      */
     public const TIMESHEET_SERVICE = 'time.timesheet_service';
 
+    /**
+     * @see \OrangeHRM\Time\Service\PayrollPeriodService
+     */
+    public const PAYROLL_PERIOD_SERVICE = 'time.payroll_period_service';
+
+    /**
+     * @see \OrangeHRM\Time\Service\BankedTimeService
+     */
+    public const BANKED_TIME_SERVICE = 'time.banked_time_service';
+
+    /**
+     * @see \OrangeHRM\Leave\Service\LeaveEntitlementTransactionService
+     */
+    public const LEAVE_ENTITLEMENT_TRANSACTION_SERVICE = 'leave.leave_entitlement_transaction_service';
+
     ///////////////////////////////////////////////////////////////
     /// Attendance plugin services
     ///////////////////////////////////////////////////////////////

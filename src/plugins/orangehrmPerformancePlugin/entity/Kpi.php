@@ -87,6 +87,13 @@ class Kpi
     private ?JobTitle $jobTitle = null;
 
     /**
+     * @var array|null list of {rating: int, label: string, description?: string}
+     *
+     * @ORM\Column(name="rating_rubric", type="json", nullable=true)
+     */
+    private ?array $ratingRubric = null;
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -196,5 +203,21 @@ class Kpi
     public function setDeletedAt(?DateTime $deletedAt): void
     {
         $this->deletedAt = $deletedAt;
+    }
+
+    /**
+     * @return array|null
+     */
+    public function getRatingRubric(): ?array
+    {
+        return $this->ratingRubric;
+    }
+
+    /**
+     * @param array|null $ratingRubric
+     */
+    public function setRatingRubric(?array $ratingRubric): void
+    {
+        $this->ratingRubric = $ratingRubric;
     }
 }

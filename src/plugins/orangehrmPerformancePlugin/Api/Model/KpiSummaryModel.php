@@ -30,7 +30,18 @@ use OrangeHRM\Entity\ReviewerRating;
  *     @OA\Property(property="id", type="integer"),
  *     @OA\Property(property="title", type="string"),
  *     @OA\Property(property="minRating", type="integer"),
- *     @OA\Property(property="maxRating", type="integer")
+ *     @OA\Property(property="maxRating", type="integer"),
+ *     @OA\Property(
+ *         property="ratingRubric",
+ *         type="array",
+ *         nullable=true,
+ *         @OA\Items(
+ *             type="object",
+ *             @OA\Property(property="rating", type="integer"),
+ *             @OA\Property(property="label", type="string"),
+ *             @OA\Property(property="description", type="string")
+ *         )
+ *     )
  * )
  */
 class KpiSummaryModel implements Normalizable
@@ -46,6 +57,7 @@ class KpiSummaryModel implements Normalizable
                 ['getKpi','getTitle'],
                 ['getKpi','getMinRating'],
                 ['getKpi','getMaxRating'],
+                ['getKpi','getRatingRubric'],
             ]
         );
         $this->setAttributeNames(
@@ -54,6 +66,7 @@ class KpiSummaryModel implements Normalizable
                 'title',
                 'minRating',
                 'maxRating',
+                'ratingRubric',
             ]
         );
     }

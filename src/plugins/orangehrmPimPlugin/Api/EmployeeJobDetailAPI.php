@@ -44,6 +44,14 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
     public const PARAMETER_JOB_CATEGORY_ID = 'jobCategoryId';
     public const PARAMETER_SUBUNIT_ID = 'subunitId';
     public const PARAMETER_LOCATION_ID = 'locationId';
+    public const PARAMETER_PAY_TYPE = 'payType';
+    public const PARAMETER_CONTRACTED_HOURS_PER_WEEK = 'contractedHoursPerWeek';
+    public const PARAMETER_OVERTIME_THRESHOLD_HOURS = 'overtimeThresholdHours';
+    public const PARAMETER_FD_LICENSE_CLASS = 'fdLicenseClass';
+    public const PARAMETER_FD_LICENSE_NUMBER = 'fdLicenseNumber';
+
+    public const PAY_TYPES = ['salaried', 'hourly'];
+    public const FD_LICENSE_CLASSES = ['none', 'class_1', 'class_2', 'tssr', 'pre_need'];
 
     /**
      * @OA\Get(
@@ -162,6 +170,26 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_LOCATION_ID
         );
+        $payType = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_PAY_TYPE
+        );
+        $contractedHours = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_CONTRACTED_HOURS_PER_WEEK
+        );
+        $overtimeThreshold = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_OVERTIME_THRESHOLD_HOURS
+        );
+        $fdLicenseClass = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_FD_LICENSE_CLASS
+        );
+        $fdLicenseNumber = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_FD_LICENSE_NUMBER
+        );
 
         $currentJoinedDate = $employee->getJoinedDate();
         $employee->setJoinedDate($joinedDate);
@@ -170,6 +198,11 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
         $employee->getDecorator()->setJobCategoryById($jobCategoryId);
         $employee->getDecorator()->setSubunitById($subunitId);
         $employee->getDecorator()->setLocationById($locationId);
+        $employee->setPayType($payType);
+        $employee->setContractedHoursPerWeek($contractedHours);
+        $employee->setOvertimeThresholdHours($overtimeThreshold);
+        $employee->setFdLicenseClass($fdLicenseClass);
+        $employee->setFdLicenseNumber($fdLicenseNumber);
 
         $this->getEmployeeService()->updateEmployeeJobDetails($employee);
 
@@ -224,6 +257,39 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
                 new ParamRule(
                     self::PARAMETER_LOCATION_ID,
                     new Rule(Rules::POSITIVE)
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_PAY_TYPE,
+                    new Rule(Rules::IN, [self::PAY_TYPES])
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_CONTRACTED_HOURS_PER_WEEK,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::LENGTH, [null, 10])
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_OVERTIME_THRESHOLD_HOURS,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::LENGTH, [null, 10])
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_FD_LICENSE_CLASS,
+                    new Rule(Rules::IN, [self::FD_LICENSE_CLASSES])
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_FD_LICENSE_NUMBER,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::LENGTH, [null, 50])
                 )
             ),
         );

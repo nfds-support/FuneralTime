@@ -34,6 +34,8 @@ import LeaveRequest from './pages/LeaveRequest.vue';
 import MyLeaveList from './pages/MyLeaveList.vue';
 import LeaveEntitlementReport from './pages/reports/LeaveEntitlementReport.vue';
 import MyLeaveEntitlementReport from './pages/reports/MyLeaveEntitlementReport.vue';
+import LeaveEntitlementHistoryReport from './pages/reports/LeaveEntitlementHistoryReport.vue';
+import MyLeaveEntitlementHistoryReport from './pages/reports/MyLeaveEntitlementHistoryReport.vue';
 
 export default {
   'leave-period': LeavePeriod,
@@ -55,4 +57,6 @@ export default {
   'my-leave-list': MyLeaveList,
   'leave-entitlement-report': LeaveEntitlementReport,
   'my-leave-entitlement-report': MyLeaveEntitlementReport,
+  'leave-entitlement-history-report': LeaveEntitlementHistoryReport,
+  'my-leave-entitlement-history-report': MyLeaveEntitlementHistoryReport,
 };

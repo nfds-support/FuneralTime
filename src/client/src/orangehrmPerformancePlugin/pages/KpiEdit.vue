@@ -81,6 +81,57 @@
         </oxd-form-row>
 
         <oxd-divider />
+        <oxd-text tag="p" class="orangehrm-main-title">
+          {{ $t('performance.rating_rubric') }}
+        </oxd-text>
+        <oxd-form-row
+          v-for="(level, index) in kpi.ratingRubric"
+          :key="index"
+        >
+          <oxd-grid :cols="4" class="orangehrm-full-width-grid">
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model.number="level.rating"
+                :label="$t('performance.rubric_level')"
+                autcomplete="off"
+                :readonly="isReadOnly"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="level.label"
+                :label="$t('performance.rubric_label')"
+                autcomplete="off"
+                :readonly="isReadOnly"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="level.description"
+                :label="$t('performance.rubric_description')"
+                autcomplete="off"
+                :readonly="isReadOnly"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item class="orangehrm-kpi-rubric-actions">
+              <oxd-icon-button
+                v-if="!isReadOnly"
+                name="trash-fill"
+                :with-container="false"
+                @click="onRemoveRubricLevel(index)"
+              />
+            </oxd-grid-item>
+          </oxd-grid>
+        </oxd-form-row>
+        <oxd-button
+          v-if="!isReadOnly"
+          icon-name="plus"
+          display-type="text"
+          :label="$t('performance.add_rubric_level')"
+          @click="onAddRubricLevel"
+        />
+
+        <oxd-divider />
         <br />
         <oxd-form-actions>
           <required-text />
@@ -116,10 +167,11 @@ const initialKpi = {
   minRating: null,
   maxRating: null,
   isDefault: false,
+  ratingRubric: [],
 };
 
 export default {
-  name: 'KpiSave',
+  name: 'KpiEdit',
   components: {
     'oxd-switch-input': OxdSwitchInput,
     'jobtitle-dropdown': JobtitleDropdown,
@@ -143,7 +195,10 @@ export default {
   data() {
     return {
       isLoading: false,
-      kpi: {...initialKpi},
+      kpi: {
+        ...initialKpi,
+        ratingRubric: [],
+      },
       isReadOnly: false,
       rules: {
         title: [required, shouldNotExceedCharLength(100)],
@@ -186,6 +241,13 @@ export default {
         this.kpi.minRating = data.minRating;
         this.kpi.maxRating = data.maxRating;
         this.kpi.isDefault = data.isDefault;
+        this.kpi.ratingRubric = Array.isArray(data.ratingRubric)
+          ? data.ratingRubric.map((level) => ({
+              rating: level.rating,
+              label: level.label || '',
+              description: level.description || '',
+            }))
+          : [];
       })
       .finally(() => {
         this.isLoading = false;
@@ -194,6 +256,26 @@ export default {
   methods: {
     onCancel() {
       navigate('/performance/searchKpi');
+    },
+    onAddRubricLevel() {
+      this.kpi.ratingRubric.push({
+        rating: null,
+        label: '',
+        description: '',
+      });
+    },
+    onRemoveRubricLevel(index) {
+      this.kpi.ratingRubric.splice(index, 1);
+    },
+    getRatingRubricPayload() {
+      const levels = this.kpi.ratingRubric
+        .filter((level) => level.rating !== null && level.rating !== '' && level.label)
+        .map((level) => ({
+          rating: Number(level.rating),
+          label: level.label,
+          ...(level.description ? {description: level.description} : {}),
+        }));
+      return levels.length > 0 ? levels : null;
     },
     onSave() {
       this.isLoading = true;
@@ -204,6 +286,7 @@ export default {
           minRating: this.kpi.minRating,
           maxRating: this.kpi.maxRating,
           isDefault: this.kpi.isDefault,
+          ratingRubric: this.getRatingRubricPayload(),
         })
         .then(() => {
           return this.$toast.updateSuccess();

@@ -39,6 +39,8 @@ class LeaveEntitlement
     use NumberHelperTrait;
 
     public const ENTITLEMENT_TYPE_ADD = 1;
+    public const ENTITLEMENT_TYPE_DEDUCTION = 2;
+    public const ENTITLEMENT_TYPE_CORRECTION = 3;
 
     /**
      * @var int
