@@ -51,18 +51,22 @@ use OrangeHRM\Entity\Employee;
  *         @OA\Property(property="name", type="string"),
  *         @OA\Property(property="unitId", type="integer")
  *     ),
- *     @OA\Property(property="location", type="object",
- *         @OA\Property(property="id", type="integer"),
- *         @OA\Property(property="name", type="string")
- *     ),
- *     @OA\Property(property="onCall", type="boolean"),
- *     @OA\Property(property="employeeTerminationRecord", type="object",
- *         @OA\Property(property="id", type="integer"),
- *         @OA\Property(property="date", type="string", format="date")
- *     )
- * )
- */
-
+     *     @OA\Property(property="location", type="object",
+     *         @OA\Property(property="id", type="integer"),
+     *         @OA\Property(property="name", type="string")
+     *     ),
+     *     @OA\Property(property="onCall", type="boolean"),
+     *     @OA\Property(property="payType", type="string", nullable=true),
+     *     @OA\Property(property="contractedHoursPerWeek", type="number", nullable=true),
+     *     @OA\Property(property="overtimeThresholdHours", type="number", nullable=true),
+     *     @OA\Property(property="fdLicenseClass", type="string", nullable=true),
+     *     @OA\Property(property="fdLicenseNumber", type="string", nullable=true),
+     *     @OA\Property(property="employeeTerminationRecord", type="object",
+     *         @OA\Property(property="id", type="integer"),
+     *         @OA\Property(property="date", type="string", format="date")
+     *     )
+     * )
+     */
 class EmployeeJobDetailModel implements Normalizable
 {
     use ModelTrait;
@@ -89,6 +93,11 @@ class EmployeeJobDetailModel implements Normalizable
                 ['getDecorator', 'getLocation', 'getId'],
                 ['getDecorator', 'getLocation', 'getName'],
                 ['isOnCall'],
+                'payType',
+                'contractedHoursPerWeek',
+                'overtimeThresholdHours',
+                'fdLicenseClass',
+                'fdLicenseNumber',
                 ['getEmployeeTerminationRecord', 'getId'],
                 ['getEmployeeTerminationRecord', 'getDecorator', 'getDate'],
             ]
@@ -112,6 +121,11 @@ class EmployeeJobDetailModel implements Normalizable
                 ['location', 'id'],
                 ['location', 'name'],
                 'onCall',
+                'payType',
+                'contractedHoursPerWeek',
+                'overtimeThresholdHours',
+                'fdLicenseClass',
+                'fdLicenseNumber',
                 ['employeeTerminationRecord', 'id'],
                 ['employeeTerminationRecord', 'date'],
             ]

@@ -73,6 +73,13 @@
       &-minmax {
         font-size: 0.75rem;
       }
+      &-rubric {
+        margin-top: 0.35rem;
+        &-item {
+          font-size: 0.75rem;
+          color: $oxd-interface-gray-color;
+        }
+      }
     }
     &-general {
       @include oxd-respond-to('md') {

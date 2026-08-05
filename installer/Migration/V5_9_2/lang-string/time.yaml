@@ -1,13 +1,69 @@
 langStrings:
   -
-    unitId: break_deductions
-    value: 'Break Deductions'
+    unitId: payroll_fill_sheet
+    value: 'Payroll Fill Sheet'
     note: ''
   -
-    unitId: total_hours
-    value: 'Total Hours'
+    unitId: payroll_fill_sheet_report
+    value: 'Payroll Fill Sheet Report'
     note: ''
   -
-    unitId: on_call_question
-    value: 'On-Call?'
+    unitId: payroll_periods
+    value: 'Payroll Periods'
+    note: ''
+  -
+    unitId: payroll_period
+    value: 'Payroll Period'
+    note: ''
+  -
+    unitId: period_number
+    value: 'Period Number (P#)'
+    note: ''
+  -
+    unitId: regular_hours_week_1
+    value: 'Regular Hours Week 1'
+    note: ''
+  -
+    unitId: regular_hours_week_2
+    value: 'Regular Hours Week 2'
+    note: ''
+  -
+    unitId: overtime_hours_week_1
+    value: 'Overtime Hours Week 1 (1.5x)'
+    note: ''
+  -
+    unitId: overtime_hours_week_2
+    value: 'Overtime Hours Week 2 (1.5x)'
+    note: ''
+  -
+    unitId: on_call_week_1
+    value: 'On-Call Week 1'
+    note: ''
+  -
+    unitId: on_call_week_2
+    value: 'On-Call Week 2'
+    note: ''
+  -
+    unitId: sick_hours
+    value: 'Sick Hours'
+    note: ''
+  -
+    unitId: vacation_hours_week_1
+    value: 'Vacation Hours Week 1'
+    note: ''
+  -
+    unitId: vacation_hours_week_2
+    value: 'Vacation Hours Week 2'
+    note: ''
+  -
+    unitId: administration_employees
+    value: 'Administration Employees'
+    note: ''
+  -
+    unitId: operation_employees
+    value: 'Operation Employees'
+    note: ''
+  -
+    unitId: banked_hours
+    value: 'Banked Hours'
     note: ''

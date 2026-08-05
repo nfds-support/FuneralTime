@@ -1,5 +1,49 @@
 langStrings:
   -
-    unitId: on_call
-    value: 'On Call'
-    note: 'Employee job setting that enables on-call checkboxes on timesheets'
+    unitId: pay_type
+    value: 'Pay Type'
+    note: ''
+  -
+    unitId: salaried
+    value: 'Salaried'
+    note: ''
+  -
+    unitId: hourly
+    value: 'Hourly'
+    note: ''
+  -
+    unitId: contracted_hours_per_week
+    value: 'Contracted Hours / Week'
+    note: ''
+  -
+    unitId: overtime_threshold_hours
+    value: 'Overtime Threshold (Hours / Week)'
+    note: ''
+  -
+    unitId: fd_license_class
+    value: 'Funeral Director License Class'
+    note: ''
+  -
+    unitId: fd_license_number
+    value: 'Funeral Director License Number'
+    note: ''
+  -
+    unitId: fd_license_none
+    value: 'None'
+    note: ''
+  -
+    unitId: fd_license_class_1
+    value: 'Class 1'
+    note: ''
+  -
+    unitId: fd_license_class_2
+    value: 'Class 2'
+    note: ''
+  -
+    unitId: fd_license_tssr
+    value: 'TSSR'
+    note: ''
+  -
+    unitId: fd_license_pre_need
+    value: 'Pre-Need'
+    note: ''

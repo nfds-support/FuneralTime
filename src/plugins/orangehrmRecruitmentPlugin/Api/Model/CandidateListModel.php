@@ -19,13 +19,13 @@
 
 namespace OrangeHRM\Recruitment\Api\Model;
 
+use OrangeHRM\Core\Api\V2\Serializer\ModelConstructorArgsAwareInterface;
 use OrangeHRM\Core\Api\V2\Serializer\Normalizable;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\Candidate;
 use OrangeHRM\Entity\CandidateVacancy;
 use OrangeHRM\Entity\Vacancy;
-use OrangeHRM\Recruitment\Traits\Service\RecruitmentAttachmentServiceTrait;
 
 /**
  * @OA\Schema(
@@ -63,9 +63,8 @@ use OrangeHRM\Recruitment\Traits\Service\RecruitmentAttachmentServiceTrait;
  *     @OA\Property(property="deletable", type="boolean")
  * )
  */
-class CandidateListModel implements Normalizable
+class CandidateListModel implements Normalizable, ModelConstructorArgsAwareInterface
 {
-    use RecruitmentAttachmentServiceTrait;
     use AuthUserTrait;
     use UserRoleManagerTrait;
 
@@ -74,9 +73,12 @@ class CandidateListModel implements Normalizable
      */
     private Candidate $candidate;
 
-    public function __construct(Candidate $candidate)
+    private bool $hasAttachment;
+
+    public function __construct(Candidate $candidate, bool $hasAttachment)
     {
         $this->candidate = $candidate;
+        $this->hasAttachment = $hasAttachment;
     }
 
     /**
@@ -107,9 +109,6 @@ class CandidateListModel implements Normalizable
             )) {
             $deletable = false;
         }
-        $candidateAttachment = $this->getRecruitmentAttachmentService()
-            ->getRecruitmentAttachmentDao()
-            ->getPartialCandidateAttachmentByCandidateId($this->candidate->getId());
 
         return [
             'id' => $this->candidate->getId(),
@@ -132,7 +131,7 @@ class CandidateListModel implements Normalizable
                 ],
             'status' => is_null($candidateVacancy) ? null :
                 $candidateVacancy->getDecorator()->getCandidateVacancyStatus(),
-            'hasAttachment' => !is_null($candidateAttachment),
+            'hasAttachment' => $this->hasAttachment,
             'deletable' => $deletable
         ];
     }

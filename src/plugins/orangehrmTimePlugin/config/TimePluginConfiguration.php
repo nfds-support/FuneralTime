@@ -23,7 +23,9 @@ use OrangeHRM\Core\Traits\ServiceContainerTrait;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Framework\PluginConfigurationInterface;
 use OrangeHRM\Framework\Services;
+use OrangeHRM\Time\Service\BankedTimeService;
 use OrangeHRM\Time\Service\CustomerService;
+use OrangeHRM\Time\Service\PayrollPeriodService;
 use OrangeHRM\Time\Service\ProjectService;
 use OrangeHRM\Time\Service\TimesheetService;
 use OrangeHRM\Time\Subscriber\TimesheetPeriodSubscriber;
@@ -41,6 +43,8 @@ class TimePluginConfiguration implements PluginConfigurationInterface
         $this->getContainer()->register(Services::PROJECT_SERVICE, ProjectService::class);
         $this->getContainer()->register(Services::CUSTOMER_SERVICE, CustomerService::class);
         $this->getContainer()->register(Services::TIMESHEET_SERVICE, TimesheetService::class);
+        $this->getContainer()->register(Services::PAYROLL_PERIOD_SERVICE, PayrollPeriodService::class);
+        $this->getContainer()->register(Services::BANKED_TIME_SERVICE, BankedTimeService::class);
 
         $this->getEventDispatcher()->addSubscriber(new TimesheetPeriodSubscriber());
     }

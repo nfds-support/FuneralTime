@@ -128,6 +128,24 @@ class RecruitmentAttachmentDao extends BaseDao
     }
 
     /**
+     * @param int[] $candidateIds
+     * @return int[] candidate ids that have at least one attachment
+     */
+    public function getCandidateIdsHavingAttachment(array $candidateIds): array
+    {
+        if (empty($candidateIds)) {
+            return [];
+        }
+
+        $qb = $this->createQueryBuilder(CandidateAttachment::class, 'candidateAttachment');
+        $qb->select('IDENTITY(candidateAttachment.candidate)')
+            ->andWhere($qb->expr()->in('candidateAttachment.candidate', ':candidateIds'))
+            ->setParameter('candidateIds', $candidateIds);
+
+        return array_map('intval', $qb->getQuery()->getSingleColumnResult());
+    }
+
+    /**
      * @param int $attachId
      * @param int $interviewId
      * @return RecruitmentAttachment|null

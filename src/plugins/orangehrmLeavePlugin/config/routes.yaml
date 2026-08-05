@@ -221,6 +221,13 @@ apiv2_leave_employee_leave:
   defaults:
     _api: OrangeHRM\Leave\Api\EmployeeLeaveAPI
 
+apiv2_leave_entitlement_transactions:
+  path: /api/v2/leave/entitlement-transactions
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST ]
+  defaults:
+    _api: OrangeHRM\Leave\Api\LeaveEntitlementTransactionAPI
+
 ##########################
 #        Screens
 ##########################
@@ -323,4 +330,14 @@ leave_view_leave_entitlement_report:
 leave_view_my_leave_entitlement_report:
   path: /leave/viewMyLeaveBalanceReport
   controller: OrangeHRM\Leave\Controller\MyLeaveEntitlementReport::handle
+  methods: [ GET ]
+
+leave_view_leave_entitlement_history_report:
+  path: /leave/viewLeaveEntitlementHistoryReport
+  controller: OrangeHRM\Leave\Controller\LeaveEntitlementHistoryReportController::handle
+  methods: [ GET ]
+
+leave_view_my_leave_entitlement_history_report:
+  path: /leave/viewMyLeaveEntitlementHistoryReport
+  controller: OrangeHRM\Leave\Controller\MyLeaveEntitlementHistoryReportController::handle
   methods: [ GET ]

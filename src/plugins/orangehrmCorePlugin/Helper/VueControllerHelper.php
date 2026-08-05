@@ -66,7 +66,6 @@ class VueControllerHelper
     public const CLIENT_BANNER_URL = 'clientBannerUrl';
     public const THEME_VARIABLES = 'themeVariables';
     public const HELP_URL = 'helpUrl';
-    public const SHOW_UPGRADE = 'showUpgrade';
     public const IS_TRIAL_MODE = 'isTrialMode';
 
     /**
@@ -154,7 +153,6 @@ class VueControllerHelper
                 self::CLIENT_BANNER_URL => $clientBannerUrl,
                 self::THEME_VARIABLES => $themeVariables,
                 self::HELP_URL => $this->getHelpUrl(),
-                self::SHOW_UPGRADE => $this->getAuthUser()->getUserRoleId() === 1,
                 self::IS_TRIAL_MODE => Config::PRODUCT_MODE === Config::MODE_TRIAL,
             ]
         );

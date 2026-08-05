@@ -35,6 +35,11 @@ export interface KPI {
   minRating: number;
   maxRating: number;
   isDefault: boolean;
+  ratingRubric?: Array<{
+    rating: number;
+    label: string;
+    description?: string;
+  }> | null;
 }
 
 export interface EvaluationData {

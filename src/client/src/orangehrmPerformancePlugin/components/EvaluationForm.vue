@@ -94,6 +94,19 @@
             <oxd-text class="orangehrm-evaluation-grid-kpi-minmax" tag="p">
               {{ $t('performance.max') }}: {{ kpi.maxRating }}
             </oxd-text>
+            <div
+              v-if="hasRubric(kpi)"
+              class="orangehrm-evaluation-grid-kpi-rubric"
+            >
+              <oxd-text
+                v-for="(level, levelIndex) in kpi.ratingRubric"
+                :key="`${kpi.id}-rubric-${levelIndex}`"
+                class="orangehrm-evaluation-grid-kpi-rubric-item"
+                tag="p"
+              >
+                {{ formatRubricLevel(level) }}
+              </oxd-text>
+            </div>
           </oxd-grid-item>
           <oxd-grid-item>
             <oxd-text
@@ -103,6 +116,17 @@
               {{ $t('performance.rating') }}
             </oxd-text>
             <oxd-input-field
+              v-if="usesRubricSelect(kpi)"
+              type="select"
+              :disabled="!editable"
+              :options="getRubricOptions(kpi)"
+              :model-value="getSelectedRubricOption(kpi, modelValue.kpis[index].rating)"
+              @update:model-value="
+                onUpdateRating(extractRubricRating($event), index)
+              "
+            />
+            <oxd-input-field
+              v-else
               type="input"
               :disabled="!editable"
               :rules="rules[index]"
@@ -278,6 +302,56 @@ export default {
       () => statusOpts.find((el) => el.id === props.status).label,
     );
 
+    const hasRubric = (kpi) =>
+      Array.isArray(kpi.ratingRubric) && kpi.ratingRubric.length > 0;
+
+    const formatRubricLevel = (level) => {
+      const base = `${level.rating} - ${level.label}`;
+      return level.description ? `${base}: ${level.description}` : base;
+    };
+
+    const usesRubricSelect = (kpi) => {
+      if (!hasRubric(kpi)) {
+        return false;
+      }
+      const ratings = new Set(
+        kpi.ratingRubric.map((level) => Number(level.rating)),
+      );
+      for (let rating = kpi.minRating; rating <= kpi.maxRating; rating++) {
+        if (!ratings.has(rating)) {
+          return false;
+        }
+      }
+      return true;
+    };
+
+    const getRubricOptions = (kpi) => {
+      return [...kpi.ratingRubric]
+        .sort((a, b) => Number(a.rating) - Number(b.rating))
+        .map((level) => ({
+          id: Number(level.rating),
+          label: `${level.rating} - ${level.label}`,
+        }));
+    };
+
+    const getSelectedRubricOption = (kpi, rating) => {
+      if (rating === null || rating === undefined || rating === '') {
+        return null;
+      }
+      return (
+        getRubricOptions(kpi).find(
+          (option) => Number(option.id) === Number(rating),
+        ) || null
+      );
+    };
+
+    const extractRubricRating = (option) => {
+      if (option === null || option === undefined) {
+        return null;
+      }
+      return typeof option === 'object' ? option.id : option;
+    };
+
     return {
       toggleForm,
       isCollapsed,
@@ -288,6 +362,12 @@ export default {
       onUpdateGeneralComment,
       commentValidators,
       evaluationLabel,
+      hasRubric,
+      formatRubricLevel,
+      usesRubricSelect,
+      getRubricOptions,
+      getSelectedRubricOption,
+      extractRubricRating,
     };
   },
 };

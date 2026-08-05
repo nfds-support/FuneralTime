@@ -25,6 +25,7 @@ use OrangeHRM\Framework\Services;
 use OrangeHRM\Leave\Service\HolidayService;
 use OrangeHRM\Leave\Service\LeaveConfigurationService;
 use OrangeHRM\Leave\Service\LeaveEntitlementService;
+use OrangeHRM\Leave\Service\LeaveEntitlementTransactionService;
 use OrangeHRM\Leave\Service\LeavePeriodService;
 use OrangeHRM\Leave\Service\LeaveRequestService;
 use OrangeHRM\Leave\Service\LeaveTypeService;
@@ -53,6 +54,10 @@ class LeavePluginConfiguration implements PluginConfigurationInterface
         $this->getContainer()->register(
             Services::LEAVE_ENTITLEMENT_SERVICE,
             LeaveEntitlementService::class
+        );
+        $this->getContainer()->register(
+            Services::LEAVE_ENTITLEMENT_TRANSACTION_SERVICE,
+            LeaveEntitlementTransactionService::class
         );
         $this->getContainer()->register(
             Services::LEAVE_PERIOD_SERVICE,

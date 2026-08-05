@@ -19,6 +19,8 @@
 
 namespace OrangeHRM\Admin\Dto;
 
+use OrangeHRM\Entity\JobSpecificationAttachment;
+
 class PartialJobSpecificationAttachment
 {
     private ?int $id;
@@ -85,5 +87,26 @@ class PartialJobSpecificationAttachment
     public function getJobTitleId(): ?int
     {
         return $this->jobTitleId;
+    }
+
+    /**
+     * Build metadata-only DTO from an already-hydrated attachment without reading file_content.
+     *
+     * @param JobSpecificationAttachment|null $attachment
+     * @return self|null
+     */
+    public static function createFromAttachment(?JobSpecificationAttachment $attachment): ?self
+    {
+        if (!$attachment instanceof JobSpecificationAttachment) {
+            return null;
+        }
+
+        return new self(
+            $attachment->getId(),
+            $attachment->getFileName(),
+            $attachment->getFileType(),
+            $attachment->getFileSize(),
+            $attachment->getJobTitle() ? $attachment->getJobTitle()->getId() : null
+        );
     }
 }

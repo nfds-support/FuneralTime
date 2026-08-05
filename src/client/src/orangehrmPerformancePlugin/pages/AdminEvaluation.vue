@@ -38,29 +38,20 @@
     />
     <br />
     <oxd-form ref="formRef" :loading="isLoading">
-      <evaluation-form
-        v-model="employeeReview"
+      <side-by-side-evaluation
+        v-if="hasReviewModels"
+        v-model:employee-review="employeeReview"
+        v-model:supervisor-review="supervisorReview"
         :kpis="kpis"
         :rules="rules"
-        :editable="hasSupervisorUpdateAction"
-        :collapsed="employee.status < 3"
-        :collapsible="employee.status === 3"
+        :employee-editable="hasSupervisorUpdateAction"
+        :supervisor-editable="hasSaveAction || hasCompleteAction"
         :employee="employee.details"
-        :job-title="employee.jobTitle"
-        :status="employee.status"
-        :title="$t('performance.self_evaluation_by')"
-      ></evaluation-form>
-      <br />
-      <evaluation-form
-        v-model="supervisorReview"
-        :kpis="kpis"
-        :rules="rules"
-        :editable="hasSaveAction || hasCompleteAction"
-        :collapsible="true"
-        :employee="supervisor.details"
-        :job-title="supervisor.jobTitle"
-        :status="supervisor.status"
-        :title="$t('performance.supervisor_evaluation_by')"
+        :supervisor="supervisor.details"
+        :employee-job-title="employee.jobTitle"
+        :supervisor-job-title="supervisor.jobTitle"
+        :employee-status="employee.status"
+        :supervisor-status="supervisor.status"
       >
         <oxd-divider />
         <final-evaluation
@@ -96,7 +87,7 @@
             />
           </div>
         </oxd-form-actions>
-      </evaluation-form>
+      </side-by-side-evaluation>
     </oxd-form>
   </div>
 </template>
@@ -107,9 +98,10 @@ import {APIService} from '@/core/util/services/api.service';
 import {navigate, reloadPage} from '@/core/util/helper/navigation';
 import ReviewSummary from '@/orangehrmPerformancePlugin/components/ReviewSummary';
 import FinalEvaluation from '@/orangehrmPerformancePlugin/components/FinalEvaluation';
-import EvaluationForm from '@/orangehrmPerformancePlugin/components/EvaluationForm';
+import SideBySideEvaluation from '@/orangehrmPerformancePlugin/components/SideBySideEvaluation';
 import useReviewEvaluation from '@/orangehrmPerformancePlugin/util/composable/useReviewEvaluation';
 import ReviewConfirmModal from '@/orangehrmPerformancePlugin/components/ReviewConfirmModal';
+import {OxdDivider} from '@ohrm/oxd';
 
 const reviewerModel = {
   details: {
@@ -126,9 +118,10 @@ const reviewerModel = {
 
 export default {
   components: {
+    'oxd-divider': OxdDivider,
     'review-summary': ReviewSummary,
     'final-evaluation': FinalEvaluation,
-    'evaluation-form': EvaluationForm,
+    'side-by-side-evaluation': SideBySideEvaluation,
     'review-confirm-modal': ReviewConfirmModal,
   },
   props: {
@@ -211,6 +204,12 @@ export default {
     };
   },
   computed: {
+    hasReviewModels() {
+      return (
+        Object.hasOwn(this.employeeReview, 'kpis') &&
+        Object.hasOwn(this.supervisorReview, 'kpis')
+      );
+    },
     hasSupervisorUpdateAction() {
       return this.employee.actions.has('supervisorUpdate');
     },

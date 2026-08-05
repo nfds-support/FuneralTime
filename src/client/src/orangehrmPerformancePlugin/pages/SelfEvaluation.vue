@@ -38,85 +38,22 @@
     />
     <br />
     <oxd-form ref="formRef" :loading="isLoading">
-      <div v-if="status < 4">
-        <evaluation-form
-          v-model="supervisorReview"
-          :kpis="kpis"
-          :rules="rules"
-          :editable="false"
-          :collapsible="false"
-          :collapsed="true"
-          :employee="supervisor.details"
-          :job-title="supervisor.jobTitle"
-          :status="supervisor.status"
-          :title="$t('performance.supervisor_evaluation_by')"
-        ></evaluation-form>
-        <br />
-        <evaluation-form
-          v-model="employeeReview"
-          :kpis="kpis"
-          :rules="rules"
-          :editable="employee.status < 3"
-          :collapsed="false"
-          :collapsible="true"
-          :employee="employee.details"
-          :job-title="employee.jobTitle"
-          :status="employee.status"
-          :title="$t('performance.self_evaluation_by')"
-        >
-          <oxd-form-actions v-show="hasActions">
-            <oxd-divider />
-            <div class="orangehrm-performance-review-actions">
-              <oxd-button
-                v-if="hasCancelAction"
-                display-type="ghost"
-                :label="$t('general.cancel')"
-                @click="onClickCancel"
-              />
-              <oxd-button
-                v-if="hasSaveAction"
-                display-type="ghost"
-                type="button"
-                :label="$t('general.save')"
-                @click="onSubmit(false)"
-              />
-              <oxd-button
-                v-if="hasCompleteAction"
-                type="button"
-                display-type="secondary"
-                :label="$t('performance.complete')"
-                @click="onSubmit(true)"
-              />
-            </div>
-          </oxd-form-actions>
-        </evaluation-form>
-      </div>
-      <div v-if="status === 4">
-        <evaluation-form
-          v-model="employeeReview"
-          :kpis="kpis"
-          :rules="rules"
-          :editable="false"
-          :collapsed="false"
-          :collapsible="true"
-          :employee="employee.details"
-          :job-title="employee.jobTitle"
-          :status="employee.status"
-          :title="$t('performance.self_evaluation_by')"
-        ></evaluation-form>
-        <br />
-        <evaluation-form
-          v-model="supervisorReview"
-          :kpis="kpis"
-          :rules="rules"
-          :editable="false"
-          :collapsible="true"
-          :collapsed="false"
-          :employee="supervisor.details"
-          :job-title="supervisor.jobTitle"
-          :status="supervisor.status"
-          :title="$t('performance.supervisor_evaluation_by')"
-        >
+      <side-by-side-evaluation
+        v-if="hasReviewModels"
+        v-model:employee-review="employeeReview"
+        v-model:supervisor-review="supervisorReview"
+        :kpis="kpis"
+        :rules="rules"
+        :employee-editable="status < 4 && employee.status < 3"
+        :supervisor-editable="false"
+        :employee="employee.details"
+        :supervisor="supervisor.details"
+        :employee-job-title="employee.jobTitle"
+        :supervisor-job-title="supervisor.jobTitle"
+        :employee-status="employee.status"
+        :supervisor-status="supervisor.status"
+      >
+        <template v-if="status === 4">
           <oxd-divider />
           <final-evaluation
             v-model:final-rating="finalRating"
@@ -125,8 +62,33 @@
             :status="status"
             :is-required="false"
           />
-        </evaluation-form>
-      </div>
+        </template>
+        <oxd-form-actions v-show="hasActions">
+          <oxd-divider />
+          <div class="orangehrm-performance-review-actions">
+            <oxd-button
+              v-if="hasCancelAction"
+              display-type="ghost"
+              :label="$t('general.cancel')"
+              @click="onClickCancel"
+            />
+            <oxd-button
+              v-if="hasSaveAction"
+              display-type="ghost"
+              type="button"
+              :label="$t('general.save')"
+              @click="onSubmit(false)"
+            />
+            <oxd-button
+              v-if="hasCompleteAction"
+              type="button"
+              display-type="secondary"
+              :label="$t('performance.complete')"
+              @click="onSubmit(true)"
+            />
+          </div>
+        </oxd-form-actions>
+      </side-by-side-evaluation>
     </oxd-form>
   </div>
 </template>
@@ -136,10 +98,11 @@ import {navigate, reloadPage} from '@/core/util/helper/navigation';
 import {APIService} from '@/core/util/services/api.service';
 import ReviewSummary from '../components/ReviewSummary';
 import FinalEvaluation from '../components/FinalEvaluation';
-import EvaluationForm from '../components/EvaluationForm';
+import SideBySideEvaluation from '../components/SideBySideEvaluation';
 import useForm from '@ohrm/core/util/composable/useForm';
 import useReviewEvaluation from '@/orangehrmPerformancePlugin/util/composable/useReviewEvaluation';
 import ReviewConfirmModal from '@/orangehrmPerformancePlugin/components/ReviewConfirmModal';
+import {OxdDivider} from '@ohrm/oxd';
 
 const reviewerModel = {
   details: {
@@ -156,9 +119,10 @@ const reviewerModel = {
 export default {
   name: 'SelfEvaluation',
   components: {
+    'oxd-divider': OxdDivider,
     'review-summary': ReviewSummary,
     'final-evaluation': FinalEvaluation,
-    'evaluation-form': EvaluationForm,
+    'side-by-side-evaluation': SideBySideEvaluation,
     'review-confirm-modal': ReviewConfirmModal,
   },
   props: {
@@ -234,6 +198,12 @@ export default {
     };
   },
   computed: {
+    hasReviewModels() {
+      return (
+        Object.hasOwn(this.employeeReview, 'kpis') &&
+        Object.hasOwn(this.supervisorReview, 'kpis')
+      );
+    },
     hasSaveAction() {
       return this.employee.actions.has('save');
     },

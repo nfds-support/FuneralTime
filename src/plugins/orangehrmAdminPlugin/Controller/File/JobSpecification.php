@@ -26,6 +26,7 @@ use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\JobSpecificationAttachment;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Framework\Http\Response;
+use OrangeHRM\Framework\Http\StreamedResponse;
 
 class JobSpecification extends AbstractFileController
 {
@@ -49,12 +50,11 @@ class JobSpecification extends AbstractFileController
 
     /**
      * @param Request $request
-     * @return Response
+     * @return Response|StreamedResponse
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request)
     {
         $attachId = $request->attributes->get('attachId');
-        $response = $this->getResponse();
 
         if ($attachId) {
             $attachment = $this->getJobTitleService()->getJobSpecAttachmentById($attachId);
@@ -62,14 +62,12 @@ class JobSpecification extends AbstractFileController
                 if (!$this->getUserRoleManager()->isEntityAccessible(JobSpecificationAttachment::class, $attachId)) {
                     throw new ForbiddenException();
                 }
-                $this->setCommonHeadersToResponse(
+                return $this->getStreamedBlobResponse(
                     $attachment->getFileName(),
                     $attachment->getFileType(),
                     $attachment->getFileSize(),
-                    $response
+                    $attachment->getFileContent()
                 );
-                $response->setContent($attachment->getDecorator()->getFileContent());
-                return $response;
             }
         }
 

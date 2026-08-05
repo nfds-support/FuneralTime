@@ -24,7 +24,9 @@ use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Authentication\Exception\ForbiddenException;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Framework\Http\Response;
+use OrangeHRM\Framework\Http\StreamedResponse;
 use OrangeHRM\Entity\Candidate;
+use OrangeHRM\Entity\CandidateAttachment as CandidateAttachmentEntity;
 use OrangeHRM\Recruitment\Traits\Service\RecruitmentAttachmentServiceTrait;
 
 class CandidateAttachment extends AbstractFileController
@@ -32,10 +34,13 @@ class CandidateAttachment extends AbstractFileController
     use RecruitmentAttachmentServiceTrait;
     use UserRoleManagerTrait;
 
-    public function handle(Request $request): Response
+    /**
+     * @param Request $request
+     * @return Response|StreamedResponse
+     */
+    public function handle(Request $request)
     {
         $candidateId = $request->attributes->get('candidateId');
-        $response = $this->getResponse();
 
         if ($candidateId) {
             if (!$this->getUserRoleManager()->isEntityAccessible(Candidate::class, $candidateId)) {
@@ -44,15 +49,13 @@ class CandidateAttachment extends AbstractFileController
             $attachment = $this->getRecruitmentAttachmentService()
                 ->getRecruitmentAttachmentDao()
                 ->getCandidateAttachmentByCandidateId($candidateId);
-            if ($attachment instanceof \OrangeHRM\Entity\CandidateAttachment) {
-                $this->setCommonHeadersToResponse(
+            if ($attachment instanceof CandidateAttachmentEntity) {
+                return $this->getStreamedBlobResponse(
                     $attachment->getFileName(),
                     $attachment->getFileType(),
                     $attachment->getFileSize(),
-                    $response
+                    $attachment->getFileContent()
                 );
-                $response->setContent($attachment->getDecorator()->getFileContent());
-                return $response;
             }
         }
         return $this->handleBadRequest();

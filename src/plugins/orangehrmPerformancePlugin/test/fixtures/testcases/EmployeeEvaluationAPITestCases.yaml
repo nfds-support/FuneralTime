@@ -20,12 +20,14 @@ GetAll:
           "id": 4
           "title": "A"
           "minRating": 0
-          "maxRating": 100
+          "maxRating": 100,
+          "ratingRubric": null
         1:
           "id": 5
           "title": "B"
           "minRating": 0
-          "maxRating": 100
+          "maxRating": 100,
+          "ratingRubric": null
       reviewer:
         "id": 3
         "employee":
@@ -96,17 +98,20 @@ GetAll:
           "id": 2
           "title": "Code Coverage"
           "minRating": 0
-          "maxRating": 100
+          "maxRating": 100,
+          "ratingRubric": null
         1:
           "id": 3
           "title": "Code Stability"
           "minRating": 0
-          "maxRating": 100
+          "maxRating": 100,
+          "ratingRubric": null
         2:
           "id": 1
           "title": "Velocity"
           "minRating": 0
-          "maxRating": 100
+          "maxRating": 100,
+          "ratingRubric": null
       reviewer:
           "id": 1
           "employee":
@@ -156,7 +161,8 @@ GetAll:
           "id": 6
           "title": "C"
           "minRating": 0
-          "maxRating": 100
+          "maxRating": 100,
+          "ratingRubric": null
       reviewer:
           "id": 15
           "employee":
@@ -203,7 +209,8 @@ GetAll:
           "id": 6
           "title": "C"
           "minRating": 0
-          "maxRating": 100
+          "maxRating": 100,
+          "ratingRubric": null
       reviewer:
           "id": 17
           "employee":

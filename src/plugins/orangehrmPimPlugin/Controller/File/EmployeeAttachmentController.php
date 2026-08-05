@@ -23,6 +23,7 @@ use OrangeHRM\Core\Controller\AbstractFileController;
 use OrangeHRM\Entity\EmployeeAttachment;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Framework\Http\Response;
+use OrangeHRM\Framework\Http\StreamedResponse;
 use OrangeHRM\Pim\Service\EmployeeAttachmentService;
 
 class EmployeeAttachmentController extends AbstractFileController
@@ -45,26 +46,22 @@ class EmployeeAttachmentController extends AbstractFileController
 
     /**
      * @param Request $request
-     * @return Response
+     * @return Response|StreamedResponse
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request)
     {
         $empNumber = $request->attributes->get('empNumber');
         $attachId = $request->attributes->get('attachId');
 
-        $response = $this->getResponse();
-
         if ($empNumber && $attachId) {
             $attachment = $this->getEmployeeAttachmentService()->getAccessibleEmployeeAttachment($empNumber, $attachId);
             if ($attachment instanceof EmployeeAttachment) {
-                $this->setCommonHeadersToResponse(
+                return $this->getStreamedBlobResponse(
                     $attachment->getFilename(),
                     $attachment->getFileType(),
                     $attachment->getSize(),
-                    $response
+                    $attachment->getAttachment()
                 );
-                $response->setContent($attachment->getDecorator()->getAttachment());
-                return $response;
             }
         }
 

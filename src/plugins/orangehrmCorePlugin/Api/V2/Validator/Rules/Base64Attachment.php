@@ -95,9 +95,14 @@ class Base64Attachment extends AbstractRule
 
         $size = intval($input['size']);
         if ($this->checkSizeStrictly) {
-            $content = base64_decode($input['base64']);
-            $contentSize = $this->getTextHelper()->strLength($content, '8bit');
-            $content = null;
+            // Estimate decoded byte length from base64 without allocating the binary payload.
+            // Standard base64: every 4 chars → 3 bytes, minus 0–2 padding bytes from trailing '='.
+            $base64 = preg_replace('/\s+/', '', (string)$input['base64']);
+            if (!is_string($base64) || $base64 === '' || !preg_match('/^[A-Za-z0-9+\/]*={0,2}$/', $base64)) {
+                return false;
+            }
+            $padding = substr_count(substr($base64, -2), '=');
+            $contentSize = (int)(strlen($base64) * 3 / 4) - $padding;
             if ($size !== $contentSize) {
                 return false;
             }

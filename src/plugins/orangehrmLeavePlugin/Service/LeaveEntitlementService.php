@@ -29,6 +29,7 @@ use OrangeHRM\Leave\Entitlement\EntitlementConsumptionStrategy;
 use OrangeHRM\Leave\Entitlement\FIFOEntitlementConsumptionStrategy;
 use OrangeHRM\Leave\Entitlement\LeaveBalance;
 use OrangeHRM\Leave\Traits\Service\LeaveConfigServiceTrait;
+use OrangeHRM\Leave\Traits\Service\LeaveEntitlementTransactionServiceTrait;
 use OrangeHRM\ORM\Exception\TransactionException;
 
 class LeaveEntitlementService
@@ -37,6 +38,7 @@ class LeaveEntitlementService
     use UserRoleManagerTrait;
     use DateTimeHelperTrait;
     use ClassHelperTrait;
+    use LeaveEntitlementTransactionServiceTrait;
 
     /**
      * @var LeaveEntitlementDao|null
@@ -183,7 +185,14 @@ class LeaveEntitlementService
         $leaveEntitlement->setFromDate($fromDate);
         $leaveEntitlement->setToDate($toDate);
 
-        return $this->getLeaveEntitlementDao()->saveLeaveEntitlement($leaveEntitlement);
+        $leaveEntitlement = $this->getLeaveEntitlementDao()->saveLeaveEntitlement($leaveEntitlement);
+        $this->getLeaveEntitlementTransactionService()->logAddition(
+            $empNumber,
+            $leaveTypeId,
+            $entitlement,
+            $leaveEntitlement->getId()
+        );
+        return $leaveEntitlement;
     }
 
     /**

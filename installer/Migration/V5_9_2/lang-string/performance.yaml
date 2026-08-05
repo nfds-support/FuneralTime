@@ -1,0 +1,41 @@
+langStrings:
+  -
+    unitId: self_assessment
+    value: 'Self Assessment'
+    note: ''
+  -
+    unitId: manager_assessment
+    value: 'Manager Assessment'
+    note: ''
+  -
+    unitId: rating_rubric
+    value: 'Rating Rubric'
+    note: ''
+  -
+    unitId: side_by_side_assessment
+    value: 'Assessment Comparison'
+    note: ''
+  -
+    unitId: rubric_level
+    value: 'Level'
+    note: ''
+  -
+    unitId: rubric_label
+    value: 'Label'
+    note: ''
+  -
+    unitId: rubric_description
+    value: 'Description'
+    note: ''
+  -
+    unitId: add_rubric_level
+    value: 'Add Rubric Level'
+    note: ''
+  -
+    unitId: self_assessment_placeholder
+    value: 'Self Assessment will show here once completed'
+    note: ''
+  -
+    unitId: manager_assessment_placeholder
+    value: 'Manager Assessment will show here once completed'
+    note: ''

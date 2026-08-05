@@ -395,6 +395,41 @@ class Employee
     private ?string $custom10 = null;
 
     /**
+     * @var string|null salaried|hourly
+     *
+     * @ORM\Column(name="pay_type", type="string", length=20, nullable=true)
+     */
+    private ?string $payType = null;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name="contracted_hours_per_week", type="decimal", precision=5, scale=2, nullable=true)
+     */
+    private ?string $contractedHoursPerWeek = null;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name="overtime_threshold_hours", type="decimal", precision=5, scale=2, nullable=true, options={"default" : 44})
+     */
+    private ?string $overtimeThresholdHours = '44.00';
+
+    /**
+     * @var string|null none|class_1|class_2|tssr|pre_need
+     *
+     * @ORM\Column(name="fd_license_class", type="string", length=20, nullable=true, options={"default" : "none"})
+     */
+    private ?string $fdLicenseClass = 'none';
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name="fd_license_number", type="string", length=50, nullable=true)
+     */
+    private ?string $fdLicenseNumber = null;
+
+    /**
      * @var DateTime|null
      *
      * @ORM\Column(name="purged_at", type="datetime", nullable=true)
@@ -1318,6 +1353,86 @@ class Employee
     public function setCustom10(?string $custom10): void
     {
         $this->custom10 = $custom10;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getPayType(): ?string
+    {
+        return $this->payType;
+    }
+
+    /**
+     * @param string|null $payType
+     */
+    public function setPayType(?string $payType): void
+    {
+        $this->payType = $payType;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getContractedHoursPerWeek(): ?string
+    {
+        return $this->contractedHoursPerWeek;
+    }
+
+    /**
+     * @param string|null $contractedHoursPerWeek
+     */
+    public function setContractedHoursPerWeek(?string $contractedHoursPerWeek): void
+    {
+        $this->contractedHoursPerWeek = $contractedHoursPerWeek;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getOvertimeThresholdHours(): ?string
+    {
+        return $this->overtimeThresholdHours;
+    }
+
+    /**
+     * @param string|null $overtimeThresholdHours
+     */
+    public function setOvertimeThresholdHours(?string $overtimeThresholdHours): void
+    {
+        $this->overtimeThresholdHours = $overtimeThresholdHours;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFdLicenseClass(): ?string
+    {
+        return $this->fdLicenseClass;
+    }
+
+    /**
+     * @param string|null $fdLicenseClass
+     */
+    public function setFdLicenseClass(?string $fdLicenseClass): void
+    {
+        $this->fdLicenseClass = $fdLicenseClass;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getFdLicenseNumber(): ?string
+    {
+        return $this->fdLicenseNumber;
+    }
+
+    /**
+     * @param string|null $fdLicenseNumber
+     */
+    public function setFdLicenseNumber(?string $fdLicenseNumber): void
+    {
+        $this->fdLicenseNumber = $fdLicenseNumber;
     }
 
     /**

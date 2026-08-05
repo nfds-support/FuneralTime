@@ -15,17 +15,20 @@ GetAll:
         "id": 2
         "title": "Code Coverage"
         "minRating": 0
-        "maxRating": 100
+        "maxRating": 100,
+        "ratingRubric": null
       1:
         "id": 3
         "title": "Code Stability"
         "minRating": 0
-        "maxRating": 100
+        "maxRating": 100,
+        "ratingRubric": null
       2:
         "id": 1
         "title": "Velocity"
         "minRating": 0
-        "maxRating": 100
+        "maxRating": 100,
+        "ratingRubric": null
     meta:
       total: 3
 
@@ -59,7 +62,8 @@ GetAll:
         "id": 5
         "title": "B"
         "minRating": 0
-        "maxRating": 100
+        "maxRating": 100,
+        "ratingRubric": null
     meta:
       total: 1
 
@@ -80,16 +84,19 @@ GetAll:
         "id": 2
         "title": "Code Coverage"
         "minRating": 0
-        "maxRating": 100
+        "maxRating": 100,
+        "ratingRubric": null
       1:
         "id": 3
         "title": "Code Stability"
         "minRating": 0
-        "maxRating": 100
+        "maxRating": 100,
+        "ratingRubric": null
       2:
         "id": 1
         "title": "Velocity"
         "minRating": 0
-        "maxRating": 100
+        "maxRating": 100,
+        "ratingRubric": null
     meta:
       total: 3

@@ -102,6 +102,45 @@
                 :disabled="!hasUpdatePermissions"
               />
             </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="job.payType"
+                type="select"
+                :label="$t('pim.pay_type')"
+                :options="payTypeOptions"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="job.contractedHoursPerWeek"
+                :label="$t('pim.contracted_hours_per_week')"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="job.overtimeThresholdHours"
+                :label="$t('pim.overtime_threshold_hours')"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="job.fdLicenseClass"
+                type="select"
+                :label="$t('pim.fd_license_class')"
+                :options="fdLicenseClassOptions"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="job.fdLicenseNumber"
+                :label="$t('pim.fd_license_number')"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
           </oxd-grid>
         </oxd-form-row>
         <oxd-divider />
@@ -227,6 +266,11 @@ const jobDetailsModel = {
   subunitId: [],
   locationId: [],
   onCall: false,
+  payType: [],
+  contractedHoursPerWeek: '',
+  overtimeThresholdHours: '44',
+  fdLicenseClass: [],
+  fdLicenseNumber: '',
 };
 
 const contractDetailsModel = {
@@ -368,6 +412,21 @@ export default {
     formattedFileSize() {
       return Math.round((this.maxFileSize / (1024 * 1024)) * 100) / 100;
     },
+    payTypeOptions() {
+      return [
+        {id: 'salaried', label: this.$t('pim.salaried')},
+        {id: 'hourly', label: this.$t('pim.hourly')},
+      ];
+    },
+    fdLicenseClassOptions() {
+      return [
+        {id: 'none', label: this.$t('pim.fd_license_none')},
+        {id: 'class_1', label: this.$t('pim.fd_license_class_1')},
+        {id: 'class_2', label: this.$t('pim.fd_license_class_2')},
+        {id: 'tssr', label: this.$t('pim.fd_license_tssr')},
+        {id: 'pre_need', label: this.$t('pim.fd_license_pre_need')},
+      ];
+    },
   },
 
   beforeMount() {
@@ -405,6 +464,11 @@ export default {
             empStatusId: this.job.empStatusId?.id,
             locationId: this.job.locationId?.id,
             onCall: !!this.job.onCall,
+            payType: this.job.payType?.id ?? null,
+            contractedHoursPerWeek: this.job.contractedHoursPerWeek || null,
+            overtimeThresholdHours: this.job.overtimeThresholdHours || null,
+            fdLicenseClass: this.job.fdLicenseClass?.id ?? null,
+            fdLicenseNumber: this.job.fdLicenseNumber || null,
           },
         })
         .then((response) => {
@@ -500,6 +564,15 @@ export default {
         (item) => item.id === data.location?.id,
       );
       this.job.onCall = !!data.onCall;
+      this.job.payType = this.payTypeOptions.find(
+        (item) => item.id === data.payType,
+      );
+      this.job.contractedHoursPerWeek = data.contractedHoursPerWeek ?? '';
+      this.job.overtimeThresholdHours = data.overtimeThresholdHours ?? '44';
+      this.job.fdLicenseClass = this.fdLicenseClassOptions.find(
+        (item) => item.id === (data.fdLicenseClass || 'none'),
+      );
+      this.job.fdLicenseNumber = data.fdLicenseNumber ?? '';
       this.termination = data.employeeTerminationRecord;
     },
   },

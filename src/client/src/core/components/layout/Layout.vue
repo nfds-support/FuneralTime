@@ -1,15 +1,7 @@
 <template>
-  <oxd-layout
-    :class="{
-      'orangehrm-upgrade-layout': showUpgrade,
-    }"
-    v-bind="$attrs"
-  >
+  <oxd-layout v-bind="$attrs">
     <template v-for="(_, name) in $slots" #[name]="slotData">
       <slot :name="name" v-bind="slotData" />
-    </template>
-    <template v-if="showUpgrade" #topbar-header-right-area>
-      <upgrade-button v-if="showUpgrade" />
     </template>
     <template #user-actions>
       <li>
@@ -58,13 +50,11 @@ import {provide, readonly, ref} from 'vue';
 import About from '@/core/pages/About.vue';
 import {OxdLayout} from '@ohrm/oxd';
 import {dateFormatKey} from '@/core/util/composable/useDateFormat';
-import UpgradeButton from '@/core/components/buttons/UpgradeButton.vue';
 
 export default {
   components: {
     about: About,
     'oxd-layout': OxdLayout,
-    'upgrade-button': UpgradeButton,
   },
   inheritAttrs: false,
   props: {
@@ -91,10 +81,6 @@ export default {
     helpUrl: {
       type: String,
       default: null,
-    },
-    showUpgrade: {
-      type: Boolean,
-      default: false,
     },
   },
   setup(props) {
@@ -123,12 +109,3 @@ export default {
   },
 };
 </script>
-
-<style lang="scss">
-.orangehrm-upgrade-layout {
-  .oxd-topbar-header-userarea {
-    align-self: center;
-    margin-left: unset;
-  }
-}
-</style>

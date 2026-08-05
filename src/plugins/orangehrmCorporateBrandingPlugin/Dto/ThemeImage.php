@@ -49,6 +49,14 @@ class ThemeImage
     }
 
     /**
+     * @return resource|string|null raw blob without materializing into a string
+     */
+    public function getRawContent()
+    {
+        return $this->content;
+    }
+
+    /**
      * @return string|null
      */
     public function getContent(): ?string

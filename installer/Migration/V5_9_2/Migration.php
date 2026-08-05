@@ -19,6 +19,7 @@
 
 namespace OrangeHRM\Installer\Migration\V5_9_2;
 
+use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Types\Types;
 use OrangeHRM\Installer\Util\V1\AbstractMigration;
 use OrangeHRM\Installer\Util\V1\LangStringHelper;
@@ -29,11 +30,20 @@ class Migration extends AbstractMigration
 
     public function up(): void
     {
-        $this->addEmployeeOnCallFlag();
-        $this->addTimesheetDayBreakDuration();
-        $this->seedDefaultTimesheetProject();
+        $this->extendEmployeePayFields();
+        $this->extendKpiRubric();
+        $this->createPayrollPeriodTable();
+        $this->createLeaveEntitlementTransactionTable();
+        $this->seedEntitlementTypes();
+        $this->seedBankedTimeLeaveType();
+        $this->seedPayrollMenuAndPermissions();
 
-        $groups = ['time', 'pim'];
+        $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
+        $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+
+        $this->insertReportMenus();
+
+        $groups = ['pim', 'time', 'leave', 'performance'];
         foreach ($groups as $group) {
             if (is_file(__DIR__ . '/lang-string/' . $group . '.yaml')) {
                 $this->getLangStringHelper()->insertOrUpdateLangStrings(__DIR__, $group);
@@ -54,124 +64,405 @@ class Migration extends AbstractMigration
         return $this->langStringHelper;
     }
 
-    private function addEmployeeOnCallFlag(): void
+    private function extendEmployeePayFields(): void
     {
-        if (!$this->getSchemaHelper()->columnExists('hs_hr_employee', 'on_call')) {
+        $columns = [
+            'pay_type' => ['type' => Types::STRING, 'options' => ['Length' => 20, 'Notnull' => false, 'Default' => null]],
+            'contracted_hours_per_week' => ['type' => Types::DECIMAL, 'options' => ['Precision' => 5, 'Scale' => 2, 'Notnull' => false, 'Default' => null]],
+            'overtime_threshold_hours' => ['type' => Types::DECIMAL, 'options' => ['Precision' => 5, 'Scale' => 2, 'Notnull' => false, 'Default' => 44]],
+            'fd_license_class' => ['type' => Types::STRING, 'options' => ['Length' => 20, 'Notnull' => false, 'Default' => 'none']],
+            'fd_license_number' => ['type' => Types::STRING, 'options' => ['Length' => 50, 'Notnull' => false, 'Default' => null]],
+        ];
+
+        foreach ($columns as $name => $definition) {
+            if (!$this->getSchemaHelper()->columnExists('hs_hr_employee', $name)) {
+                $this->getSchemaHelper()->addColumn('hs_hr_employee', $name, $definition['type'], $definition['options']);
+            }
+        }
+    }
+
+    private function extendKpiRubric(): void
+    {
+        if (!$this->getSchemaHelper()->columnExists('ohrm_kpi', 'rating_rubric')) {
             $this->getSchemaHelper()->addColumn(
-                'hs_hr_employee',
-                'on_call',
-                Types::BOOLEAN,
-                ['Notnull' => true, 'Default' => false]
+                'ohrm_kpi',
+                'rating_rubric',
+                Types::JSON,
+                ['Notnull' => false, 'Default' => null]
             );
         }
     }
 
-    private function addTimesheetDayBreakDuration(): void
+    private function createPayrollPeriodTable(): void
     {
-        if ($this->getSchemaHelper()->tableExists(['ohrm_timesheet_day'])
-            && !$this->getSchemaHelper()->columnExists('ohrm_timesheet_day', 'break_duration')
-        ) {
-            $this->getSchemaHelper()->addColumn(
-                'ohrm_timesheet_day',
-                'break_duration',
-                Types::INTEGER,
-                ['Notnull' => true, 'Default' => 0]
-            );
-        }
-    }
-
-    private function seedDefaultTimesheetProject(): void
-    {
-        $existingProjectId = $this->getConfigHelper()->getConfigValue('timesheet.default_project_id');
-        if (!empty($existingProjectId)) {
+        if ($this->getSchemaHelper()->tableExists(['ohrm_payroll_period'])) {
             return;
         }
 
-        $customerId = $this->getConnection()->createQueryBuilder()
-            ->select('customer_id')
-            ->from('ohrm_customer')
-            ->where('name = :name')
-            ->andWhere('is_deleted = :deleted')
-            ->setParameter('name', 'Internal')
-            ->setParameter('deleted', 0)
+        $this->getSchemaHelper()->createTable('ohrm_payroll_period')
+            ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
+            ->addColumn('period_number', Types::INTEGER, ['Notnull' => true])
+            ->addColumn('start_date', Types::DATE_MUTABLE, ['Notnull' => true])
+            ->addColumn('end_date', Types::DATE_MUTABLE, ['Notnull' => true])
+            ->addColumn('label', Types::STRING, ['Length' => 100, 'Notnull' => false, 'Default' => null])
+            ->setPrimaryKey(['id'])
+            ->create();
+    }
+
+    private function createLeaveEntitlementTransactionTable(): void
+    {
+        if ($this->getSchemaHelper()->tableExists(['ohrm_leave_entitlement_transaction'])) {
+            return;
+        }
+
+        $this->getSchemaHelper()->createTable('ohrm_leave_entitlement_transaction')
+            ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
+            ->addColumn('emp_number', Types::INTEGER, ['Notnull' => true])
+            ->addColumn('leave_type_id', Types::INTEGER, ['Notnull' => true])
+            ->addColumn('entitlement_id', Types::INTEGER, ['Notnull' => false, 'Default' => null])
+            ->addColumn('transaction_type', Types::STRING, ['Length' => 20, 'Notnull' => true])
+            ->addColumn('days', Types::DECIMAL, ['Precision' => 8, 'Scale' => 4, 'Notnull' => true])
+            ->addColumn('balance_after', Types::DECIMAL, ['Precision' => 8, 'Scale' => 4, 'Notnull' => false, 'Default' => null])
+            ->addColumn('note', Types::STRING, ['Length' => 255, 'Notnull' => false, 'Default' => null])
+            ->addColumn('created_by', Types::INTEGER, ['Notnull' => false, 'Default' => null])
+            ->addColumn('created_at', Types::DATETIMETZ_MUTABLE, ['Notnull' => true])
+            ->setPrimaryKey(['id'])
+            ->create();
+
+        $this->getSchemaHelper()->addForeignKey(
+            'ohrm_leave_entitlement_transaction',
+            new ForeignKeyConstraint(
+                ['emp_number'],
+                'hs_hr_employee',
+                ['emp_number'],
+                'leave_entitlement_txn_emp_number',
+                ['onDelete' => 'CASCADE']
+            )
+        );
+        $this->getSchemaHelper()->addForeignKey(
+            'ohrm_leave_entitlement_transaction',
+            new ForeignKeyConstraint(
+                ['leave_type_id'],
+                'ohrm_leave_type',
+                ['id'],
+                'leave_entitlement_txn_leave_type',
+                ['onDelete' => 'CASCADE']
+            )
+        );
+    }
+
+    private function seedEntitlementTypes(): void
+    {
+        $existing = $this->createQueryBuilder()
+            ->select('t.id', 't.name')
+            ->from('ohrm_leave_entitlement_type', 't')
+            ->executeQuery()
+            ->fetchAllAssociative();
+        $names = array_map('strtolower', array_column($existing, 'name'));
+
+        if (!in_array('deduction', $names, true)) {
+            $this->createQueryBuilder()
+                ->insert('ohrm_leave_entitlement_type')
+                ->values([
+                    'id' => ':id',
+                    'name' => ':name',
+                    'is_editable' => ':editable',
+                ])
+                ->setParameter('id', 2)
+                ->setParameter('name', 'Deduction')
+                ->setParameter('editable', true)
+                ->executeQuery();
+        }
+        if (!in_array('correction', $names, true)) {
+            $this->createQueryBuilder()
+                ->insert('ohrm_leave_entitlement_type')
+                ->values([
+                    'id' => ':id',
+                    'name' => ':name',
+                    'is_editable' => ':editable',
+                ])
+                ->setParameter('id', 3)
+                ->setParameter('name', 'Correction')
+                ->setParameter('editable', true)
+                ->executeQuery();
+        }
+    }
+
+    private function seedBankedTimeLeaveType(): void
+    {
+        $existing = $this->createQueryBuilder()
+            ->select('lt.id')
+            ->from('ohrm_leave_type', 'lt')
+            ->where('lt.name = :name')
+            ->setParameter('name', 'Banked Time')
             ->executeQuery()
             ->fetchOne();
 
-        if (!$customerId) {
-            $this->getConnection()->createQueryBuilder()
-                ->insert('ohrm_customer')
-                ->values([
-                    'name' => ':name',
-                    'description' => ':description',
-                    'is_deleted' => ':deleted',
-                ])
-                ->setParameter('name', 'Internal')
-                ->setParameter('description', 'System customer for clock-based timesheets')
-                ->setParameter('deleted', 0)
-                ->executeQuery();
-
-            $customerId = (int) $this->getConnection()->lastInsertId();
+        if ($existing) {
+            $this->getConfigHelper()->setConfigValue('leave.banked_time_type_id', (string) $existing);
+            return;
         }
 
-        $projectId = $this->getConnection()->createQueryBuilder()
-            ->select('project_id')
-            ->from('ohrm_project')
-            ->where('name = :name')
-            ->andWhere('customer_id = :customer_id')
-            ->andWhere('is_deleted = :deleted')
-            ->setParameter('name', 'General Time')
-            ->setParameter('customer_id', $customerId)
-            ->setParameter('deleted', 0)
+        $this->createQueryBuilder()
+            ->insert('ohrm_leave_type')
+            ->values([
+                'name' => ':name',
+                'deleted' => ':deleted',
+                'exclude_in_reports_if_no_entitlement' => ':exclude',
+                'operational_country_id' => ':country',
+            ])
+            ->setParameter('name', 'Banked Time')
+            ->setParameter('deleted', false)
+            ->setParameter('exclude', false)
+            ->setParameter('country', null)
+            ->executeQuery();
+
+        $id = (int) $this->getConnection()->lastInsertId();
+        $this->getConfigHelper()->setConfigValue('leave.banked_time_type_id', (string) $id);
+    }
+
+    private function seedPayrollMenuAndPermissions(): void
+    {
+        $moduleId = $this->createQueryBuilder()
+            ->select('m.id')
+            ->from('ohrm_module', 'm')
+            ->where('m.name = :name')
+            ->setParameter('name', 'time')
             ->executeQuery()
             ->fetchOne();
 
-        if (!$projectId) {
-            $this->getConnection()->createQueryBuilder()
-                ->insert('ohrm_project')
-                ->values([
-                    'customer_id' => ':customer_id',
-                    'name' => ':name',
-                    'description' => ':description',
-                    'is_deleted' => ':deleted',
-                ])
-                ->setParameter('customer_id', $customerId)
-                ->setParameter('name', 'General Time')
-                ->setParameter('description', 'Default project for weekly clock-based timesheets')
-                ->setParameter('deleted', 0)
-                ->executeQuery();
-
-            $projectId = (int) $this->getConnection()->lastInsertId();
+        if (!$moduleId) {
+            return;
         }
 
-        $activityId = $this->getConnection()->createQueryBuilder()
-            ->select('activity_id')
-            ->from('ohrm_project_activity')
-            ->where('name = :name')
-            ->andWhere('project_id = :project_id')
-            ->andWhere('is_deleted = :deleted')
-            ->setParameter('name', 'Regular Hours')
-            ->setParameter('project_id', $projectId)
-            ->setParameter('deleted', 0)
+        $existing = $this->createQueryBuilder()
+            ->select('s.id')
+            ->from('ohrm_screen', 's')
+            ->where('s.action_url = :url')
+            ->setParameter('url', 'viewPayrollFillSheetReport')
             ->executeQuery()
             ->fetchOne();
 
-        if (!$activityId) {
-            $this->getConnection()->createQueryBuilder()
-                ->insert('ohrm_project_activity')
+        if (!$existing) {
+            $this->createQueryBuilder()
+                ->insert('ohrm_screen')
                 ->values([
-                    'project_id' => ':project_id',
                     'name' => ':name',
-                    'is_deleted' => ':deleted',
+                    'module_id' => ':moduleId',
+                    'action_url' => ':url',
                 ])
-                ->setParameter('project_id', $projectId)
-                ->setParameter('name', 'Regular Hours')
-                ->setParameter('deleted', 0)
+                ->setParameter('name', 'Payroll Fill Sheet Report')
+                ->setParameter('moduleId', $moduleId)
+                ->setParameter('url', 'viewPayrollFillSheetReport')
                 ->executeQuery();
-
-            $activityId = (int) $this->getConnection()->lastInsertId();
         }
 
-        $this->getConfigHelper()->setConfigValue('timesheet.default_project_id', (string) $projectId);
-        $this->getConfigHelper()->setConfigValue('timesheet.default_activity_id', (string) $activityId);
+        $leaveModuleId = $this->createQueryBuilder()
+            ->select('m.id')
+            ->from('ohrm_module', 'm')
+            ->where('m.name = :name')
+            ->setParameter('name', 'leave')
+            ->executeQuery()
+            ->fetchOne();
+
+        if ($leaveModuleId) {
+            $existingLeave = $this->createQueryBuilder()
+                ->select('s.id')
+                ->from('ohrm_screen', 's')
+                ->where('s.action_url = :url')
+                ->setParameter('url', 'viewLeaveEntitlementHistoryReport')
+                ->executeQuery()
+                ->fetchOne();
+
+            if (!$existingLeave) {
+                $this->createQueryBuilder()
+                    ->insert('ohrm_screen')
+                    ->values([
+                        'name' => ':name',
+                        'module_id' => ':moduleId',
+                        'action_url' => ':url',
+                    ])
+                    ->setParameter('name', 'Leave Entitlement History Report')
+                    ->setParameter('moduleId', $leaveModuleId)
+                    ->setParameter('url', 'viewLeaveEntitlementHistoryReport')
+                    ->executeQuery();
+            }
+
+            $existingMyLeave = $this->createQueryBuilder()
+                ->select('s.id')
+                ->from('ohrm_screen', 's')
+                ->where('s.action_url = :url')
+                ->setParameter('url', 'viewMyLeaveEntitlementHistoryReport')
+                ->executeQuery()
+                ->fetchOne();
+
+            if (!$existingMyLeave) {
+                $this->createQueryBuilder()
+                    ->insert('ohrm_screen')
+                    ->values([
+                        'name' => ':name',
+                        'module_id' => ':moduleId',
+                        'action_url' => ':url',
+                    ])
+                    ->setParameter('name', 'My Leave Entitlement History Report')
+                    ->setParameter('moduleId', $leaveModuleId)
+                    ->setParameter('url', 'viewMyLeaveEntitlementHistoryReport')
+                    ->executeQuery();
+            }
+        }
+    }
+
+    private function insertReportMenus(): void
+    {
+        $timeMenuId = $this->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_menu_item')
+            ->where('menu_title = :time')
+            ->andWhere('level = 1')
+            ->setParameter('time', 'Time')
+            ->executeQuery()
+            ->fetchOne();
+
+        $timeReportsParentId = null;
+        if ($timeMenuId) {
+            $timeReportsParentId = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :reports')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('reports', 'Reports')
+                ->setParameter('parent', $timeMenuId)
+                ->executeQuery()
+                ->fetchOne();
+        }
+
+        if ($timeReportsParentId) {
+            $exists = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :title')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('title', 'Payroll Fill Sheet')
+                ->setParameter('parent', $timeReportsParentId)
+                ->executeQuery()
+                ->fetchOne();
+            if (!$exists) {
+                $this->insertMenuItem(
+                    'Payroll Fill Sheet',
+                    $this->getScreenId('Payroll Fill Sheet Report'),
+                    (int) $timeReportsParentId,
+                    3,
+                    400
+                );
+            }
+        }
+
+        $leaveMenuId = $this->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_menu_item')
+            ->where('menu_title = :leave')
+            ->andWhere('level = 1')
+            ->setParameter('leave', 'Leave')
+            ->executeQuery()
+            ->fetchOne();
+
+        $leaveReportsParentId = null;
+        if ($leaveMenuId) {
+            $leaveReportsParentId = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :reports')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('reports', 'Reports')
+                ->setParameter('parent', $leaveMenuId)
+                ->executeQuery()
+                ->fetchOne();
+            if (!$leaveReportsParentId) {
+                $leaveReportsParentId = $leaveMenuId;
+            }
+        }
+
+        if ($leaveReportsParentId) {
+            $exists = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :title')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('title', 'Entitlement History')
+                ->setParameter('parent', $leaveReportsParentId)
+                ->executeQuery()
+                ->fetchOne();
+            if (!$exists) {
+                $this->insertMenuItem(
+                    'Entitlement History',
+                    $this->getScreenId('Leave Entitlement History Report'),
+                    (int) $leaveReportsParentId,
+                    $leaveReportsParentId == $leaveMenuId ? 2 : 3,
+                    500
+                );
+            }
+
+            $existsMy = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :title')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('title', 'My Entitlement History')
+                ->setParameter('parent', $leaveReportsParentId)
+                ->executeQuery()
+                ->fetchOne();
+            if (!$existsMy) {
+                $this->insertMenuItem(
+                    'My Entitlement History',
+                    $this->getScreenId('My Leave Entitlement History Report'),
+                    (int) $leaveReportsParentId,
+                    $leaveReportsParentId == $leaveMenuId ? 2 : 3,
+                    600
+                );
+            }
+        }
+    }
+
+    private function getScreenId(string $name): ?int
+    {
+        $id = $this->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_screen')
+            ->where('name = :name')
+            ->setParameter('name', $name)
+            ->executeQuery()
+            ->fetchOne();
+
+        return $id === false || $id === null ? null : (int) $id;
+    }
+
+    private function insertMenuItem(
+        string $menuTitle,
+        ?int $screenId,
+        int $parentId,
+        int $level,
+        int $orderHint
+    ): void {
+        $this->createQueryBuilder()
+            ->insert('ohrm_menu_item')
+            ->values([
+                'menu_title' => ':menu_title',
+                'screen_id' => ':screen_id',
+                'parent_id' => ':parent_id',
+                'level' => ':level',
+                'order_hint' => ':order_hint',
+                'status' => ':status',
+                'additional_params' => ':additional_params',
+            ])
+            ->setParameters([
+                'menu_title' => $menuTitle,
+                'screen_id' => $screenId,
+                'parent_id' => $parentId,
+                'level' => $level,
+                'order_hint' => $orderHint,
+                'status' => 1,
+                'additional_params' => null,
+            ])
+            ->executeQuery();
     }
 }
