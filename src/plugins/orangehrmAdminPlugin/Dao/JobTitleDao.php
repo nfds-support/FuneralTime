@@ -224,12 +224,35 @@ class JobTitleDao extends BaseDao
      */
     public function getJobSpecificationByJobTitleId(int $jobTitleId): ?PartialJobSpecificationAttachment
     {
+        $results = $this->getJobSpecificationsByJobTitleIds([$jobTitleId]);
+        return $results[$jobTitleId] ?? null;
+    }
+
+    /**
+     * @param int[] $jobTitleIds
+     * @return array<int, PartialJobSpecificationAttachment> keyed by job title id
+     */
+    public function getJobSpecificationsByJobTitleIds(array $jobTitleIds): array
+    {
+        if (empty($jobTitleIds)) {
+            return [];
+        }
+
         $select = 'NEW ' . PartialJobSpecificationAttachment::class
             . "(js.id,js.fileName,js.fileType,js.fileSize,IDENTITY(js.jobTitle))";
         $q = $this->createQueryBuilder(JobSpecificationAttachment::class, 'js');
         $q->select($select);
-        $q->andWhere('js.jobTitle = :jobTitleId')
-            ->setParameter('jobTitleId', $jobTitleId);
-        return $q->getQuery()->getOneOrNullResult();
+        $q->andWhere($q->expr()->in('js.jobTitle', ':jobTitleIds'))
+            ->setParameter('jobTitleIds', $jobTitleIds);
+
+        $indexed = [];
+        /** @var PartialJobSpecificationAttachment $partial */
+        foreach ($q->getQuery()->execute() as $partial) {
+            $jobTitleId = $partial->getJobTitleId();
+            if (!is_null($jobTitleId)) {
+                $indexed[$jobTitleId] = $partial;
+            }
+        }
+        return $indexed;
     }
 }
