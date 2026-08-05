@@ -22,6 +22,7 @@ namespace OrangeHRM\Admin\Api;
 use OpenApi\Annotations as OA;
 use OrangeHRM\Admin\Api\Model\JobTitleModel;
 use OrangeHRM\Admin\Dto\JobTitleSearchFilterParams;
+use OrangeHRM\Admin\Dto\PartialJobSpecificationAttachment;
 use OrangeHRM\Admin\Service\JobTitleService;
 use OrangeHRM\Core\Api\CommonParams;
 use OrangeHRM\Core\Api\V2\CrudEndpoint;
@@ -115,7 +116,10 @@ class JobTitleAPI extends Endpoint implements CrudEndpoint
             throw new RecordNotFoundException();
         }
 
-        return new EndpointResourceResult(JobTitleModel::class, $jobTitle);
+        return new EndpointResourceResult(
+            JobTitleModel::class,
+            $this->getJobTitleModelData($jobTitle)
+        );
     }
 
     /**
@@ -185,7 +189,7 @@ class JobTitleAPI extends Endpoint implements CrudEndpoint
         $jobTitles = $this->getJobTitleService()->getJobTitleDao()->getJobTitles($jobTitleSearchFilterParams);
         return new EndpointCollectionResult(
             JobTitleModel::class,
-            $jobTitles,
+            $this->getJobTitleModelDataList($jobTitles),
             new ParameterBag([CommonParams::PARAMETER_TOTAL => $count])
         );
     }
@@ -246,7 +250,10 @@ class JobTitleAPI extends Endpoint implements CrudEndpoint
 
         $jobTitle = $this->getJobTitleService()->saveJobTitle($jobTitle);
 
-        return new EndpointResourceResult(JobTitleModel::class, $jobTitle);
+        return new EndpointResourceResult(
+            JobTitleModel::class,
+            $this->getJobTitleModelData($jobTitle, true)
+        );
     }
 
     /**
@@ -424,36 +431,59 @@ class JobTitleAPI extends Endpoint implements CrudEndpoint
         $this->throwRecordNotFoundExceptionIfNotExist($jobTitle, JobTitle::class);
         $this->setJobTitle($jobTitle);
 
-        $jobSpecification = $jobTitle->getJobSpecificationAttachment();
+        $partialJobSpecification = $this->getJobTitleService()
+            ->getJobTitleDao()
+            ->getJobSpecificationByJobTitleId($id);
+        $hasJobSpecification = $partialJobSpecification instanceof PartialJobSpecificationAttachment;
         $base64Attachment = $this->getBase64JobSpecification();
 
-        if (!$jobSpecification instanceof JobSpecificationAttachment && !is_null($currentJobSpecification)) {
+        if (!$hasJobSpecification && !is_null($currentJobSpecification)) {
             throw $this->getBadRequestException(
                 "`" . self::PARAMETER_CURRENT_JOB_SPECIFICATION . "` should not define if there is no job specification"
             );
-        } elseif ($jobSpecification instanceof JobSpecificationAttachment && is_null($currentJobSpecification)) {
+        } elseif ($hasJobSpecification && is_null($currentJobSpecification)) {
             throw $this->getBadRequestException(
                 "`" . self::PARAMETER_CURRENT_JOB_SPECIFICATION . "` should define if there is a job specification"
             );
         }
 
-        if (!$jobSpecification instanceof JobSpecificationAttachment && $base64Attachment) {
+        $jobSpecificationForResponse = $partialJobSpecification;
+        if (!$hasJobSpecification && $base64Attachment) {
             $jobSpecification = new JobSpecificationAttachment();
             $this->setJobSpecification($jobSpecification);
             $jobTitle->setJobSpecificationAttachment($jobSpecification);
             $jobSpecification->setJobTitle($jobTitle);
+            $jobSpecificationForResponse = null; // rebuilt from in-memory after save
         } elseif ($currentJobSpecification === self::JOB_SPECIFICATION_DELETE_CURRENT) {
+            $jobSpecification = $this->getJobTitleService()->getJobSpecAttachmentById(
+                $partialJobSpecification->getId()
+            );
             $jobTitle->setJobSpecificationAttachment(null);
             $this->getJobTitleService()->deleteJobSpecificationAttachment($jobSpecification);
+            $jobSpecificationForResponse = null;
         } elseif ($currentJobSpecification === self::JOB_SPECIFICATION_REPLACE_CURRENT) {
+            $jobSpecification = $this->getJobTitleService()->getJobSpecAttachmentById(
+                $partialJobSpecification->getId()
+            );
             $this->setJobSpecification($jobSpecification);
             $jobTitle->setJobSpecificationAttachment($jobSpecification);
             $jobSpecification->setJobTitle($jobTitle);
-        } // else self::JOB_SPECIFICATION_KEEP_CURRENT
+            $jobSpecificationForResponse = null; // rebuilt from in-memory after save
+        } // else self::JOB_SPECIFICATION_KEEP_CURRENT — do not hydrate file_content
 
         $this->getJobTitleService()->saveJobTitle($jobTitle);
 
-        return new EndpointResourceResult(JobTitleModel::class, $jobTitle);
+        if (is_null($jobSpecificationForResponse)) {
+            return new EndpointResourceResult(
+                JobTitleModel::class,
+                $this->getJobTitleModelData($jobTitle, true)
+            );
+        }
+
+        return new EndpointResourceResult(
+            JobTitleModel::class,
+            [$jobTitle, $jobSpecificationForResponse]
+        );
     }
 
     /**
@@ -527,5 +557,51 @@ class JobTitleAPI extends Endpoint implements CrudEndpoint
         return new ParamRuleCollection(
             new ParamRule(CommonParams::PARAMETER_IDS),
         );
+    }
+
+    /**
+     * @param JobTitle $jobTitle
+     * @param bool $useInMemoryAttachment when true, read metadata from an already-managed attachment
+     *                                     (create/replace) without selecting file_content from the DB
+     * @return array{0: JobTitle, 1: PartialJobSpecificationAttachment|null}
+     */
+    private function getJobTitleModelData(JobTitle $jobTitle, bool $useInMemoryAttachment = false): array
+    {
+        if ($useInMemoryAttachment) {
+            return [
+                $jobTitle,
+                PartialJobSpecificationAttachment::createFromAttachment(
+                    $jobTitle->getJobSpecificationAttachment()
+                ),
+            ];
+        }
+
+        return [
+            $jobTitle,
+            $this->getJobTitleService()
+                ->getJobTitleDao()
+                ->getJobSpecificationByJobTitleId($jobTitle->getId()),
+        ];
+    }
+
+    /**
+     * @param JobTitle[] $jobTitles
+     * @return array<int, array{0: JobTitle, 1: PartialJobSpecificationAttachment|null}>
+     */
+    private function getJobTitleModelDataList(array $jobTitles): array
+    {
+        $jobTitleIds = [];
+        foreach ($jobTitles as $jobTitle) {
+            $jobTitleIds[] = $jobTitle->getId();
+        }
+        $jobSpecifications = $this->getJobTitleService()
+            ->getJobTitleDao()
+            ->getJobSpecificationsByJobTitleIds($jobTitleIds);
+
+        $result = [];
+        foreach ($jobTitles as $jobTitle) {
+            $result[] = [$jobTitle, $jobSpecifications[$jobTitle->getId()] ?? null];
+        }
+        return $result;
     }
 }

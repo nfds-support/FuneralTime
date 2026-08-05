@@ -24,6 +24,7 @@ use OrangeHRM\CorporateBranding\Dto\ThemeImage;
 use OrangeHRM\CorporateBranding\Traits\ThemeServiceTrait;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Framework\Http\Response;
+use OrangeHRM\Framework\Http\StreamedResponse;
 
 class ImageAttachmentController extends AbstractFileController
 {
@@ -31,9 +32,9 @@ class ImageAttachmentController extends AbstractFileController
 
     /**
      * @param Request $request
-     * @return Response
+     * @return Response|StreamedResponse
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request)
     {
         $imageName = $request->attributes->get('imageName');
         $map = [
@@ -48,15 +49,12 @@ class ImageAttachmentController extends AbstractFileController
                 ->getThemeDao()
                 ->getImageByImageKeyAndThemeName($imageKey);
             if ($image instanceof ThemeImage) {
-                $response = $this->getResponse();
-                $this->setCommonHeadersToResponse(
+                return $this->getStreamedBlobResponse(
                     $image->getFilename(),
                     $image->getFileType(),
                     $image->getFileSize(),
-                    $response
+                    $image->getRawContent()
                 );
-                $response->setContent($image->getContent());
-                return $response;
             }
         }
 

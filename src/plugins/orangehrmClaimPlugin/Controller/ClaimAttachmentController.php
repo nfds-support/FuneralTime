@@ -27,6 +27,7 @@ use OrangeHRM\Entity\ClaimAttachment;
 use OrangeHRM\Entity\ClaimRequest;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Framework\Http\Response;
+use OrangeHRM\Framework\Http\StreamedResponse;
 
 class ClaimAttachmentController extends AbstractFileController
 {
@@ -35,12 +36,10 @@ class ClaimAttachmentController extends AbstractFileController
 
     /**
      * @param Request $request
-     * @return Response
+     * @return Response|StreamedResponse
      */
-    public function handle(Request $request): Response
+    public function handle(Request $request)
     {
-        $response = $this->getResponse();
-
         if ($request->attributes->has('requestId') && $request->attributes->has('attachId')) {
             $requestId = $request->attributes->get('requestId');
             $attachId = $request->attributes->get('attachId');
@@ -63,14 +62,12 @@ class ClaimAttachmentController extends AbstractFileController
             }
 
             if ($attachment instanceof ClaimAttachment) {
-                $this->setCommonHeadersToResponse(
+                return $this->getStreamedBlobResponse(
                     $attachment->getFilename(),
                     $attachment->getFileType(),
                     $attachment->getSize(),
-                    $response
+                    $attachment->getAttachment()
                 );
-                $response->setContent($attachment->getDecorator()->getAttachment());
-                return $response;
             }
         }
         return $this->handleBadRequest();

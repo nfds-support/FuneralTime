@@ -20,7 +20,8 @@
 namespace OrangeHRM\Admin\Api\Model;
 
 use OpenApi\Annotations as OA;
-use OrangeHRM\Core\Api\V2\Serializer\ModelTrait;
+use OrangeHRM\Admin\Dto\PartialJobSpecificationAttachment;
+use OrangeHRM\Core\Api\V2\Serializer\ModelConstructorArgsAwareInterface;
 use OrangeHRM\Core\Api\V2\Serializer\Normalizable;
 use OrangeHRM\Entity\JobTitle;
 
@@ -42,36 +43,43 @@ use OrangeHRM\Entity\JobTitle;
  *     )
  * )
  */
-class JobTitleModel implements Normalizable
+class JobTitleModel implements Normalizable, ModelConstructorArgsAwareInterface
 {
-    use ModelTrait;
+    private JobTitle $jobTitle;
 
-    public function __construct(JobTitle $jobTitle)
+    private ?PartialJobSpecificationAttachment $jobSpecification;
+
+    /**
+     * @param JobTitle $jobTitle
+     * @param PartialJobSpecificationAttachment|null $jobSpecification
+     */
+    public function __construct(JobTitle $jobTitle, ?PartialJobSpecificationAttachment $jobSpecification = null)
     {
-        $this->setEntity($jobTitle);
-        $this->setFilters(
-            [
-                'id',
-                'jobTitleName',
-                'jobDescription',
-                'note',
-                ['getJobSpecificationAttachment', 'getId'],
-                ['getJobSpecificationAttachment', 'getFileName'],
-                ['getJobSpecificationAttachment', 'getFileType'],
-                ['getJobSpecificationAttachment', 'getFileSize'],
-            ]
-        );
-        $this->setAttributeNames(
-            [
-                'id',
-                'title',
-                'description',
-                'note',
-                ['jobSpecification', 'id'],
-                ['jobSpecification', 'filename'],
-                ['jobSpecification', 'fileType'],
-                ['jobSpecification', 'fileSize'],
-            ]
-        );
+        $this->jobTitle = $jobTitle;
+        $this->jobSpecification = $jobSpecification;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function toArray(): array
+    {
+        $jobSpecification = null;
+        if ($this->jobSpecification instanceof PartialJobSpecificationAttachment) {
+            $jobSpecification = [
+                'id' => $this->jobSpecification->getId(),
+                'filename' => $this->jobSpecification->getFileName(),
+                'fileType' => $this->jobSpecification->getFileType(),
+                'fileSize' => $this->jobSpecification->getFileSize(),
+            ];
+        }
+
+        return [
+            'id' => $this->jobTitle->getId(),
+            'title' => $this->jobTitle->getJobTitleName(),
+            'description' => $this->jobTitle->getJobDescription(),
+            'note' => $this->jobTitle->getNote(),
+            'jobSpecification' => $jobSpecification,
+        ];
     }
 }

@@ -21,6 +21,7 @@ namespace OrangeHRM\Core\Controller;
 
 use OrangeHRM\Framework\Http\BinaryFileResponse;
 use OrangeHRM\Framework\Http\Response;
+use OrangeHRM\Framework\Http\StreamedResponse;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 
 abstract class AbstractFileController extends AbstractController
@@ -65,15 +66,15 @@ abstract class AbstractFileController extends AbstractController
      * @param string $filename
      * @param string $contentType
      * @param string $contentLength
-     * @param Response|null $response
-     * @return Response
+     * @param Response|StreamedResponse|null $response
+     * @return Response|StreamedResponse
      */
     protected function setCommonHeadersToResponse(
         string $filename,
         string $contentType,
         string $contentLength,
-        ?Response $response = null
-    ): Response {
+        $response = null
+    ) {
         if (is_null($response)) {
             $response = $this->getResponse();
         }
@@ -95,5 +96,38 @@ abstract class AbstractFileController extends AbstractController
         $response->headers->set('Expires', '0');
 
         return $response;
+    }
+
+    /**
+     * Stream a DB blob (resource or string) without buffering the full payload in Response content.
+     *
+     * @param string $filename
+     * @param string $contentType
+     * @param int|string $contentLength
+     * @param resource|string|null $blob
+     * @return StreamedResponse
+     */
+    protected function getStreamedBlobResponse(
+        string $filename,
+        string $contentType,
+        $contentLength,
+        $blob
+    ): StreamedResponse {
+        $response = new StreamedResponse(function () use ($blob) {
+            if (is_string($blob)) {
+                echo $blob;
+                return;
+            }
+            if (is_resource($blob)) {
+                fpassthru($blob);
+            }
+        });
+
+        return $this->setCommonHeadersToResponse(
+            $filename,
+            $contentType,
+            (string)$contentLength,
+            $response
+        );
     }
 }

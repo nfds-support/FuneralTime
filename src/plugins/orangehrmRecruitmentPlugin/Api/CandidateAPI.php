@@ -299,7 +299,7 @@ class CandidateAPI extends Endpoint implements CrudEndpoint
 
         return new EndpointCollectionResult(
             $this->getModelClass(),
-            $candidates,
+            $this->prepareCandidatesForModel($candidates),
             new ParameterBag([CommonParams::PARAMETER_TOTAL => $count])
         );
     }
@@ -517,7 +517,10 @@ class CandidateAPI extends Endpoint implements CrudEndpoint
 
             $this->commitTransaction();
             $candidate = $this->getCandidateService()->getCandidateDao()->getCandidateById($lastInsertedCandidateId);
-            return new EndpointResourceResult($this->getModelClass(), $candidate);
+            return new EndpointResourceResult(
+                $this->getModelClass(),
+                $this->prepareCandidateForModel($candidate)
+            );
         } catch (Exception $e) {
             $this->rollBackTransaction();
             throw new TransactionException($e);
@@ -865,7 +868,10 @@ class CandidateAPI extends Endpoint implements CrudEndpoint
             $this->performCandidateVacancyUpdateCriteria($candidateId, $candidateVacancy);
 
             $this->commitTransaction();
-            return new EndpointResourceResult($this->getModelClass(), $candidate);
+            return new EndpointResourceResult(
+                $this->getModelClass(),
+                $this->prepareCandidateForModel($candidate)
+            );
         } catch (RecordNotFoundException $e) {
             $this->rollBackTransaction();
             throw $e;
@@ -982,5 +988,49 @@ class CandidateAPI extends Endpoint implements CrudEndpoint
         );
         $candidateHistory->setCandidateVacancyName($candidateVacancy->getVacancy()->getName());
         $this->getCandidateService()->getCandidateDao()->saveCandidateHistory($candidateHistory);
+    }
+
+    /**
+     * @param Candidate[] $candidates
+     * @return Candidate[]|array<int, array{0: Candidate, 1: bool}>
+     */
+    private function prepareCandidatesForModel(array $candidates)
+    {
+        if ($this->getModelClass() !== CandidateListModel::class) {
+            return $candidates;
+        }
+
+        $candidateIds = [];
+        foreach ($candidates as $candidate) {
+            $candidateIds[] = $candidate->getId();
+        }
+        $candidateIdsWithAttachment = array_flip(
+            $this->getRecruitmentAttachmentService()
+                ->getRecruitmentAttachmentDao()
+                ->getCandidateIdsHavingAttachment($candidateIds)
+        );
+
+        $result = [];
+        foreach ($candidates as $candidate) {
+            $result[] = [$candidate, isset($candidateIdsWithAttachment[$candidate->getId()])];
+        }
+        return $result;
+    }
+
+    /**
+     * @param Candidate $candidate
+     * @return Candidate|array{0: Candidate, 1: bool}
+     */
+    private function prepareCandidateForModel(Candidate $candidate)
+    {
+        if ($this->getModelClass() !== CandidateListModel::class) {
+            return $candidate;
+        }
+
+        $hasAttachment = $this->getRecruitmentAttachmentService()
+            ->getRecruitmentAttachmentDao()
+            ->hasCandidateAttachmentByCandidateId($candidate->getId());
+
+        return [$candidate, $hasAttachment];
     }
 }

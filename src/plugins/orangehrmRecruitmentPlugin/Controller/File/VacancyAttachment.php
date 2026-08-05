@@ -25,6 +25,7 @@ use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\VacancyAttachment as VacancyAttachmentEntity;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Framework\Http\Response;
+use OrangeHRM\Framework\Http\StreamedResponse;
 use OrangeHRM\Recruitment\Traits\Service\RecruitmentAttachmentServiceTrait;
 
 class VacancyAttachment extends AbstractFileController
@@ -32,10 +33,13 @@ class VacancyAttachment extends AbstractFileController
     use RecruitmentAttachmentServiceTrait;
     use UserRoleManagerTrait;
 
-    public function handle(Request $request): Response
+    /**
+     * @param Request $request
+     * @return Response|StreamedResponse
+     */
+    public function handle(Request $request)
     {
         $attachId = $request->attributes->get('attachId');
-        $response = $this->getResponse();
 
         if ($attachId) {
             $attachment = $this->getRecruitmentAttachmentService()
@@ -45,14 +49,12 @@ class VacancyAttachment extends AbstractFileController
                 if (!$this->getUserRoleManager()->isEntityAccessible(VacancyAttachmentEntity::class, $attachId)) {
                     throw new ForbiddenException();
                 }
-                $this->setCommonHeadersToResponse(
+                return $this->getStreamedBlobResponse(
                     $attachment->getFileName(),
                     $attachment->getFileType(),
                     $attachment->getFileSize(),
-                    $response
+                    $attachment->getFileContent()
                 );
-                $response->setContent($attachment->getDecorator()->getFileContent());
-                return $response;
             }
         }
         return $this->handleBadRequest();
