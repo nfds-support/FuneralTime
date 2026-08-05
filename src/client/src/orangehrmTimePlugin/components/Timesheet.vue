@@ -46,187 +46,111 @@
       <table :class="tableClasses">
         <thead class="orangehrm-timesheet-table-header">
           <tr class="orangehrm-timesheet-table-header-row">
-            <th :class="fixedColumnClasses">
-              {{ $t('time.project') }}
-            </th>
-            <th class="orangehrm-timesheet-table-header-cell">
-              {{ $t('time.activity') }}
-            </th>
-
-            <!-- timesheet days of week -->
+            <th class="orangehrm-timesheet-table-header-cell --freeze-left"></th>
             <th
               v-for="day in daysOfWeek"
               :key="day.id"
               class="orangehrm-timesheet-table-header-cell --center"
               :class="{'--stat-holiday': day.isHoliday}"
             >
-              <span class="--day">
-                {{ day.day }}
-              </span>
-              <span>
-                {{ day.title }}
-              </span>
+              <span class="--day-name">{{ day.title }},</span>
+              <span class="--day">{{ day.formattedDate }}</span>
               <span v-if="day.isHoliday" class="--holiday-label">
                 {{ day.holidayName || $t('time.statutory_holiday') }}
               </span>
-            </th>
-            <!-- timesheet days of week -->
-
-            <th
-              v-if="!editable"
-              class="orangehrm-timesheet-table-header-cell --center --freeze-right"
-            >
-              {{ $t('general.total') }}
             </th>
           </tr>
         </thead>
 
         <tbody class="orangehrm-timesheet-table-body">
-          <!-- timesheet activities -->
-          <tr
-            v-for="(record, i) in records"
-            :key="record"
-            class="orangehrm-timesheet-table-body-row"
-          >
-            <td :class="fixedCellClasses">
-              <project-autocomplete
+          <tr class="orangehrm-timesheet-table-body-row">
+            <td class="orangehrm-timesheet-table-body-cell --freeze-left --label">
+              {{ $t('time.start_time') }}
+            </td>
+            <td
+              v-for="date in days"
+              :key="`start-${date}`"
+              class="orangehrm-timesheet-table-body-cell --center --duration-input"
+            >
+              <oxd-input-field
                 v-if="editable"
-                :only-allowed="false"
-                :rules="rules.project"
-                :model-value="getProject(record)"
-                @update:model-value="updateProject($event, i)"
+                autocomplete="off"
+                :placeholder="'HH:MM'"
+                :model-value="getStartTime(date)"
+                @update:model-value="updateStartTime($event, date)"
               />
-              <span v-else>
-                {{
-                  record.project
-                    ? `${record.customer.name} - ${record.project.name}`
-                    : ''
-                }}
-              </span>
-            </td>
-            <td class="orangehrm-timesheet-table-body-cell">
-              <activity-dropdown
-                v-if="editable"
-                :rules="rules.activity"
-                :project-id="record.project && record.project.id"
-                :model-value="getActivity(record.activity)"
-                @update:model-value="updateActivity($event, i)"
-              />
-              <span v-else>{{ record.activity && record.activity.name }}</span>
-            </td>
-            <td
-              v-for="(column, date) in columns"
-              :key="`${record.project}_${record.activity}_${date}`"
-              :class="{
-                'orangehrm-timesheet-table-body-cell': true,
-                '--center': true,
-                '--duration-input': editable,
-                '--highlight-3': !editable && column.workday,
-              }"
-            >
-              <oxd-icon-button
-                v-show="isCommentVisible(record.dates[date], i, date)"
-                display-type="secondary"
-                class="orangehrm-timesheet-icon-comment"
-                :name="getCommentIcon(record.dates[date])"
-                @mousedown="viewComment(record, record.dates[date], i, date)"
-              />
-              <div v-if="editable" class="orangehrm-timesheet-time-entry">
-                <oxd-input-field
-                  autocomplete="off"
-                  :placeholder="$t('time.start_time')"
-                  :model-value="getStartTime(record.dates[date])"
-                  @update:model-value="updateStartTime($event, i, date)"
-                />
-                <oxd-input-field
-                  autocomplete="off"
-                  :placeholder="$t('time.end_time')"
-                  :model-value="getEndTime(record.dates[date])"
-                  @update:model-value="updateEndTime($event, i, date)"
-                />
-                <oxd-input-field
-                  autocomplete="off"
-                  :rules="validateDuration(date)"
-                  :model-value="getDuration(record.dates[date])"
-                  @blur="onDurationBlur"
-                  @focus="onDurationFocus(i, date)"
-                  @update:model-value="updateTime($event, i, date)"
-                />
-              </div>
-              <span v-else>
-                <template v-if="getStartTime(record.dates[date])">
-                  {{ getStartTime(record.dates[date]) }} -
-                  {{ getEndTime(record.dates[date]) }}
-                  ({{ getDuration(record.dates[date]) ?? '00:00' }})
-                </template>
-                <template v-else>
-                  {{ getDuration(record.dates[date]) ?? '00:00' }}
-                </template>
-              </span>
-            </td>
-            <td
-              v-if="!editable"
-              class="orangehrm-timesheet-table-body-cell --center --freeze-right --highlight"
-            >
-              {{ record.total.label }}
-            </td>
-            <td
-              v-if="editable"
-              class="orangehrm-timesheet-table-body-cell --flex"
-            >
-              <oxd-icon-button
-                name="trash"
-                class="orangehrm-timesheet-icon"
-                @click="deleteRow(i)"
-              />
+              <span v-else>{{ getStartTime(date) || '—' }}</span>
             </td>
           </tr>
-          <!-- timesheet activities -->
 
-          <!-- totals -->
-          <tr
-            v-if="!editable && records.length > 0"
-            class="orangehrm-timesheet-table-body-row --total"
-          >
-            <td
-              class="orangehrm-timesheet-table-body-cell --freeze-left --highlight"
-            >
-              {{ $t('general.total') }}
+          <tr class="orangehrm-timesheet-table-body-row">
+            <td class="orangehrm-timesheet-table-body-cell --freeze-left --label">
+              {{ $t('time.end_time') }}
             </td>
-            <td></td>
-            <!-- total per day -->
             <td
-              v-for="date in columns"
+              v-for="date in days"
+              :key="`end-${date}`"
+              class="orangehrm-timesheet-table-body-cell --center --duration-input"
+            >
+              <oxd-input-field
+                v-if="editable"
+                autocomplete="off"
+                :placeholder="'HH:MM'"
+                :model-value="getEndTime(date)"
+                @update:model-value="updateEndTime($event, date)"
+              />
+              <span v-else>{{ getEndTime(date) || '—' }}</span>
+            </td>
+          </tr>
+
+          <tr class="orangehrm-timesheet-table-body-row">
+            <td class="orangehrm-timesheet-table-body-cell --freeze-left --label">
+              {{ $t('time.break_deductions') }}
+            </td>
+            <td
+              v-for="(day, index) in localDaysMeta"
+              :key="`break-${day.date}`"
+              class="orangehrm-timesheet-table-body-cell --center --duration-input"
+            >
+              <oxd-input-field
+                v-if="editable"
+                autocomplete="off"
+                :placeholder="'HH:MM'"
+                :model-value="day.breakDuration || '00:00'"
+                @update:model-value="updateBreakDuration($event, index)"
+              />
+              <span v-else>{{ day.breakDuration || '00:00' }}</span>
+            </td>
+          </tr>
+
+          <tr class="orangehrm-timesheet-table-body-row --total">
+            <td class="orangehrm-timesheet-table-body-cell --freeze-left --label --highlight">
+              {{ $t('time.total_hours') }}
+            </td>
+            <td
+              v-for="date in days"
               :key="`total-${date}`"
-              class="orangehrm-timesheet-table-body-cell --center"
+              class="orangehrm-timesheet-table-body-cell --center --highlight"
             >
-              {{ date.total.label }}
-            </td>
-            <!-- total per day -->
-            <td
-              class="orangehrm-timesheet-table-body-cell --center --freeze-right --highlight-2"
-            >
-              {{ subtotal }}
+              {{ getTotalHours(date) }}
             </td>
           </tr>
-          <!-- totals -->
 
-          <!-- on-call row -->
           <tr
-            v-if="daysMeta.length"
+            v-if="onCallEnabled"
             class="orangehrm-timesheet-table-body-row --on-call"
           >
-            <td class="orangehrm-timesheet-table-body-cell" colspan="2">
-              {{ $t('time.on_call') }}
+            <td class="orangehrm-timesheet-table-body-cell --freeze-left --label">
+              {{ $t('time.on_call_question') }}
             </td>
             <td
-              v-for="day in daysMeta"
+              v-for="(day, index) in localDaysMeta"
               :key="`on-call-${day.date}`"
               class="orangehrm-timesheet-table-body-cell --center"
             >
               <oxd-input-field
                 v-if="editable"
-                v-model="day.onCall"
+                v-model="localDaysMeta[index].onCall"
                 type="checkbox"
                 :true-value="true"
                 :false-value="false"
@@ -237,81 +161,8 @@
               </oxd-text>
             </td>
           </tr>
-          <!-- on-call row -->
-
-          <!-- add row -->
-          <tr v-if="editable" class="orangehrm-timesheet-table-body-row">
-            <td class="orangehrm-timesheet-table-body-cell --flex">
-              <oxd-icon-button
-                name="plus"
-                class="orangehrm-timesheet-icon"
-                @click="addRow"
-              />
-              <oxd-text type="subtitle-2">
-                {{ $t('time.add_row') }}
-              </oxd-text>
-            </td>
-          </tr>
-          <!-- add row -->
-
-          <tr
-            v-if="records.length === 0"
-            class="orangehrm-timesheet-table-body-row"
-          >
-            <td colspan="9" class="orangehrm-timesheet-table-body-cell">
-              {{ $t('general.no_records_found') }}
-            </td>
-          </tr>
         </tbody>
       </table>
-
-      <div v-if="showDeductions" class="orangehrm-timesheet-deductions">
-        <oxd-text tag="h6" class="orangehrm-main-title">
-          {{ $t('time.deductions') }}
-        </oxd-text>
-        <div
-          v-for="(deduction, index) in localDeductions"
-          :key="`deduction-${index}`"
-          class="orangehrm-timesheet-deduction-row"
-        >
-          <oxd-input-field
-            v-if="editable"
-            v-model="deduction.date"
-            :label="$t('general.date')"
-          />
-          <oxd-text v-else tag="p">{{ deduction.date }}</oxd-text>
-          <oxd-input-field
-            v-if="editable"
-            v-model="deduction.startTime"
-            :label="$t('time.start_time')"
-          />
-          <oxd-text v-else tag="p">{{ deduction.startTime }}</oxd-text>
-          <oxd-input-field
-            v-if="editable"
-            v-model="deduction.endTime"
-            :label="$t('time.end_time')"
-          />
-          <oxd-text v-else tag="p">{{ deduction.endTime }}</oxd-text>
-          <oxd-input-field
-            v-if="editable"
-            v-model="deduction.reason"
-            :label="$t('time.deduction_reason')"
-          />
-          <oxd-text v-else tag="p">{{ deduction.reason }}</oxd-text>
-          <oxd-icon-button
-            v-if="editable"
-            name="trash"
-            @click="removeDeduction(index)"
-          />
-        </div>
-        <oxd-button
-          v-if="editable"
-          display-type="ghost"
-          icon-name="plus"
-          :label="$t('time.add_deduction')"
-          @click="addDeduction"
-        />
-      </div>
     </div>
 
     <div class="orangehrm-timesheet-footer">
@@ -322,23 +173,11 @@
         <slot name="footer-options"></slot>
       </div>
     </div>
-
-    <timesheet-comment-modal
-      v-if="showCommentModal"
-      :editable="editable"
-      :data="commentModalState"
-      :timesheet-id="timesheetId"
-      @close="onCommentModalClose"
-    ></timesheet-comment-modal>
   </oxd-form>
 </template>
 
 <script>
-import {validSelection} from '@/core/util/validation/rules';
 import {parseDate, parseTimeInSeconds} from '@ohrm/core/util/helper/datefns';
-import ActivityDropdown from '@/orangehrmTimePlugin/components/ActivityDropdown.vue';
-import ProjectAutocomplete from '@/orangehrmTimePlugin/components/ProjectAutocomplete.vue';
-import TimesheetCommentModal from '@/orangehrmTimePlugin/components/TimesheetCommentModal.vue';
 import {OxdAlert, OxdSpinner} from '@ohrm/oxd';
 
 export default {
@@ -347,9 +186,6 @@ export default {
   components: {
     'oxd-alert': OxdAlert,
     'oxd-loading-spinner': OxdSpinner,
-    'activity-dropdown': ActivityDropdown,
-    'project-autocomplete': ProjectAutocomplete,
-    'timesheet-comment-modal': TimesheetCommentModal,
   },
 
   props: {
@@ -383,52 +219,58 @@ export default {
       type: Array,
       default: () => [],
     },
-    deductions: {
-      type: Array,
-      default: () => [],
+    onCallEnabled: {
+      type: Boolean,
+      default: false,
     },
   },
 
-  emits: ['update:records', 'update:daysMeta', 'update:deductions'],
+  emits: ['update:records', 'update:daysMeta'],
 
   data() {
     return {
-      focusedField: null,
-      showCommentModal: false,
-      commentModalState: null,
-      localDeductions: [],
-      rules: {
-        project: [
-          validSelection,
-          (v) => v !== null || this.$t('time.select_a_project'),
-        ],
-        activity: [
-          (v) => v !== null || this.$t('time.select_an_activity'),
-          (v) =>
-            this.records.filter((record) => record.activity?.id === v?.id)
-              .length < 2 || this.$t('time.duplicate_record'),
-        ],
-      },
+      localDaysMeta: [],
     };
   },
 
   watch: {
-    deductions: {
-      immediate: true,
-      handler(value) {
-        this.localDeductions = JSON.parse(JSON.stringify(value || []));
-      },
-    },
-    localDeductions: {
-      deep: true,
-      handler(value) {
-        this.$emit('update:deductions', value);
-      },
-    },
     daysMeta: {
+      immediate: true,
       deep: true,
       handler(value) {
+        const dates = this.columns ? Object.keys(this.columns) : [];
+        if (value && value.length) {
+          this.localDaysMeta = JSON.parse(JSON.stringify(value)).map((day) => ({
+            date: day.date,
+            onCall: !!day.onCall,
+            breakDuration: day.breakDuration || '00:00',
+            isHoliday: !!day.isHoliday,
+            holidayName: day.holidayName || null,
+          }));
+        } else if (dates.length) {
+          this.localDaysMeta = dates.map((date) => ({
+            date,
+            onCall: false,
+            breakDuration: '00:00',
+            isHoliday: !!this.columns?.[date]?.isHoliday,
+            holidayName: null,
+          }));
+        } else {
+          this.localDaysMeta = [];
+        }
+      },
+    },
+    localDaysMeta: {
+      deep: true,
+      handler(value) {
+        if (!this.editable) return;
         this.$emit('update:daysMeta', value);
+      },
+    },
+    columns: {
+      immediate: true,
+      handler() {
+        this.ensureSingleRecord();
       },
     },
   },
@@ -437,18 +279,8 @@ export default {
     days() {
       return this.columns ? Object.keys(this.columns) : [];
     },
-    showDeductions() {
-      return this.editable || (this.localDeductions && this.localDeductions.length > 0);
-    },
-    dailyTotals() {
-      const totals = {};
-      for (const date in this.columns) {
-        totals[date] = this.records.reduce((acc, record) => {
-          const duration = parseTimeInSeconds(record.dates[date]?.duration);
-          return duration > 0 ? acc + duration : acc;
-        }, 0);
-      }
-      return totals;
+    clockRecord() {
+      return this.records?.[0] || {dates: {}};
     },
     daysOfWeek() {
       const days = [
@@ -462,10 +294,14 @@ export default {
       ];
       return this.days.map((day) => {
         const date = parseDate(day, 'yyyy-MM-dd');
-        const meta = this.daysMeta.find((item) => item.date === day) || {};
+        const meta = this.localDaysMeta.find((item) => item.date === day) || {};
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const dayNum = String(date.getDate()).padStart(2, '0');
         return {
           id: date.valueOf(),
           day: date.getDate(),
+          dayLabel: day,
+          formattedDate: `${month}/${dayNum}`,
           title: days[date.getDay()],
           isHoliday: !!meta.isHoliday || !!this.columns?.[day]?.isHoliday,
           holidayName: meta.holidayName || null,
@@ -476,248 +312,101 @@ export default {
       return {
         'orangehrm-timesheet-table': true,
         '--editable': this.editable,
-      };
-    },
-    fixedColumnClasses() {
-      return {
-        'orangehrm-timesheet-table-header-cell': true,
-        '--freeze-left': !this.editable,
-      };
-    },
-    fixedCellClasses() {
-      return {
-        'orangehrm-timesheet-table-body-cell': true,
-        '--freeze-left': !this.editable,
+        '--clock-layout': true,
       };
     },
   },
 
   methods: {
-    deleteRow(index) {
-      const updated = this.records.filter((_, i) => i !== index);
-      this.syncRecords(updated);
-      this.$nextTick().then(() => {
-        if (updated.length === 0) this.addRow();
-      });
+    ensureSingleRecord() {
+      if (!this.editable || !this.columns) return;
+      if (this.records.length === 0) {
+        this.$emit('update:records', [{project: null, activity: null, dates: {}}]);
+      }
     },
-    addRow() {
-      const updated = [
-        ...this.records,
-        {
-          project: null,
-          activity: null,
-          dates: {},
-        },
-      ];
-      this.syncRecords(updated);
+    getEntry(date) {
+      return this.clockRecord.dates?.[date] || null;
     },
-    updateTime($value, index, date) {
-      const updated = this.records.map((record, i) => {
-        if (i === index) {
-          const _date = {
-            [date]: {
-              date: date,
-              duration: $value,
-              startTime: record.dates[date]?.startTime,
-              endTime: record.dates[date]?.endTime,
-              id: record.dates[date]?.id,
-              comment: record.dates[date]?.comment,
-            },
-          };
-          record.dates = {...record.dates, ..._date};
-        }
-        return record;
-      });
-      this.syncRecords(updated);
+    getStartTime(date) {
+      return this.getEntry(date)?.startTime ?? '';
     },
-    getStartTime(entry) {
-      return entry?.startTime ?? '';
+    getEndTime(date) {
+      return this.getEntry(date)?.endTime ?? '';
     },
-    getEndTime(entry) {
-      return entry?.endTime ?? '';
+    updateStartTime($value, date) {
+      this.updateClockField('startTime', $value, date);
     },
-    updateStartTime($value, index, date) {
-      this.updateClockField('startTime', $value, index, date);
+    updateEndTime($value, date) {
+      this.updateClockField('endTime', $value, date);
     },
-    updateEndTime($value, index, date) {
-      this.updateClockField('endTime', $value, index, date);
+    updateBreakDuration($value, index) {
+      const updated = [...this.localDaysMeta];
+      updated[index] = {
+        ...updated[index],
+        breakDuration: $value || '00:00',
+      };
+      this.localDaysMeta = updated;
+      this.recalculateDuration(updated[index].date);
     },
-    updateClockField(field, $value, index, date) {
-      const updated = this.records.map((record, i) => {
-        if (i === index) {
-          const current = {
-            date: date,
-            duration: record.dates[date]?.duration,
-            startTime: record.dates[date]?.startTime,
-            endTime: record.dates[date]?.endTime,
-            id: record.dates[date]?.id,
-            comment: record.dates[date]?.comment,
-            [field]: $value,
-          };
-          if (current.startTime && current.endTime) {
-            const start = parseTimeInSeconds(current.startTime);
-            const end = parseTimeInSeconds(current.endTime);
-            let seconds = end - start;
-            if (seconds < 0) seconds += 24 * 3600;
-            if (seconds >= 0) {
-              const hours = Math.floor(seconds / 3600)
-                .toString()
-                .padStart(2, '0');
-              const minutes = Math.floor((seconds % 3600) / 60)
-                .toString()
-                .padStart(2, '0');
-              current.duration = `${hours}:${minutes}`;
-            }
+    updateClockField(field, $value, date) {
+      const current = {
+        date,
+        duration: this.getEntry(date)?.duration,
+        startTime: this.getEntry(date)?.startTime,
+        endTime: this.getEntry(date)?.endTime,
+        id: this.getEntry(date)?.id,
+        comment: this.getEntry(date)?.comment,
+        [field]: $value,
+      };
+      this.applyDuration(current);
+      const dates = {...(this.clockRecord.dates || {}), [date]: current};
+      this.syncRecords([{...(this.clockRecord || {}), dates}]);
+    },
+    recalculateDuration(date) {
+      const current = {
+        date,
+        duration: this.getEntry(date)?.duration,
+        startTime: this.getEntry(date)?.startTime,
+        endTime: this.getEntry(date)?.endTime,
+        id: this.getEntry(date)?.id,
+        comment: this.getEntry(date)?.comment,
+      };
+      this.applyDuration(current);
+      const dates = {...(this.clockRecord.dates || {}), [date]: current};
+      this.syncRecords([{...(this.clockRecord || {}), dates}]);
+    },
+    applyDuration(entry) {
+      if (entry.startTime && entry.endTime) {
+        const start = parseTimeInSeconds(entry.startTime);
+        const end = parseTimeInSeconds(entry.endTime);
+        if (start >= 0 && end >= 0) {
+          let seconds = end - start;
+          if (seconds < 0) seconds += 24 * 3600;
+          const breakMeta = this.localDaysMeta.find((d) => d.date === entry.date);
+          const breakSeconds = parseTimeInSeconds(breakMeta?.breakDuration || '00:00');
+          if (breakSeconds > 0) {
+            seconds = Math.max(0, seconds - breakSeconds);
           }
-          record.dates = {...record.dates, [date]: current};
+          const hours = Math.floor(seconds / 3600)
+            .toString()
+            .padStart(2, '0');
+          const minutes = Math.floor((seconds % 3600) / 60)
+            .toString()
+            .padStart(2, '0');
+          entry.duration = `${hours}:${minutes}`;
         }
-        return record;
-      });
-      this.syncRecords(updated);
+      }
     },
-    addDeduction() {
-      const firstDay = this.days[0] || '';
-      this.localDeductions = [
-        ...this.localDeductions,
-        {
-          id: null,
-          date: firstDay,
-          startTime: '',
-          endTime: '',
-          reason: '',
-        },
-      ];
-    },
-    removeDeduction(index) {
-      this.localDeductions = this.localDeductions.filter((_, i) => i !== index);
-    },
-    updateComment(id, comment, index, date) {
-      const updated = this.records.map((record, i) => {
-        if (i === index) {
-          const _date = {
-            [date]: {
-              id: id,
-              date: date,
-              comment: comment,
-              duration: record.dates[date]?.duration,
-              startTime: record.dates[date]?.startTime,
-              endTime: record.dates[date]?.endTime,
-            },
-          };
-          record.dates = {...record.dates, ..._date};
-        }
-        return record;
-      });
-      this.syncRecords(updated);
-    },
-    updateProject($value, index) {
-      const updated = this.records.map((record, i) => {
-        if (i === index) {
-          record.project = $value ? $value : null;
-          record.customer = $value?._customer ? $value._customer : null;
-        }
-        return record;
-      });
-      this.updateActivity(null, index);
-      this.syncRecords(updated);
-    },
-    updateActivity($value, index) {
-      const updated = this.records.map((record, i) => {
-        if (i === index) {
-          record.activity = $value ? {id: $value.id, name: $value.label} : null;
-        }
-        return record;
-      });
-      this.syncRecords(updated);
+    getTotalHours(date) {
+      const entry = this.getEntry(date);
+      if (entry?.duration) return entry.duration;
+      if (this.columns?.[date]?.net?.label) return this.columns[date].net.label;
+      if (this.columns?.[date]?.total?.label) return this.columns[date].total.label;
+      return '00:00';
     },
     syncRecords(updated) {
       if (!this.editable) return;
       this.$emit('update:records', updated);
-    },
-    viewComment(record, entry, index, date) {
-      if (record.project?.id && record.activity?.id) {
-        this.commentModalState = {
-          date,
-          index,
-          id: entry?.id,
-          project: record.project,
-          activity: record.activity,
-          customer: record.customer,
-        };
-        this.showCommentModal = true;
-      } else {
-        this.$toast.warn({
-          title: this.$t('general.warning'),
-          message: this.$t('time.select_a_project_and_an_activity'),
-        });
-      }
-    },
-    onCommentModalClose($event) {
-      if ($event) {
-        const {id, comment} = $event;
-        const {index, date} = this.commentModalState;
-        this.updateComment(id, comment, index, date);
-      }
-      this.showCommentModal = false;
-      this.commentModalState = null;
-    },
-    getProject(record) {
-      const {project, customer} = record;
-      if (project && project.label) {
-        return project;
-      }
-      if (project && customer) {
-        return {
-          id: project.id,
-          label: `${customer.name} - ${project.name}`,
-        };
-      }
-      return null;
-    },
-    getActivity(activity) {
-      return activity ? {id: activity.id, label: activity.name} : null;
-    },
-    getDuration(entry) {
-      // TODO: convert to format from user config
-      return entry?.duration ? entry.duration : null;
-    },
-    getCommentIcon(entry) {
-      return entry?.comment ? 'chat-dots-fill' : 'chat-dots';
-    },
-    isCommentVisible(entry, index, date) {
-      if (entry?.comment) return true;
-      if (this.editable) {
-        return (
-          this.focusedField &&
-          this.focusedField.index === index &&
-          this.focusedField.date === date
-        );
-      }
-      return false;
-    },
-    onDurationFocus(index, date) {
-      this.focusedField = {index, date};
-    },
-    onDurationBlur() {
-      this.focusedField = null;
-    },
-    validateDuration(date) {
-      const validateFormat = (v) => {
-        return (
-          v === '' ||
-          v === null ||
-          parseTimeInSeconds(v) >= 0 ||
-          this.$t('time.should_be_less_than_24_and_in_hh_mm_or_decimal_format')
-        );
-      };
-
-      const validateTotal = () => {
-        return this.dailyTotals[date] > 86400
-          ? this.$t('time.total_should_be_less_than_24_hours')
-          : true;
-      };
-
-      return [validateFormat, validateTotal];
     },
   },
 };

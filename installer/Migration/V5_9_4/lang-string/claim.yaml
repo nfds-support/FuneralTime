@@ -1,0 +1,46 @@
+langStrings:
+  -
+    value: 'Employee Expense Limits'
+    unitId: menu_employee_expense_limits
+  -
+    value: 'Monthly Expense Report'
+    unitId: menu_monthly_expense_report
+  -
+    value: 'Expense Limits'
+    unitId: employee_expense_limits
+  -
+    value: 'Expense Category Limits'
+    unitId: expense_category_limits
+  -
+    value: 'Monthly Limit'
+    unitId: monthly_limit
+  -
+    value: 'Generate Report'
+    unitId: generate_report
+  -
+    value: 'Download Expense Report'
+    unitId: download_expense_report
+  -
+    value: 'Select Month'
+    unitId: select_month
+  -
+    value: 'Quantity (KM)'
+    unitId: quantity_km
+  -
+    value: 'Mileage Reimbursement Rate'
+    unitId: mileage_reimbursement_rate
+  -
+    value: 'Per kilometer rate used for mileage claim expenses'
+    unitId: help_mileage_reimbursement_rate
+  -
+    value: 'Report Column'
+    unitId: report_column
+  -
+    value: 'Successfully Saved'
+    unitId: successfully_saved
+  -
+    value: 'Successfully Updated'
+    unitId: successfully_updated
+  -
+    value: 'Successfully Deleted'
+    unitId: successfully_deleted

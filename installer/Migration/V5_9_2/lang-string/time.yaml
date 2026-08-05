@@ -1,17 +1,69 @@
-payroll_fill_sheet: 'Payroll Fill Sheet'
-payroll_fill_sheet_report: 'Payroll Fill Sheet Report'
-payroll_periods: 'Payroll Periods'
-payroll_period: 'Payroll Period'
-period_number: 'Period Number (P#)'
-regular_hours_week_1: 'Regular Hours Week 1'
-regular_hours_week_2: 'Regular Hours Week 2'
-overtime_hours_week_1: 'Overtime Hours Week 1 (1.5x)'
-overtime_hours_week_2: 'Overtime Hours Week 2 (1.5x)'
-on_call_week_1: 'On-Call Week 1'
-on_call_week_2: 'On-Call Week 2'
-sick_hours: 'Sick Hours'
-vacation_hours_week_1: 'Vacation Hours Week 1'
-vacation_hours_week_2: 'Vacation Hours Week 2'
-administration_employees: 'Administration Employees'
-operation_employees: 'Operation Employees'
-banked_hours: 'Banked Hours'
+langStrings:
+  -
+    unitId: payroll_fill_sheet
+    value: 'Payroll Fill Sheet'
+    note: ''
+  -
+    unitId: payroll_fill_sheet_report
+    value: 'Payroll Fill Sheet Report'
+    note: ''
+  -
+    unitId: payroll_periods
+    value: 'Payroll Periods'
+    note: ''
+  -
+    unitId: payroll_period
+    value: 'Payroll Period'
+    note: ''
+  -
+    unitId: period_number
+    value: 'Period Number (P#)'
+    note: ''
+  -
+    unitId: regular_hours_week_1
+    value: 'Regular Hours Week 1'
+    note: ''
+  -
+    unitId: regular_hours_week_2
+    value: 'Regular Hours Week 2'
+    note: ''
+  -
+    unitId: overtime_hours_week_1
+    value: 'Overtime Hours Week 1 (1.5x)'
+    note: ''
+  -
+    unitId: overtime_hours_week_2
+    value: 'Overtime Hours Week 2 (1.5x)'
+    note: ''
+  -
+    unitId: on_call_week_1
+    value: 'On-Call Week 1'
+    note: ''
+  -
+    unitId: on_call_week_2
+    value: 'On-Call Week 2'
+    note: ''
+  -
+    unitId: sick_hours
+    value: 'Sick Hours'
+    note: ''
+  -
+    unitId: vacation_hours_week_1
+    value: 'Vacation Hours Week 1'
+    note: ''
+  -
+    unitId: vacation_hours_week_2
+    value: 'Vacation Hours Week 2'
+    note: ''
+  -
+    unitId: administration_employees
+    value: 'Administration Employees'
+    note: ''
+  -
+    unitId: operation_employees
+    value: 'Operation Employees'
+    note: ''
+  -
+    unitId: banked_hours
+    value: 'Banked Hours'
+    note: ''

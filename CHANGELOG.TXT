@@ -1,9 +1,15 @@
-New & Changed Features for OrangeHRM ver 5.9.3
+New & Changed Features for OrangeHRM ver 5.9.4
     New Features/Changes
     -----------
     - Claim - Per-employee expense category monthly limits and mileage reimbursement rate ($/km)
     - Claim - Mileage expenses capture KM and auto-calculate amount from the employee rate
     - Claim - Monthly expense report: fills the cooperative claim-form XLSX and compiles an approved PDF with receipt attachments (EmployeeName_ExpenseReport_MONTH_YEAR.pdf)
+
+New & Changed Features for OrangeHRM ver 5.9.3
+    New Features/Changes
+    -----------
+    - Time - Clock-based weekly timesheet grid (Start Time, End Time, Break Deductions, Total Hours) without project/activity rows
+    - Time / PIM - Employee On Call job setting; timesheet shows per-day On-Call checkboxes only when enabled
 
 New & Changed Features for OrangeHRM ver 5.9.2
     New Features/Changes

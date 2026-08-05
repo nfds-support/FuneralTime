@@ -35,6 +35,7 @@ use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
 use OrangeHRM\Core\Traits\ORM\EntityManagerHelperTrait;
+use OrangeHRM\Core\Traits\Service\ConfigServiceTrait;
 use OrangeHRM\Core\Traits\Service\DateTimeHelperTrait;
 use OrangeHRM\Core\Traits\Service\NormalizerServiceTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
@@ -61,6 +62,7 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
     use NormalizerServiceTrait;
     use EntityManagerHelperTrait;
     use HolidayServiceTrait;
+    use ConfigServiceTrait;
 
     public const PARAMETER_TIMESHEET_ID = 'timesheetId';
     public const PARAMETER_ENTRIES = 'entries';
@@ -80,6 +82,9 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
     public const META_PARAMETER_ALLOWED_ACTIONS = 'allowedActions';
     public const META_PARAMETER_DAYS = 'days';
     public const META_PARAMETER_DEDUCTIONS = 'deductions';
+    public const META_PARAMETER_ON_CALL_ENABLED = 'onCallEnabled';
+    public const META_PARAMETER_DEFAULT_PROJECT_ID = 'defaultProjectId';
+    public const META_PARAMETER_DEFAULT_ACTIVITY_ID = 'defaultActivityId';
 
     /**
      * @OA\Get(
@@ -212,8 +217,11 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
         }
 
         $onCallByDate = [];
+        $breakByDate = [];
         foreach ($this->getTimesheetService()->getTimesheetDao()->getTimesheetDaysByTimesheetId($timesheetId) as $day) {
-            $onCallByDate[$this->getDateTimeHelper()->formatDateTimeToYmd($day->getDate())] = $day->isOnCall();
+            $ymd = $this->getDateTimeHelper()->formatDateTimeToYmd($day->getDate());
+            $onCallByDate[$ymd] = $day->isOnCall();
+            $breakByDate[$ymd] = $day->getBreakDuration();
         }
 
         $daysMeta = [];
@@ -221,7 +229,7 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
             $sum += $column->getTotal();
             $date = $this->getDateTimeHelper()->formatDateTimeToYmd($column->getDate());
             $dates[] = $date;
-            $dayDeduction = $deductionSecondsByDate[$date] ?? 0;
+            $dayDeduction = $deductionSecondsByDate[$date] ?? ($breakByDate[$date] ?? 0);
             $columns[$date] = [
                 'total' => $this->getNormalizedTotalDuration($column->getTotal()),
                 'deduction' => $this->getNormalizedTotalDuration($dayDeduction),
@@ -231,9 +239,11 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
                 'onCall' => $onCallByDate[$date] ?? false,
             ];
             $holiday = $this->getHolidayService()->getHolidayDao()->getHolidayByDate($column->getDate());
+            $breakSeconds = $breakByDate[$date] ?? 0;
             $daysMeta[] = [
                 'date' => $date,
                 'onCall' => $onCallByDate[$date] ?? false,
+                'breakDuration' => $this->getNormalizedTotalDuration($breakSeconds)['label'],
                 'isHoliday' => $columns[$date]['isHoliday'],
                 'holidayName' => $holiday?->getName(),
             ];
@@ -276,6 +286,9 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
             self::META_PARAMETER_ALLOWED_ACTIONS => $allowedActions,
             self::META_PARAMETER_DAYS => $daysMeta,
             self::META_PARAMETER_DEDUCTIONS => $deductionsMeta,
+            self::META_PARAMETER_ON_CALL_ENABLED => $detailedTimesheet->getTimesheet()->getEmployee()->isOnCall(),
+            self::META_PARAMETER_DEFAULT_PROJECT_ID => $this->getConfigService()->getTimesheetDefaultProjectId(),
+            self::META_PARAMETER_DEFAULT_ACTIVITY_ID => $this->getConfigService()->getTimesheetDefaultActivityId(),
         ]);
     }
 

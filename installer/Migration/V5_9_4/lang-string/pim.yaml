@@ -1,0 +1,5 @@
+langStrings:
+  -
+    unitId: mileage_reimbursement_rate
+    value: 'Mileage Reimbursement Rate ($/km)'
+    note: ''

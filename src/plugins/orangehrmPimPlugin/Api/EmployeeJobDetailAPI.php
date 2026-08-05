@@ -44,6 +44,7 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
     public const PARAMETER_JOB_CATEGORY_ID = 'jobCategoryId';
     public const PARAMETER_SUBUNIT_ID = 'subunitId';
     public const PARAMETER_LOCATION_ID = 'locationId';
+    public const PARAMETER_ON_CALL = 'onCall';
     public const PARAMETER_PAY_TYPE = 'payType';
     public const PARAMETER_CONTRACTED_HOURS_PER_WEEK = 'contractedHoursPerWeek';
     public const PARAMETER_OVERTIME_THRESHOLD_HOURS = 'overtimeThresholdHours';
@@ -171,6 +172,10 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_LOCATION_ID
         );
+        $onCall = $this->getRequestParams()->getBooleanOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_ON_CALL
+        );
         $payType = $this->getRequestParams()->getStringOrNull(
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_PAY_TYPE
@@ -203,6 +208,9 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
         $employee->getDecorator()->setJobCategoryById($jobCategoryId);
         $employee->getDecorator()->setSubunitById($subunitId);
         $employee->getDecorator()->setLocationById($locationId);
+        if (!is_null($onCall)) {
+            $employee->setOnCall($onCall);
+        }
         $employee->setPayType($payType);
         $employee->setContractedHoursPerWeek($contractedHours);
         $employee->setOvertimeThresholdHours($overtimeThreshold);
@@ -263,6 +271,12 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
                 new ParamRule(
                     self::PARAMETER_LOCATION_ID,
                     new Rule(Rules::POSITIVE)
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_ON_CALL,
+                    new Rule(Rules::BOOL_VAL)
                 )
             ),
             $this->getValidationDecorator()->notRequiredParamRule(

@@ -59,6 +59,14 @@ export default function useTimesheet(
           state.timesheetSubtotal = meta.sum.label;
           state.timesheetStatus = timesheet.status.name;
           state.timesheetAllowedActions = allowedActions;
+          state.onCallEnabled = !!meta.onCallEnabled;
+          state.defaultProjectId = meta.defaultProjectId ?? null;
+          state.defaultActivityId = meta.defaultActivityId ?? null;
+          state.timesheetDays = (meta.days || []).map((day) => ({
+            ...day,
+            onCall: !!day.onCall,
+            breakDuration: day.breakDuration || '00:00',
+          }));
           data.length === 0 && noRecordsFound();
         } else {
           state.employee = null;
@@ -67,6 +75,8 @@ export default function useTimesheet(
           state.timesheetStatus = null;
           state.timesheetSubtotal = null;
           state.timesheetAllowedActions = [];
+          state.timesheetDays = [];
+          state.onCallEnabled = false;
         }
       })
       .finally(() => {

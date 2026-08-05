@@ -38,6 +38,31 @@ class ThemeDao extends BaseDao
     }
 
     /**
+     * Update theme columns without selecting blob image columns.
+     *
+     * @param string $themeName
+     * @param array<string, mixed> $fields map of Doctrine field name => value
+     * @return int number of affected rows
+     */
+    public function updateThemeFieldsByThemeName(string $themeName, array $fields): int
+    {
+        if (empty($fields)) {
+            return 0;
+        }
+
+        $q = $this->createQueryBuilder(Theme::class, 't')->update();
+        foreach ($fields as $field => $value) {
+            $param = 'p_' . $field;
+            $q->set('t.' . $field, ':' . $param)
+                ->setParameter($param, $value);
+        }
+        $q->where('t.name = :themeName')
+            ->setParameter('themeName', $themeName);
+
+        return $q->getQuery()->execute();
+    }
+
+    /**
      * @param string $themeName
      * @return Theme|null
      */

@@ -27,6 +27,7 @@ class Base64Attachment
     private string $fileType;
     private string $size;
     private string $base64Content;
+    private ?string $decodedContent = null;
 
     /**
      * @param string $filename
@@ -104,6 +105,7 @@ class Base64Attachment
     public function setBase64Content(string $base64Content): void
     {
         $this->base64Content = $base64Content;
+        $this->decodedContent = null;
     }
 
     /**
@@ -111,7 +113,11 @@ class Base64Attachment
      */
     public function getContent(): ?string
     {
-        return base64_decode($this->base64Content) ?? null;
+        if (is_null($this->decodedContent)) {
+            $decoded = base64_decode($this->base64Content, true);
+            $this->decodedContent = $decoded === false ? null : $decoded;
+        }
+        return $this->decodedContent;
     }
 
     /**
@@ -119,6 +125,7 @@ class Base64Attachment
      */
     public function setContent(string $content): void
     {
+        $this->decodedContent = $content;
         $this->base64Content = base64_encode($content);
     }
 

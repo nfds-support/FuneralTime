@@ -22,11 +22,11 @@
     <timesheet
       v-model:records="timesheetRecords"
       v-model:days-meta="timesheetDays"
-      v-model:deductions="timesheetDeductions"
       :editable="true"
       :loading="isLoading"
       :timesheet-id="timesheetId"
       :columns="timesheetColumns"
+      :on-call-enabled="onCallEnabled"
       @submit-valid="onSave"
     >
       <template #header-title>
@@ -108,8 +108,6 @@ export default {
 
     http.setIgnorePath('/api/v2/time/timesheets/[0-9]+/entries');
 
-    let timesheetModal = [];
-
     const {saveSuccess} = useToast();
     const {state, fetchTimesheetEntries, updateTimesheetEntries} =
       useTimesheetAPIs(http);
@@ -117,12 +115,16 @@ export default {
     const {locale} = useLocale();
     const {$tEmpName} = useEmployeeNameTranslate();
 
+    let originalRecords = [];
+
     const loadTimesheet = () => {
       state.isLoading = true;
-      timesheetModal = [];
       state.timesheetRecords = [];
       state.timesheetDays = [];
-      state.timesheetDeductions = [];
+      state.onCallEnabled = false;
+      state.defaultProjectId = null;
+      state.defaultActivityId = null;
+      originalRecords = [];
       fetchTimesheetEntries(props.timesheetId, !props.myTimesheet).then(
         (response) => {
           const {data, meta, timesheet, allowedActions} = response;
@@ -132,29 +134,31 @@ export default {
           state.timesheetSubtotal = meta.sum.label;
           state.timesheetStatus = timesheet.status.name;
           state.timesheetAllowedActions = allowedActions;
+          state.onCallEnabled = !!meta.onCallEnabled;
+          state.defaultProjectId = meta.defaultProjectId;
+          state.defaultActivityId = meta.defaultActivityId;
           state.timesheetDays = (meta.days || []).map((day) => ({
             ...day,
             onCall: !!day.onCall,
+            breakDuration: day.breakDuration || '00:00',
           }));
-          state.timesheetDeductions = (meta.deductions || []).map((item) => ({
-            id: item.id,
-            date: item.date,
-            startTime: item.startTime,
-            endTime: item.endTime,
-            reason: item.reason || '',
-          }));
+          originalRecords = JSON.parse(JSON.stringify(data || []));
           if (data.length > 0) {
-            state.timesheetRecords = data;
-            timesheetModal = JSON.parse(JSON.stringify(data));
+            const preferred =
+              data.find(
+                (row) =>
+                  row.project?.id === meta.defaultProjectId &&
+                  row.activity?.id === meta.defaultActivityId,
+              ) || data[0];
+            state.timesheetRecords = [preferred];
           } else {
             state.timesheetRecords.push({
-              project: null,
-              activity: null,
-              dates: {},
-            });
-            timesheetModal.push({
-              project: null,
-              activity: null,
+              project: meta.defaultProjectId
+                ? {id: meta.defaultProjectId, name: 'General Time'}
+                : null,
+              activity: meta.defaultActivityId
+                ? {id: meta.defaultActivityId, name: 'Regular Hours'}
+                : null,
               dates: {},
             });
           }
@@ -187,37 +191,47 @@ export default {
 
     const onSave = () => {
       state.isLoading = true;
+      const projectId =
+        state.timesheetRecords[0]?.project?.id || state.defaultProjectId;
+      const activityId =
+        state.timesheetRecords[0]?.activity?.id || state.defaultActivityId;
+      const dates = {};
+      const record = state.timesheetRecords[0] || {dates: {}};
+      for (const date in record.dates || {}) {
+        const entry = record.dates[date];
+        if (!entry?.startTime && !entry?.endTime && !entry?.duration) {
+          continue;
+        }
+        const _duration = parseTimeInSeconds(entry.duration);
+        dates[date] = {
+          duration: _duration > 0 ? secondsTohhmm(_duration) : '00:00',
+        };
+        if (entry.startTime) {
+          dates[date].startTime = entry.startTime;
+        }
+        if (entry.endTime) {
+          dates[date].endTime = entry.endTime;
+        }
+      }
+
       const payload = {
-        entries: state.timesheetRecords.map((record) => {
-          const dates = {};
-          for (const date in record.dates) {
-            const entry = record.dates[date];
-            const _duration = parseTimeInSeconds(entry.duration);
-            dates[date] = {
-              duration: _duration > 0 ? secondsTohhmm(_duration) : '00:00',
-            };
-            if (entry.startTime) {
-              dates[date].startTime = entry.startTime;
-            }
-            if (entry.endTime) {
-              dates[date].endTime = entry.endTime;
-            }
-          }
-          return {
-            projectId: record.project.id,
-            activityId: record.activity.id,
-            dates,
-          };
-        }),
-        deletedEntries: timesheetModal
+        entries:
+          Object.keys(dates).length > 0 && projectId && activityId
+            ? [
+                {
+                  projectId,
+                  activityId,
+                  dates,
+                },
+              ]
+            : [],
+        deletedEntries: originalRecords
           .filter((record) => {
-            if (!record.project) return false;
-            return (
-              state.timesheetRecords.findIndex(
-                (item) =>
-                  item.project.id === record.project.id &&
-                  item.activity.id === record.activity.id,
-              ) < 0
+            if (!record.project?.id || !record.activity?.id) return false;
+            return !(
+              record.project.id === projectId &&
+              record.activity.id === activityId &&
+              Object.keys(dates).length > 0
             );
           })
           .map((record) => ({
@@ -225,10 +239,7 @@ export default {
             activityId: record.activity.id,
           })),
       };
-      const deductionsHttp = new APIService(
-        window.appGlobal.baseUrl,
-        `/api/v2/time/timesheets/${props.timesheetId}/deductions`,
-      );
+
       updateTimesheetEntries(props.timesheetId, payload, !props.myTimesheet)
         .then(() =>
           http.request({
@@ -238,44 +249,15 @@ export default {
               days: (state.timesheetDays || []).map((day) => ({
                 date: day.date,
                 onCall: !!day.onCall,
+                breakDuration: day.breakDuration || '00:00',
               })),
             },
           }),
         )
-        .then(async () => {
-          const existing = await deductionsHttp.getAll();
-          const existingIds = (existing.data?.data || [])
-            .map((item) => item.id)
-            .filter(Boolean);
-          const keepIds = (state.timesheetDeductions || [])
-            .map((item) => item.id)
-            .filter(Boolean);
-          const toDelete = existingIds.filter((id) => !keepIds.includes(id));
-          if (toDelete.length) {
-            await deductionsHttp.deleteAll({ids: toDelete});
-          }
-          for (const deduction of state.timesheetDeductions || []) {
-            if (!deduction.date || !deduction.startTime || !deduction.endTime) {
-              continue;
-            }
-            const body = {
-              date: deduction.date,
-              startTime: deduction.startTime,
-              endTime: deduction.endTime,
-              reason: deduction.reason || null,
-            };
-            if (deduction.id) {
-              await deductionsHttp.update(deduction.id, body);
-            } else {
-              await deductionsHttp.create(body);
-            }
-          }
-        })
         .then(() => {
           return saveSuccess();
         })
         .catch(() => {
-          // Catch invalid parameter error when submitting without any time
           return saveSuccess();
         })
         .then(() => {

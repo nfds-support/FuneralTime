@@ -55,6 +55,7 @@ use OrangeHRM\Entity\Employee;
  *         @OA\Property(property="id", type="integer"),
  *         @OA\Property(property="name", type="string")
  *     ),
+ *     @OA\Property(property="onCall", type="boolean"),
  *     @OA\Property(property="payType", type="string", nullable=true),
  *     @OA\Property(property="contractedHoursPerWeek", type="number", nullable=true),
  *     @OA\Property(property="overtimeThresholdHours", type="number", nullable=true),
@@ -92,6 +93,7 @@ class EmployeeJobDetailModel implements Normalizable
                 ['getSubDivision', 'getUnitId'],
                 ['getDecorator', 'getLocation', 'getId'],
                 ['getDecorator', 'getLocation', 'getName'],
+                ['isOnCall'],
                 'payType',
                 'contractedHoursPerWeek',
                 'overtimeThresholdHours',
@@ -120,6 +122,7 @@ class EmployeeJobDetailModel implements Normalizable
                 ['subunit', 'unitId'],
                 ['location', 'id'],
                 ['location', 'name'],
+                'onCall',
                 'payType',
                 'contractedHoursPerWeek',
                 'overtimeThresholdHours',

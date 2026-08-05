@@ -1,4 +1,5 @@
-<!--
+<?php
+
 /**
  * OrangeHRM is a comprehensive Human Resource Management (HRM) System that captures
  * all the essential functionalities required for any enterprise.
@@ -15,42 +16,11 @@
  * You should have received a copy of the GNU General Public License along with OrangeHRM.
  * If not, see <https://www.gnu.org/licenses/>.
  */
- -->
 
-<template>
-  <div class="orangehrm-upgrade-container">
-    <a
-      class="orangehrm-upgrade-link"
-      target="_blank"
-      href="https://orangehrm.com/open-source/upgrade-to-advanced"
-    >
-      <oxd-glass-button
-        :label="$t('general.upgrade')"
-        size="large"
-        class="orangehrm-upgrade-button"
-      >
-        <template #icon>
-          <oxd-icon
-            type="svg"
-            name="upgrade"
-            class="orangehrm-upgrade-icon"
-          ></oxd-icon>
-        </template>
-      </oxd-glass-button>
-    </a>
-  </div>
-</template>
+namespace OrangeHRM\Framework\Http;
 
-<script>
-import {OxdGlassButton, OxdIcon} from '@ohrm/oxd';
+use Symfony\Component\HttpFoundation\StreamedResponse as HttpStreamedResponse;
 
-export default {
-  name: 'UpgradeButton',
-  components: {
-    'oxd-icon': OxdIcon,
-    'oxd-glass-button': OxdGlassButton,
-  },
-};
-</script>
-
-<style src="./upgrade-button.scss" scoped lang="scss"></style>
+class StreamedResponse extends HttpStreamedResponse
+{
+}

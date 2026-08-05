@@ -19,7 +19,6 @@
 
 namespace OrangeHRM\Installer\Migration\V5_9_3;
 
-use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Types\Types;
 use OrangeHRM\Installer\Util\V1\AbstractMigration;
 use OrangeHRM\Installer\Util\V1\LangStringHelper;
@@ -30,18 +29,12 @@ class Migration extends AbstractMigration
 
     public function up(): void
     {
-        $this->extendEmployeeMileageRate();
-        $this->extendExpenseTypeReportColumn();
-        $this->extendExpenseQuantityKm();
-        $this->createClaimExpenseLimitTable();
-        $this->seedExpenseTypes();
-        $this->seedScreens();
+        $this->addEmployeeOnCallFlag();
+        $this->addTimesheetDayBreakDuration();
+        $this->seedDefaultTimesheetProject();
 
-        $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
-        $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
-        $this->insertMenus();
-
-        foreach (['claim', 'pim'] as $group) {
+        $groups = ['time', 'pim'];
+        foreach ($groups as $group) {
             if (is_file(__DIR__ . '/lang-string/' . $group . '.yaml')) {
                 $this->getLangStringHelper()->insertOrUpdateLangStrings(__DIR__, $group);
             }
@@ -61,247 +54,124 @@ class Migration extends AbstractMigration
         return $this->langStringHelper;
     }
 
-    private function extendEmployeeMileageRate(): void
+    private function addEmployeeOnCallFlag(): void
     {
-        if (!$this->getSchemaHelper()->columnExists('hs_hr_employee', 'mileage_reimbursement_rate')) {
+        if (!$this->getSchemaHelper()->columnExists('hs_hr_employee', 'on_call')) {
             $this->getSchemaHelper()->addColumn(
                 'hs_hr_employee',
-                'mileage_reimbursement_rate',
-                Types::DECIMAL,
-                ['Precision' => 8, 'Scale' => 4, 'Notnull' => false, 'Default' => 0.55]
+                'on_call',
+                Types::BOOLEAN,
+                ['Notnull' => true, 'Default' => false]
             );
         }
     }
 
-    private function extendExpenseTypeReportColumn(): void
+    private function addTimesheetDayBreakDuration(): void
     {
-        if (!$this->getSchemaHelper()->columnExists('ohrm_expense_type', 'report_column')) {
+        if ($this->getSchemaHelper()->tableExists(['ohrm_timesheet_day'])
+            && !$this->getSchemaHelper()->columnExists('ohrm_timesheet_day', 'break_duration')
+        ) {
             $this->getSchemaHelper()->addColumn(
-                'ohrm_expense_type',
-                'report_column',
-                Types::STRING,
-                ['Length' => 20, 'Notnull' => false, 'Default' => null]
+                'ohrm_timesheet_day',
+                'break_duration',
+                Types::INTEGER,
+                ['Notnull' => true, 'Default' => 0]
             );
         }
     }
 
-    private function extendExpenseQuantityKm(): void
+    private function seedDefaultTimesheetProject(): void
     {
-        if (!$this->getSchemaHelper()->columnExists('ohrm_expense', 'quantity_km')) {
-            $this->getSchemaHelper()->addColumn(
-                'ohrm_expense',
-                'quantity_km',
-                Types::DECIMAL,
-                ['Precision' => 10, 'Scale' => 2, 'Notnull' => false, 'Default' => null]
-            );
-        }
-    }
-
-    private function createClaimExpenseLimitTable(): void
-    {
-        if ($this->getSchemaHelper()->tableExists(['ohrm_claim_expense_limit'])) {
+        $existingProjectId = $this->getConfigHelper()->getConfigValue('timesheet.default_project_id');
+        if (!empty($existingProjectId)) {
             return;
         }
 
-        $this->getSchemaHelper()->createTable('ohrm_claim_expense_limit')
-            ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
-            ->addColumn('emp_number', Types::INTEGER, ['Notnull' => true])
-            ->addColumn('expense_type_id', Types::INTEGER, ['Notnull' => true])
-            ->addColumn('monthly_limit', Types::DECIMAL, ['Precision' => 12, 'Scale' => 2, 'Notnull' => true])
-            ->setPrimaryKey(['id'])
-            ->create();
-
-        $this->getSchemaHelper()->addForeignKey(
-            'ohrm_claim_expense_limit',
-            new ForeignKeyConstraint(
-                ['emp_number'],
-                'hs_hr_employee',
-                ['emp_number'],
-                'claim_expense_limit_emp',
-                ['onDelete' => 'CASCADE']
-            )
-        );
-        $this->getSchemaHelper()->addForeignKey(
-            'ohrm_claim_expense_limit',
-            new ForeignKeyConstraint(
-                ['expense_type_id'],
-                'ohrm_expense_type',
-                ['id'],
-                'claim_expense_limit_type',
-                ['onDelete' => 'CASCADE']
-            )
-        );
-    }
-
-    private function seedExpenseTypes(): void
-    {
-        $types = [
-            ['Mileage', 'mileage', 'Mileage reimbursement (KM × employee rate)'],
-            ['Gas / Fuel', 'gas', '55300 - Gas fuel'],
-            ['Vehicle Expense', 'vehicle', '55700 - Vehicle Expense'],
-            ['Wellness Allowance', 'wellness', '61300 - Wellness Allowance'],
-            ['Cellulaire', 'cellular', '63310 - Cellulaire'],
-            ['Office Expense', 'office', '63600 - Office Expense'],
-            ['Meal', 'meal', '69100 - Meal'],
-            ['Travelling Expense', 'travelling', '69120 - Travelling Expense'],
-            ['Other', 'other', 'Other expense (justify in note)'],
-        ];
-
-        $adminUserId = $this->createQueryBuilder()
-            ->select('u.id')
-            ->from('ohrm_user', 'u')
-            ->orderBy('u.id', 'ASC')
-            ->setMaxResults(1)
-            ->executeQuery()
-            ->fetchOne();
-
-        foreach ($types as [$name, $column, $description]) {
-            $existingId = $this->createQueryBuilder()
-                ->select('t.id')
-                ->from('ohrm_expense_type', 't')
-                ->where('t.name = :name')
-                ->orWhere('t.report_column = :column')
-                ->setParameter('name', $name)
-                ->setParameter('column', $column)
-                ->executeQuery()
-                ->fetchOne();
-
-            if ($existingId) {
-                $this->createQueryBuilder()
-                    ->update('ohrm_expense_type')
-                    ->set('report_column', ':column')
-                    ->set('status', ':status')
-                    ->where('id = :id')
-                    ->setParameter('column', $column)
-                    ->setParameter('status', true)
-                    ->setParameter('id', $existingId)
-                    ->executeQuery();
-                continue;
-            }
-
-            $values = [
-                'name' => ':name',
-                'description' => ':description',
-                'status' => ':status',
-                'is_deleted' => ':deleted',
-                'report_column' => ':column',
-            ];
-            $qb = $this->createQueryBuilder()->insert('ohrm_expense_type')->values($values)
-                ->setParameter('name', $name)
-                ->setParameter('description', $description)
-                ->setParameter('status', true)
-                ->setParameter('deleted', false)
-                ->setParameter('column', $column);
-
-            if ($adminUserId) {
-                $qb->setValue('added_by', ':addedBy')->setParameter('addedBy', $adminUserId);
-            }
-            $qb->executeQuery();
-        }
-    }
-
-    private function seedScreens(): void
-    {
-        $moduleId = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_module')
+        $customerId = $this->getConnection()->createQueryBuilder()
+            ->select('customer_id')
+            ->from('ohrm_customer')
             ->where('name = :name')
-            ->setParameter('name', 'claim')
+            ->andWhere('is_deleted = :deleted')
+            ->setParameter('name', 'Internal')
+            ->setParameter('deleted', 0)
             ->executeQuery()
             ->fetchOne();
-        if (!$moduleId) {
-            return;
-        }
 
-        $screens = [
-            ['Employee Expense Limits', 'viewEmployeeExpenseLimits'],
-            ['Monthly Expense Report', 'viewMonthlyExpenseReport'],
-        ];
-        foreach ($screens as [$name, $url]) {
-            $exists = $this->createQueryBuilder()
-                ->select('id')
-                ->from('ohrm_screen')
-                ->where('action_url = :url')
-                ->setParameter('url', $url)
-                ->executeQuery()
-                ->fetchOne();
-            if ($exists) {
-                continue;
-            }
-            $this->createQueryBuilder()
-                ->insert('ohrm_screen')
+        if (!$customerId) {
+            $this->getConnection()->createQueryBuilder()
+                ->insert('ohrm_customer')
                 ->values([
                     'name' => ':name',
-                    'module_id' => ':moduleId',
-                    'action_url' => ':url',
+                    'description' => ':description',
+                    'is_deleted' => ':deleted',
                 ])
-                ->setParameter('name', $name)
-                ->setParameter('moduleId', $moduleId)
-                ->setParameter('url', $url)
+                ->setParameter('name', 'Internal')
+                ->setParameter('description', 'System customer for clock-based timesheets')
+                ->setParameter('deleted', 0)
                 ->executeQuery();
-        }
-    }
 
-    private function insertMenus(): void
-    {
-        $claimMenuId = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_menu_item')
-            ->where('menu_title = :title')
-            ->andWhere('level = 1')
-            ->setParameter('title', 'Claim')
+            $customerId = (int) $this->getConnection()->lastInsertId();
+        }
+
+        $projectId = $this->getConnection()->createQueryBuilder()
+            ->select('project_id')
+            ->from('ohrm_project')
+            ->where('name = :name')
+            ->andWhere('customer_id = :customer_id')
+            ->andWhere('is_deleted = :deleted')
+            ->setParameter('name', 'General Time')
+            ->setParameter('customer_id', $customerId)
+            ->setParameter('deleted', 0)
             ->executeQuery()
             ->fetchOne();
-        if (!$claimMenuId) {
-            return;
-        }
 
-        $menus = [
-            ['Expense Limits', 'Employee Expense Limits', 850],
-            ['Monthly Expense Report', 'Monthly Expense Report', 900],
-        ];
-        foreach ($menus as [$title, $screenName, $order]) {
-            $exists = $this->createQueryBuilder()
-                ->select('id')
-                ->from('ohrm_menu_item')
-                ->where('menu_title = :title')
-                ->andWhere('parent_id = :parent')
-                ->setParameter('title', $title)
-                ->setParameter('parent', $claimMenuId)
-                ->executeQuery()
-                ->fetchOne();
-            if ($exists) {
-                continue;
-            }
-            $screenId = $this->createQueryBuilder()
-                ->select('id')
-                ->from('ohrm_screen')
-                ->where('name = :name')
-                ->setParameter('name', $screenName)
-                ->executeQuery()
-                ->fetchOne();
-
-            $this->createQueryBuilder()
-                ->insert('ohrm_menu_item')
+        if (!$projectId) {
+            $this->getConnection()->createQueryBuilder()
+                ->insert('ohrm_project')
                 ->values([
-                    'menu_title' => ':menu_title',
-                    'screen_id' => ':screen_id',
-                    'parent_id' => ':parent_id',
-                    'level' => ':level',
-                    'order_hint' => ':order_hint',
-                    'status' => ':status',
-                    'additional_params' => ':additional_params',
+                    'customer_id' => ':customer_id',
+                    'name' => ':name',
+                    'description' => ':description',
+                    'is_deleted' => ':deleted',
                 ])
-                ->setParameters([
-                    'menu_title' => $title,
-                    'screen_id' => $screenId ?: null,
-                    'parent_id' => $claimMenuId,
-                    'level' => 2,
-                    'order_hint' => $order,
-                    'status' => 1,
-                    'additional_params' => null,
-                ])
+                ->setParameter('customer_id', $customerId)
+                ->setParameter('name', 'General Time')
+                ->setParameter('description', 'Default project for weekly clock-based timesheets')
+                ->setParameter('deleted', 0)
                 ->executeQuery();
+
+            $projectId = (int) $this->getConnection()->lastInsertId();
         }
+
+        $activityId = $this->getConnection()->createQueryBuilder()
+            ->select('activity_id')
+            ->from('ohrm_project_activity')
+            ->where('name = :name')
+            ->andWhere('project_id = :project_id')
+            ->andWhere('is_deleted = :deleted')
+            ->setParameter('name', 'Regular Hours')
+            ->setParameter('project_id', $projectId)
+            ->setParameter('deleted', 0)
+            ->executeQuery()
+            ->fetchOne();
+
+        if (!$activityId) {
+            $this->getConnection()->createQueryBuilder()
+                ->insert('ohrm_project_activity')
+                ->values([
+                    'project_id' => ':project_id',
+                    'name' => ':name',
+                    'is_deleted' => ':deleted',
+                ])
+                ->setParameter('project_id', $projectId)
+                ->setParameter('name', 'Regular Hours')
+                ->setParameter('deleted', 0)
+                ->executeQuery();
+
+            $activityId = (int) $this->getConnection()->lastInsertId();
+        }
+
+        $this->getConfigHelper()->setConfigValue('timesheet.default_project_id', (string) $projectId);
+        $this->getConfigHelper()->setConfigValue('timesheet.default_activity_id', (string) $activityId);
     }
 }

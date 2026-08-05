@@ -178,88 +178,125 @@ class ThemeAPI extends Endpoint implements ResourceEndpoint
         $variables = $this->getRequestParams()->getArray(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_VARIABLES);
         $this->validate($variables, $this->getParamRuleCollection());
 
-        $theme = $this->getThemeService()
-            ->getThemeDao()
-            ->getThemeByThemeName(ThemeService::CUSTOM_THEME);
-
-        if (!$theme instanceof Theme) {
-            $theme = new Theme();
-            $theme->setName(ThemeService::CUSTOM_THEME);
-        }
-
-        $theme->setVariables($variables);
-        $theme->setShowSocialMediaIcons(
-            $this->getRequestParams()->getBoolean(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_SHOW_SOCIAL_MEDIA_ICONS,
-                true
-            )
+        $showSocialMediaIcons = $this->getRequestParams()->getBoolean(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_SHOW_SOCIAL_MEDIA_ICONS,
+            true
         );
 
-        $currentClientLogo = $this->getRequestParams()
-            ->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_CURRENT_CLIENT_LOGO);
-        if (is_null($currentClientLogo) || $currentClientLogo === self::REPLACE_CURRENT) {
-            $clientLogo = $this->getRequestParams()->getAttachmentOrNull(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_CLIENT_LOGO
-            );
-            if ($clientLogo instanceof Base64Attachment) {
-                $theme->setClientLogo($clientLogo->getContent());
-                $theme->setClientLogoFilename($clientLogo->getFilename());
-                $theme->setClientLogoFileType($clientLogo->getFileType());
-                $theme->setClientLogoFileSize($clientLogo->getSize());
-            }
-        } elseif ($currentClientLogo === self::DELETE_CURRENT) {
-            $theme->setClientLogo(null);
-            $theme->setClientLogoFilename(null);
-            $theme->setClientLogoFileType(null);
-            $theme->setClientLogoFileSize(null);
-        } // else self::KEEP_CURRENT
+        $existingTheme = $this->getThemeService()
+            ->getThemeDao()
+            ->getPartialThemeByThemeName(ThemeService::CUSTOM_THEME);
 
-        $currentClientBanner = $this->getRequestParams()
-            ->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_CURRENT_CLIENT_BANNER);
-        if (is_null($currentClientBanner) || $currentClientBanner === self::REPLACE_CURRENT) {
-            $clientBanner = $this->getRequestParams()->getAttachmentOrNull(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_CLIENT_BANNER
-            );
-            if ($clientBanner instanceof Base64Attachment) {
-                $theme->setClientBanner($clientBanner->getContent());
-                $theme->setClientBannerFilename($clientBanner->getFilename());
-                $theme->setClientBannerFileType($clientBanner->getFileType());
-                $theme->setClientBannerFileSize($clientBanner->getSize());
-            }
-        } elseif ($currentClientBanner === self::DELETE_CURRENT) {
-            $theme->setClientBanner(null);
-            $theme->setClientBannerFilename(null);
-            $theme->setClientBannerFileType(null);
-            $theme->setClientBannerFileSize(null);
-        } // else self::KEEP_CURRENT
+        $fields = [
+            'variables' => $variables,
+            'showSocialMediaIcons' => $showSocialMediaIcons,
+        ];
 
-        $currentLoginBanner = $this->getRequestParams()
-            ->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_CURRENT_LOGIN_BANNER);
-        if (is_null($currentLoginBanner) || $currentLoginBanner === self::REPLACE_CURRENT) {
-            $loginBanner = $this->getRequestParams()->getAttachmentOrNull(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_LOGIN_BANNER
-            );
-            if ($loginBanner instanceof Base64Attachment) {
-                $theme->setLoginBanner($loginBanner->getContent());
-                $theme->setLoginBannerFilename($loginBanner->getFilename());
-                $theme->setLoginBannerFileType($loginBanner->getFileType());
-                $theme->setLoginBannerFileSize($loginBanner->getSize());
-            }
-        } elseif ($currentLoginBanner === self::DELETE_CURRENT) {
-            $theme->setLoginBanner(null);
-            $theme->setLoginBannerFilename(null);
-            $theme->setLoginBannerFileType(null);
-            $theme->setLoginBannerFileSize(null);
-        } // else self::KEEP_CURRENT
+        $this->applyThemeImageUpdate(
+            $fields,
+            self::PARAMETER_CURRENT_CLIENT_LOGO,
+            self::PARAMETER_CLIENT_LOGO,
+            'clientLogo',
+            'clientLogoFilename',
+            'clientLogoFileType',
+            'clientLogoFileSize'
+        );
+        $this->applyThemeImageUpdate(
+            $fields,
+            self::PARAMETER_CURRENT_CLIENT_BANNER,
+            self::PARAMETER_CLIENT_BANNER,
+            'clientBanner',
+            'clientBannerFilename',
+            'clientBannerFileType',
+            'clientBannerFileSize'
+        );
+        $this->applyThemeImageUpdate(
+            $fields,
+            self::PARAMETER_CURRENT_LOGIN_BANNER,
+            self::PARAMETER_LOGIN_BANNER,
+            'loginBanner',
+            'loginBannerFilename',
+            'loginBannerFileType',
+            'loginBannerFileSize'
+        );
 
-        $this->getThemeService()->getThemeDao()->saveTheme($theme);
+        if (!$existingTheme instanceof PartialTheme) {
+            $theme = new Theme();
+            $theme->setName(ThemeService::CUSTOM_THEME);
+            $theme->setVariables($variables);
+            $theme->setShowSocialMediaIcons($showSocialMediaIcons);
+            if (array_key_exists('clientLogo', $fields)) {
+                $theme->setClientLogo($fields['clientLogo']);
+                $theme->setClientLogoFilename($fields['clientLogoFilename']);
+                $theme->setClientLogoFileType($fields['clientLogoFileType']);
+                $theme->setClientLogoFileSize($fields['clientLogoFileSize']);
+            }
+            if (array_key_exists('clientBanner', $fields)) {
+                $theme->setClientBanner($fields['clientBanner']);
+                $theme->setClientBannerFilename($fields['clientBannerFilename']);
+                $theme->setClientBannerFileType($fields['clientBannerFileType']);
+                $theme->setClientBannerFileSize($fields['clientBannerFileSize']);
+            }
+            if (array_key_exists('loginBanner', $fields)) {
+                $theme->setLoginBanner($fields['loginBanner']);
+                $theme->setLoginBannerFilename($fields['loginBannerFilename']);
+                $theme->setLoginBannerFileType($fields['loginBannerFileType']);
+                $theme->setLoginBannerFileSize($fields['loginBannerFileSize']);
+            }
+            $this->getThemeService()->getThemeDao()->saveTheme($theme);
+            $partialTheme = PartialTheme::createFromTheme($theme);
+        } else {
+            $this->getThemeService()
+                ->getThemeDao()
+                ->updateThemeFieldsByThemeName(ThemeService::CUSTOM_THEME, $fields);
+            $partialTheme = $this->getThemeService()
+                ->getThemeDao()
+                ->getPartialThemeByThemeName(ThemeService::CUSTOM_THEME);
+        }
+
         $this->getThemeService()->resetThemeCache();
 
-        return new EndpointResourceResult(ThemeModel::class, PartialTheme::createFromTheme($theme));
+        return new EndpointResourceResult(ThemeModel::class, $partialTheme);
+    }
+
+    /**
+     * @param array<string, mixed> $fields
+     * @param string $currentParam
+     * @param string $attachmentParam
+     * @param string $contentField
+     * @param string $filenameField
+     * @param string $fileTypeField
+     * @param string $fileSizeField
+     */
+    private function applyThemeImageUpdate(
+        array &$fields,
+        string $currentParam,
+        string $attachmentParam,
+        string $contentField,
+        string $filenameField,
+        string $fileTypeField,
+        string $fileSizeField
+    ): void {
+        $current = $this->getRequestParams()
+            ->getStringOrNull(RequestParams::PARAM_TYPE_BODY, $currentParam);
+        if (is_null($current) || $current === self::REPLACE_CURRENT) {
+            $attachment = $this->getRequestParams()->getAttachmentOrNull(
+                RequestParams::PARAM_TYPE_BODY,
+                $attachmentParam
+            );
+            if ($attachment instanceof Base64Attachment) {
+                $fields[$contentField] = $attachment->getContent();
+                $fields[$filenameField] = $attachment->getFilename();
+                $fields[$fileTypeField] = $attachment->getFileType();
+                $fields[$fileSizeField] = (int)$attachment->getSize();
+            }
+        } elseif ($current === self::DELETE_CURRENT) {
+            $fields[$contentField] = null;
+            $fields[$filenameField] = null;
+            $fields[$fileTypeField] = null;
+            $fields[$fileSizeField] = null;
+        } // else self::KEEP_CURRENT — omit image fields so existing blobs are untouched
     }
 
     /**

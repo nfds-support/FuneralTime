@@ -1,1 +1,5 @@
-mileage_reimbursement_rate: 'Mileage Reimbursement Rate ($/km)'
+langStrings:
+  -
+    unitId: on_call
+    value: 'On Call'
+    note: 'Employee job setting that enables on-call checkboxes on timesheets'

@@ -223,23 +223,22 @@ $card-padding: $card-padding-top-bottom $card-padding-left-right;
   }
 }
 
-.orangehrm-timesheet-time-entry {
-  display: flex;
-  flex-direction: column;
-  gap: 0.25rem;
-}
-
-.orangehrm-timesheet-deductions {
-  padding: 1rem 1.2rem 1.4rem;
-  border-top: $oxd-border $oxd-interface-gray-lighten-2-color;
-}
-
-.orangehrm-timesheet-deduction-row {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr)) auto;
-  gap: 0.75rem;
-  align-items: end;
-  margin: 0.75rem 0;
+.orangehrm-timesheet-table.--clock-layout {
+  .--day-name {
+    display: block;
+    font-weight: 700;
+  }
+  .--day {
+    display: block;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: $oxd-interface-gray-darken-1-color;
+  }
+  .orangehrm-timesheet-table-body-cell.--label {
+    font-weight: 600;
+    white-space: nowrap;
+    min-width: 8.5rem;
+  }
 }
 
 .orangehrm-timesheet-table-body-row.--on-call {

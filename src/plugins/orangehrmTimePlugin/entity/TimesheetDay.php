@@ -60,6 +60,15 @@ class TimesheetDay
     private bool $onCall = false;
 
     /**
+     * Break deduction duration in seconds.
+     *
+     * @var int
+     *
+     * @ORM\Column(name="break_duration", type="integer", options={"default" : 0})
+     */
+    private int $breakDuration = 0;
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -121,5 +130,21 @@ class TimesheetDay
     public function setOnCall(bool $onCall): void
     {
         $this->onCall = $onCall;
+    }
+
+    /**
+     * @return int
+     */
+    public function getBreakDuration(): int
+    {
+        return $this->breakDuration;
+    }
+
+    /**
+     * @param int $breakDuration
+     */
+    public function setBreakDuration(int $breakDuration): void
+    {
+        $this->breakDuration = max(0, $breakDuration);
     }
 }
