@@ -51,22 +51,23 @@ use OrangeHRM\Entity\Employee;
  *         @OA\Property(property="name", type="string"),
  *         @OA\Property(property="unitId", type="integer")
  *     ),
-     *     @OA\Property(property="location", type="object",
-     *         @OA\Property(property="id", type="integer"),
-     *         @OA\Property(property="name", type="string")
-     *     ),
-     *     @OA\Property(property="onCall", type="boolean"),
-     *     @OA\Property(property="payType", type="string", nullable=true),
-     *     @OA\Property(property="contractedHoursPerWeek", type="number", nullable=true),
-     *     @OA\Property(property="overtimeThresholdHours", type="number", nullable=true),
-     *     @OA\Property(property="fdLicenseClass", type="string", nullable=true),
-     *     @OA\Property(property="fdLicenseNumber", type="string", nullable=true),
-     *     @OA\Property(property="employeeTerminationRecord", type="object",
-     *         @OA\Property(property="id", type="integer"),
-     *         @OA\Property(property="date", type="string", format="date")
-     *     )
-     * )
-     */
+ *     @OA\Property(property="location", type="object",
+ *         @OA\Property(property="id", type="integer"),
+ *         @OA\Property(property="name", type="string")
+ *     ),
+ *     @OA\Property(property="onCall", type="boolean"),
+ *     @OA\Property(property="payType", type="string", nullable=true),
+ *     @OA\Property(property="contractedHoursPerWeek", type="number", nullable=true),
+ *     @OA\Property(property="overtimeThresholdHours", type="number", nullable=true),
+ *     @OA\Property(property="fdLicenseClass", type="string", nullable=true),
+ *     @OA\Property(property="fdLicenseNumber", type="string", nullable=true),
+ *     @OA\Property(property="mileageReimbursementRate", type="number", nullable=true),
+ *     @OA\Property(property="employeeTerminationRecord", type="object",
+ *         @OA\Property(property="id", type="integer"),
+ *         @OA\Property(property="date", type="string", format="date")
+ *     )
+ * )
+ */
 class EmployeeJobDetailModel implements Normalizable
 {
     use ModelTrait;
@@ -98,6 +99,7 @@ class EmployeeJobDetailModel implements Normalizable
                 'overtimeThresholdHours',
                 'fdLicenseClass',
                 'fdLicenseNumber',
+                'mileageReimbursementRate',
                 ['getEmployeeTerminationRecord', 'getId'],
                 ['getEmployeeTerminationRecord', 'getDecorator', 'getDate'],
             ]
@@ -126,6 +128,7 @@ class EmployeeJobDetailModel implements Normalizable
                 'overtimeThresholdHours',
                 'fdLicenseClass',
                 'fdLicenseNumber',
+                'mileageReimbursementRate',
                 ['employeeTerminationRecord', 'id'],
                 ['employeeTerminationRecord', 'date'],
             ]

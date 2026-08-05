@@ -19,60 +19,49 @@
 
 namespace OrangeHRM\Claim\Api\Model;
 
+use OpenApi\Annotations as OA;
 use OrangeHRM\Core\Api\V2\Serializer\ModelTrait;
 use OrangeHRM\Core\Api\V2\Serializer\Normalizable;
-use OrangeHRM\Entity\ExpenseType;
+use OrangeHRM\Entity\ClaimExpenseLimit;
 
 /**
  * @OA\Schema(
- *     schema="Claim-ExpenseTypeModel",
+ *     schema="Claim-ClaimExpenseLimitModel",
  *     type="object",
+ *     @OA\Property(property="id", type="integer"),
  *     @OA\Property(
- *         property="id",
- *         type="integer"
+ *         property="expenseType",
+ *         type="object",
+ *         @OA\Property(property="id", type="integer"),
+ *         @OA\Property(property="name", type="string"),
+ *         @OA\Property(property="reportColumn", type="string", nullable=true)
  *     ),
- *     @OA\Property(
- *         property="name",
- *         type="string",
- *     ),
- *     @OA\Property(
- *         property="description",
- *         type="string",
- *     ),
- *     @OA\Property(
- *         property="status",
- *         type="boolean",
- *     ),
- *     @OA\Property(
- *         property="reportColumn",
- *         type="string",
- *         nullable=true
- *     )
+ *     @OA\Property(property="monthlyLimit", type="number")
  * )
  */
-class ClaimExpenseTypeModel implements Normalizable
+class ClaimExpenseLimitModel implements Normalizable
 {
     use ModelTrait;
 
-    public function __construct(ExpenseType $expenseType)
+    public function __construct(ClaimExpenseLimit $claimExpenseLimit)
     {
-        $this->setEntity($expenseType);
+        $this->setEntity($claimExpenseLimit);
         $this->setFilters(
             [
                 'id',
-                'name',
-                'description',
-                'status',
-                'reportColumn',
+                ['getExpenseType', 'getId'],
+                ['getExpenseType', 'getName'],
+                ['getExpenseType', 'getReportColumn'],
+                'monthlyLimit',
             ]
         );
         $this->setAttributeNames(
             [
                 'id',
-                'name',
-                'description',
-                'status',
-                'reportColumn',
+                ['expenseType', 'id'],
+                ['expenseType', 'name'],
+                ['expenseType', 'reportColumn'],
+                'monthlyLimit',
             ]
         );
     }

@@ -26,12 +26,14 @@ use OrangeHRM\Claim\Api\Model\ClaimExpenseModel;
 use OrangeHRM\Claim\Api\Traits\ClaimRequestAPIHelperTrait;
 use OrangeHRM\Claim\Dto\ClaimExpenseSearchFilterParams;
 use OrangeHRM\Claim\Traits\Service\ClaimServiceTrait;
+use OrangeHRM\Claim\Traits\Service\ExpenseClaimLimitServiceTrait;
 use OrangeHRM\Core\Api\CommonParams;
 use OrangeHRM\Core\Api\V2\CrudEndpoint;
 use OrangeHRM\Core\Api\V2\Endpoint;
 use OrangeHRM\Core\Api\V2\EndpointCollectionResult;
 use OrangeHRM\Core\Api\V2\EndpointResourceResult;
 use OrangeHRM\Core\Api\V2\EndpointResult;
+use OrangeHRM\Core\Api\V2\Exception\BadRequestException;
 use OrangeHRM\Core\Api\V2\Exception\ForbiddenException;
 use OrangeHRM\Core\Api\V2\Exception\InvalidParamException;
 use OrangeHRM\Core\Api\V2\Exception\RecordNotFoundException;
@@ -55,6 +57,7 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
 {
     use EntityManagerHelperTrait;
     use ClaimServiceTrait;
+    use ExpenseClaimLimitServiceTrait;
     use DateTimeHelperTrait;
     use AuthUserTrait;
     use UserRoleManagerTrait;
@@ -66,6 +69,7 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_NOTE = 'note';
     public const PARAMETER_DATE = 'date';
     public const PARAMETER_REQUEST_ID = 'requestId';
+    public const PARAMETER_QUANTITY_KM = 'quantityKm';
     public const NOTE_MAX_LENGTH = 1000;
     public const PARAMETER_TOTAL_AMOUNT = 'totalAmount';
     private const AMOUNT_VALIDATOR = '/^\d+(\.\d{1,2})?$/';
@@ -234,15 +238,28 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
             }
             $claimExpense->setAmount($amount);
 
+            $quantityKm = $this->getRequestParams()->getFloatOrNull(
+                RequestParams::PARAM_TYPE_BODY,
+                self::PARAMETER_QUANTITY_KM
+            );
+            $claimExpense->setQuantityKm(
+                $quantityKm === null ? null : number_format($quantityKm, 2, '.', '')
+            );
+
             $claimExpense->setNote(
                 $this->getRequestParams()
                     ->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_NOTE)
             );
+
+            $employee = $claimRequest->getEmployee();
+            $this->getExpenseClaimLimitService()->applyMileageAmount($claimExpense, $employee);
+            $this->getExpenseClaimLimitService()->assertWithinMonthlyLimit($claimExpense);
+
             $this->getClaimService()
                 ->getClaimDao()
                 ->saveClaimExpense($claimExpense);
             $this->commitTransaction();
-        } catch (ForbiddenException | InvalidParamException | RecordNotFoundException $e) {
+        } catch (ForbiddenException | InvalidParamException | RecordNotFoundException | BadRequestException $e) {
             $this->rollBackTransaction();
             throw $e;
         } catch (Exception $e) {
@@ -267,7 +284,6 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
             ),
             new ParamRule(
                 self::PARAMETER_AMOUNT,
-                new Rule(Rules::POSITIVE),
                 new Rule(Rules::BETWEEN, [0, 9999999999.99])
             ),
             new ParamRule(
@@ -281,6 +297,13 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
                     new Rule(Rules::LENGTH, [null, self::NOTE_MAX_LENGTH])
                 ),
                 true
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_QUANTITY_KM,
+                    new Rule(Rules::ZERO_OR_POSITIVE),
+                    new Rule(Rules::BETWEEN, [0, 99999999.99])
+                )
             ),
         );
     }
@@ -502,6 +525,13 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
                     new Rule(Rules::LENGTH, [null, self::NOTE_MAX_LENGTH])
                 ),
                 true
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_QUANTITY_KM,
+                    new Rule(Rules::ZERO_OR_POSITIVE),
+                    new Rule(Rules::BETWEEN, [0, 99999999.99])
+                )
             ),
         );
     }

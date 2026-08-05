@@ -430,6 +430,13 @@ class Employee
     private ?string $fdLicenseNumber = null;
 
     /**
+     * @var string|null
+     *
+     * @ORM\Column(name="mileage_reimbursement_rate", type="decimal", precision=8, scale=4, nullable=true, options={"default" : 0.55})
+     */
+    private ?string $mileageReimbursementRate = '0.5500';
+
+    /**
      * @var DateTime|null
      *
      * @ORM\Column(name="purged_at", type="datetime", nullable=true)
@@ -1433,6 +1440,22 @@ class Employee
     public function setFdLicenseNumber(?string $fdLicenseNumber): void
     {
         $this->fdLicenseNumber = $fdLicenseNumber;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getMileageReimbursementRate(): ?string
+    {
+        return $this->mileageReimbursementRate;
+    }
+
+    /**
+     * @param string|null $mileageReimbursementRate
+     */
+    public function setMileageReimbursementRate(?string $mileageReimbursementRate): void
+    {
+        $this->mileageReimbursementRate = $mileageReimbursementRate;
     }
 
     /**

@@ -80,6 +80,12 @@ class ClaimExpense
     private bool $isDeleted = false;
 
     /**
+     * @var string|null
+     * @ORM\Column(name="quantity_km", type="decimal", precision=10, scale=2, nullable=true)
+     */
+    private ?string $quantityKm = null;
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -189,5 +195,21 @@ class ClaimExpense
     public function setIsDeleted(bool $isDeleted): void
     {
         $this->isDeleted = $isDeleted;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getQuantityKm(): ?string
+    {
+        return $this->quantityKm;
+    }
+
+    /**
+     * @param string|null $quantityKm
+     */
+    public function setQuantityKm(?string $quantityKm): void
+    {
+        $this->quantityKm = $quantityKm;
     }
 }

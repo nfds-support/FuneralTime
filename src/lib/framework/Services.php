@@ -443,6 +443,16 @@ final class Services
      */
     public const CLAIM_SERVICE = 'claim.claim_service';
 
+    /**
+     * @see \OrangeHRM\Claim\Service\ExpenseClaimLimitService
+     */
+    public const EXPENSE_CLAIM_LIMIT_SERVICE = 'claim.expense_claim_limit_service';
+
+    /**
+     * @see \OrangeHRM\Claim\Service\ExpenseClaimReportService
+     */
+    public const EXPENSE_CLAIM_REPORT_SERVICE = 'claim.expense_claim_report_service';
+
     ///////////////////////////////////////////////////////////////
     /// Discipline plugin services
     ///////////////////////////////////////////////////////////////

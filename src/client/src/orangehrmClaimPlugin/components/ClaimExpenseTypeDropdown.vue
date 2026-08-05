@@ -19,20 +19,42 @@
 
 <template>
   <oxd-input-field
+    v-model="selected"
     type="select"
-    :label="$t('claim.event')"
+    :label="label"
     :options="options"
+    :rules="rules"
     required
   />
 </template>
 
 <script>
-import {ref, onBeforeMount} from 'vue';
+import {ref, onBeforeMount, watch, computed} from 'vue';
 import {APIService} from '@ohrm/core/util/services/api.service';
+
 export default {
-  name: 'ClaimEventDropdown',
-  setup() {
+  name: 'ClaimExpenseTypeDropdown',
+  props: {
+    modelValue: {
+      type: [Object, null],
+      default: null,
+    },
+    label: {
+      type: String,
+      default: '',
+    },
+    rules: {
+      type: Array,
+      default: () => [],
+    },
+  },
+  emits: ['update:modelValue'],
+  setup(props, {emit}) {
     const options = ref([]);
+    const selected = computed({
+      get: () => props.modelValue,
+      set: (value) => emit('update:modelValue', value),
+    });
     const http = new APIService(
       window.appGlobal.baseUrl,
       '/api/v2/claim/expenses/types',
@@ -43,12 +65,14 @@ export default {
           return {
             id: item.id,
             label: item.name,
+            reportColumn: item.reportColumn,
           };
         });
       });
     });
     return {
       options,
+      selected,
     };
   },
 };

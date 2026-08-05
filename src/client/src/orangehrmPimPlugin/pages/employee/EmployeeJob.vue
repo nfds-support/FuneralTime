@@ -141,6 +141,13 @@
                 :disabled="!hasUpdatePermissions"
               />
             </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="job.mileageReimbursementRate"
+                :label="$t('pim.mileage_reimbursement_rate')"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
           </oxd-grid>
         </oxd-form-row>
         <oxd-divider />
@@ -271,6 +278,7 @@ const jobDetailsModel = {
   overtimeThresholdHours: '44',
   fdLicenseClass: [],
   fdLicenseNumber: '',
+  mileageReimbursementRate: '0.55',
 };
 
 const contractDetailsModel = {
@@ -469,6 +477,7 @@ export default {
             overtimeThresholdHours: this.job.overtimeThresholdHours || null,
             fdLicenseClass: this.job.fdLicenseClass?.id ?? null,
             fdLicenseNumber: this.job.fdLicenseNumber || null,
+            mileageReimbursementRate: this.job.mileageReimbursementRate || null,
           },
         })
         .then((response) => {
@@ -573,6 +582,8 @@ export default {
         (item) => item.id === (data.fdLicenseClass || 'none'),
       );
       this.job.fdLicenseNumber = data.fdLicenseNumber ?? '';
+      this.job.mileageReimbursementRate =
+        data.mileageReimbursementRate ?? '0.55';
       this.termination = data.employeeTerminationRecord;
     },
   },

@@ -17,24 +17,18 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-use OrangeHRM\Claim\Service\ClaimService;
-use OrangeHRM\Claim\Service\ExpenseClaimLimitService;
+namespace OrangeHRM\Claim\Traits\Service;
+
 use OrangeHRM\Claim\Service\ExpenseClaimReportService;
 use OrangeHRM\Core\Traits\ServiceContainerTrait;
-use OrangeHRM\Framework\Http\Request;
-use OrangeHRM\Framework\PluginConfigurationInterface;
 use OrangeHRM\Framework\Services;
 
-class ClaimPluginConfiguration implements PluginConfigurationInterface
+trait ExpenseClaimReportServiceTrait
 {
     use ServiceContainerTrait;
-    /**
-     * @inheritDoc
-     */
-    public function initialize(Request $request): void
+
+    protected function getExpenseClaimReportService(): ExpenseClaimReportService
     {
-        $this->getContainer()->register(Services::CLAIM_SERVICE, ClaimService::class);
-        $this->getContainer()->register(Services::EXPENSE_CLAIM_LIMIT_SERVICE, ExpenseClaimLimitService::class);
-        $this->getContainer()->register(Services::EXPENSE_CLAIM_REPORT_SERVICE, ExpenseClaimReportService::class);
+        return $this->getContainer()->get(Services::EXPENSE_CLAIM_REPORT_SERVICE);
     }
 }

@@ -54,6 +54,11 @@ use OrangeHRM\Entity\ClaimExpense;
  *         property="note",
  *         type="string",
  *     ),
+ *     @OA\Property(
+ *         property="quantityKm",
+ *         type="number",
+ *         nullable=true
+ *     ),
  * )
  */
 class ClaimExpenseModel implements Normalizable
@@ -70,9 +75,11 @@ class ClaimExpenseModel implements Normalizable
                 ['getExpenseType', 'getName'],
                 ['getExpenseType', 'getStatus'],
                 ['getExpenseType', 'isDeleted'],
+                ['getExpenseType', 'getReportColumn'],
                 'amount',
                 'note',
-                ['getDecorator', 'getDate']
+                ['getDecorator', 'getDate'],
+                'quantityKm',
             ]
         );
         $this->setAttributeNames(
@@ -82,9 +89,11 @@ class ClaimExpenseModel implements Normalizable
                 ['expenseType', 'name'],
                 ['expenseType', 'status'],
                 ['expenseType', 'isDeleted'],
+                ['expenseType', 'reportColumn'],
                 'amount',
                 'note',
-                'date'
+                'date',
+                'quantityKm',
             ]
         );
     }

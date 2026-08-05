@@ -49,7 +49,15 @@
               required
             />
           </oxd-grid-item>
-          <oxd-grid-item>
+          <oxd-grid-item v-if="isMileage">
+            <oxd-input-field
+              v-model="expense.quantityKm"
+              :label="$t('claim.quantity_km')"
+              :rules="rules.quantityKm"
+              required
+            />
+          </oxd-grid-item>
+          <oxd-grid-item v-else>
             <oxd-input-field
               v-model="expense.amount"
               :label="$t('general.amount')"
@@ -92,6 +100,7 @@
 import {APIService} from '@ohrm/core/util/services/api.service';
 import {required, validDateFormat} from '@/core/util/validation/rules';
 import useDateFormat from '@/core/util/composable/useDateFormat';
+import {yearRange} from '@ohrm/core/util/helper/year-range';
 import {OxdDialog} from '@ohrm/oxd';
 import {
   shouldNotExceedCharLength,
@@ -105,6 +114,7 @@ const expenseModel = {
   expenseType: null,
   date: null,
   amount: null,
+  quantityKm: null,
   note: null,
 };
 
@@ -145,6 +155,7 @@ export default {
   data() {
     return {
       isLoading: false,
+      yearsArray: [...yearRange()],
       selectedOption: {},
       expense: {
         ...expenseModel,
@@ -159,8 +170,18 @@ export default {
           maxCurrency(10000000000),
           digitsOnlyWithTwoDecimalPoints,
         ],
+        quantityKm: [required, digitsOnlyWithTwoDecimalPoints],
       },
     };
+  },
+
+  computed: {
+    isMileage() {
+      return (
+        this.selectedOption?.reportColumn === 'mileage' ||
+        this.expense.expenseType?.reportColumn === 'mileage'
+      );
+    },
   },
 
   beforeMount() {
@@ -171,6 +192,7 @@ export default {
         const {data} = response.data;
         this.expense = data;
         this.expense.amount = parseFloat(data.amount).toFixed(2);
+        this.expense.quantityKm = data.quantityKm;
         this.selectedOption = {
           id: data.expenseType.id,
           label: data.expenseType.isDeleted
@@ -178,6 +200,7 @@ export default {
             : !data.expenseType.status
             ? `${data.expenseType.name} (${this.$t('performance.inactive')})`
             : data.expenseType.name,
+          reportColumn: data.expenseType.reportColumn,
         };
       })
       .finally(() => {
@@ -188,19 +211,28 @@ export default {
   methods: {
     onSave() {
       this.isLoading = true;
+      const payload = {
+        expenseTypeId: this.selectedOption.id,
+        date: this.expense.date,
+        note: this.expense.note,
+      };
+      if (this.isMileage) {
+        payload.quantityKm = Number(this.expense.quantityKm);
+        payload.amount = 0;
+      } else {
+        payload.amount = Number(this.expense.amount).toFixed(2);
+      }
       this.http
-        .update(this.data.id, {
-          expenseTypeId: this.selectedOption.id,
-          date: this.expense.date,
-          amount: Number(this.expense.amount).toFixed(2),
-          note: this.expense.note,
-        })
+        .update(this.data.id, payload)
         .then(() => {
           return this.$toast.updateSuccess();
         })
         .then(() => {
           this.expense = {...expenseModel};
           this.onCancel();
+        })
+        .catch(() => {
+          this.isLoading = false;
         });
     },
     onCancel() {
