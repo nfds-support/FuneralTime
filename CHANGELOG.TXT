@@ -1,3 +1,9 @@
+New & Changed Features for OrangeHRM ver 5.9.3
+    New Features/Changes
+    -----------
+    - Time - Clock-based weekly timesheet grid (Start Time, End Time, Break Deductions, Total Hours) without project/activity rows
+    - Time / PIM - Employee On Call job setting; timesheet shows per-day On-Call checkboxes only when enabled
+
 New & Changed Features for OrangeHRM ver 5.9.2
     New Features/Changes
     -----------

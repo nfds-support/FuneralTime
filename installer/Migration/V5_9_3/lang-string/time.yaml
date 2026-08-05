@@ -1,0 +1,13 @@
+langStrings:
+  -
+    unitId: break_deductions
+    value: 'Break Deductions'
+    note: ''
+  -
+    unitId: total_hours
+    value: 'Total Hours'
+    note: ''
+  -
+    unitId: on_call_question
+    value: 'On-Call?'
+    note: ''

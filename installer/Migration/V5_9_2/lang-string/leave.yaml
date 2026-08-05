@@ -1,11 +1,45 @@
-entitlement_history: 'Entitlement History'
-entitlement_additions: 'Additions'
-entitlement_deductions: 'Deductions'
-entitlement_corrections: 'Corrections'
-entitlement_usage: 'Usage'
-transaction_type: 'Transaction Type'
-balance_after: 'Balance After'
-my_entitlement_history: 'My Entitlement History'
-leave_entitlement_history: 'Leave Entitlement History'
-leave_entitlement_history_report: 'Leave Entitlement History'
-my_leave_entitlement_history: 'My Leave Entitlement History'
+langStrings:
+  -
+    unitId: entitlement_history
+    value: 'Entitlement History'
+    note: ''
+  -
+    unitId: entitlement_additions
+    value: 'Additions'
+    note: ''
+  -
+    unitId: entitlement_deductions
+    value: 'Deductions'
+    note: ''
+  -
+    unitId: entitlement_corrections
+    value: 'Corrections'
+    note: ''
+  -
+    unitId: entitlement_usage
+    value: 'Usage'
+    note: ''
+  -
+    unitId: transaction_type
+    value: 'Transaction Type'
+    note: ''
+  -
+    unitId: balance_after
+    value: 'Balance After'
+    note: ''
+  -
+    unitId: my_entitlement_history
+    value: 'My Entitlement History'
+    note: ''
+  -
+    unitId: leave_entitlement_history
+    value: 'Leave Entitlement History'
+    note: ''
+  -
+    unitId: leave_entitlement_history_report
+    value: 'Leave Entitlement History'
+    note: ''
+  -
+    unitId: my_leave_entitlement_history
+    value: 'My Leave Entitlement History'
+    note: ''

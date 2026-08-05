@@ -93,6 +93,17 @@
             </oxd-grid-item>
             <oxd-grid-item>
               <oxd-input-field
+                v-model="job.onCall"
+                type="checkbox"
+                :label="$t('pim.on_call')"
+                :option-label="$t('general.yes')"
+                :true-value="true"
+                :false-value="false"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
                 v-model="job.payType"
                 type="select"
                 :label="$t('pim.pay_type')"
@@ -254,6 +265,7 @@ const jobDetailsModel = {
   jobCategoryId: [],
   subunitId: [],
   locationId: [],
+  onCall: false,
   payType: [],
   contractedHoursPerWeek: '',
   overtimeThresholdHours: '44',
@@ -451,6 +463,7 @@ export default {
             subunitId: this.job.subunitId?.id,
             empStatusId: this.job.empStatusId?.id,
             locationId: this.job.locationId?.id,
+            onCall: !!this.job.onCall,
             payType: this.job.payType?.id ?? null,
             contractedHoursPerWeek: this.job.contractedHoursPerWeek || null,
             overtimeThresholdHours: this.job.overtimeThresholdHours || null,
@@ -550,6 +563,7 @@ export default {
       this.job.locationId = this.locations.find(
         (item) => item.id === data.location?.id,
       );
+      this.job.onCall = !!data.onCall;
       this.job.payType = this.payTypeOptions.find(
         (item) => item.id === data.payType,
       );

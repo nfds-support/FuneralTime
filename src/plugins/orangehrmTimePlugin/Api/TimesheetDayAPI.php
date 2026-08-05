@@ -55,9 +55,12 @@ class TimesheetDayAPI extends Endpoint implements CrudEndpoint
     public function getAll(): EndpointResult
     {
         $timesheet = $this->getAccessibleTimesheet();
-        $onCallByDate = [];
+        $dayMetaByDate = [];
         foreach ($this->getTimesheetService()->getTimesheetDao()->getTimesheetDaysByTimesheetId($timesheet->getId()) as $day) {
-            $onCallByDate[$day->getDate()->format('Y-m-d')] = $day->isOnCall();
+            $dayMetaByDate[$day->getDate()->format('Y-m-d')] = [
+                'onCall' => $day->isOnCall(),
+                'breakDuration' => $this->formatSecondsAsDuration($day->getBreakDuration()),
+            ];
         }
 
         $result = [];
@@ -66,7 +69,8 @@ class TimesheetDayAPI extends Endpoint implements CrudEndpoint
             $holiday = $this->getHolidayService()->getHolidayDao()->getHolidayByDate($date);
             $result[] = [
                 'date' => $ymd,
-                'onCall' => $onCallByDate[$ymd] ?? false,
+                'onCall' => $dayMetaByDate[$ymd]['onCall'] ?? false,
+                'breakDuration' => $dayMetaByDate[$ymd]['breakDuration'] ?? '00:00',
                 'isHoliday' => $this->getHolidayService()->isHoliday($date)
                     || $this->getHolidayService()->isHalfDayHoliday($date),
                 'holidayName' => $holiday?->getName(),
@@ -117,11 +121,15 @@ class TimesheetDayAPI extends Endpoint implements CrudEndpoint
             if (array_key_exists('onCall', $dayPayload)) {
                 $timesheetDay->setOnCall((bool) $dayPayload['onCall']);
             }
+            if (array_key_exists('breakDuration', $dayPayload)) {
+                $timesheetDay->setBreakDuration($this->parseDurationToSeconds((string) $dayPayload['breakDuration']));
+            }
             $this->getTimesheetService()->getTimesheetDao()->saveTimesheetDay($timesheetDay);
             $holiday = $this->getHolidayService()->getHolidayDao()->getHolidayByDate($date);
             $saved[] = [
                 'date' => $date->format('Y-m-d'),
                 'onCall' => $timesheetDay->isOnCall(),
+                'breakDuration' => $this->formatSecondsAsDuration($timesheetDay->getBreakDuration()),
                 'isHoliday' => $this->getHolidayService()->isHoliday($date)
                     || $this->getHolidayService()->isHalfDayHoliday($date),
                 'holidayName' => $holiday?->getName(),
@@ -202,5 +210,24 @@ class TimesheetDayAPI extends Endpoint implements CrudEndpoint
             throw $this->getForbiddenException();
         }
         return $timesheet;
+    }
+
+    private function parseDurationToSeconds(string $duration): int
+    {
+        if ($duration === '' || $duration === '00:00') {
+            return 0;
+        }
+        if (!preg_match('/^(\d{1,2}):([0-5]\d)$/', $duration, $matches)) {
+            return 0;
+        }
+        return ((int) $matches[1]) * 3600 + ((int) $matches[2]) * 60;
+    }
+
+    private function formatSecondsAsDuration(int $seconds): string
+    {
+        $seconds = max(0, $seconds);
+        $hours = intdiv($seconds, 3600);
+        $minutes = intdiv($seconds % 3600, 60);
+        return sprintf('%02d:%02d', $hours, $minutes);
     }
 }

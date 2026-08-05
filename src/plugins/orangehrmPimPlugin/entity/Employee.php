@@ -301,6 +301,15 @@ class Employee
     private ?DateTime $joinedDate = null;
 
     /**
+     * When true, the employee sees On-Call checkboxes on weekly timesheets.
+     *
+     * @var bool
+     *
+     * @ORM\Column(name="on_call", type="boolean", options={"default" : 0})
+     */
+    private bool $onCall = false;
+
+    /**
      * @var string|null
      *
      * @ORM\Column(name="emp_oth_email", type="string", length=50, nullable=true)
@@ -1136,6 +1145,22 @@ class Employee
     public function setJoinedDate(?DateTime $joinedDate): void
     {
         $this->joinedDate = $joinedDate;
+    }
+
+    /**
+     * @return bool
+     */
+    public function isOnCall(): bool
+    {
+        return $this->onCall;
+    }
+
+    /**
+     * @param bool $onCall
+     */
+    public function setOnCall(bool $onCall): void
+    {
+        $this->onCall = $onCall;
     }
 
     /**
