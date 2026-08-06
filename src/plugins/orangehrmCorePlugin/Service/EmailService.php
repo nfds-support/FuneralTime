@@ -112,6 +112,11 @@ class EmailService
     private array $messageBcc;
 
     /**
+     * @var array<int, array{content: string, filename: string, contentType: string}>
+     */
+    private array $messageAttachments = [];
+
+    /**
      * @var Mailer
      */
     protected Mailer $mailer;
@@ -235,6 +240,25 @@ class EmailService
     public function setMessageBcc($messageBcc)
     {
         $this->messageBcc = $messageBcc;
+    }
+
+    /**
+     * @param string $content
+     * @param string $filename
+     * @param string $contentType
+     */
+    public function addAttachment(string $content, string $filename, string $contentType): void
+    {
+        $this->messageAttachments[] = [
+            'content' => $content,
+            'filename' => $filename,
+            'contentType' => $contentType,
+        ];
+    }
+
+    public function clearAttachments(): void
+    {
+        $this->messageAttachments = [];
     }
 
     /**
@@ -373,6 +397,11 @@ class EmailService
         if (!empty($this->messageBcc)) {
             $message->setBcc($this->messageBcc);
         }
+
+        foreach ($this->messageAttachments as $attachment) {
+            $message->attach($attachment['content'], $attachment['filename'], $attachment['contentType']);
+        }
+
         return $message;
     }
 
