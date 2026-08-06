@@ -1,0 +1,101 @@
+apiv2_policy_policies:
+  path: /api/v2/policy/policies
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Policy\Api\PolicyAPI
+
+apiv2_policy_policy:
+  path: /api/v2/policy/policies/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Policy\Api\PolicyAPI
+    _key: id
+  requirements:
+    id: '\d+'
+
+apiv2_policy_my_policies:
+  path: /api/v2/policy/my-policies
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST ]
+  defaults:
+    _api: OrangeHRM\Policy\Api\MyPolicyAPI
+
+apiv2_policy_acknowledgments:
+  path: /api/v2/policy/policies/{policyId}/acknowledgments
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET ]
+  defaults:
+    _api: OrangeHRM\Policy\Api\PolicyAcknowledgmentAPI
+  requirements:
+    policyId: '\d+'
+
+apiv2_policy_moodle_cohort_maps:
+  path: /api/v2/policy/moodle/cohort-maps
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Policy\Api\MoodleCohortMapAPI
+
+apiv2_policy_moodle_cohort_map:
+  path: /api/v2/policy/moodle/cohort-maps/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Policy\Api\MoodleCohortMapAPI
+    _key: id
+  requirements:
+    id: '\d+'
+
+apiv2_policy_moodle_config:
+  path: /api/v2/policy/moodle/config
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Policy\Api\MoodleConfigAPI
+    id: 0
+
+policy_module:
+  path: /policy/viewPolicyModule
+  controller: OrangeHRM\Policy\Controller\PolicyModuleController::handle
+  methods: [ GET ]
+
+policy_view_policies:
+  path: /policy/viewPolicies
+  controller: OrangeHRM\Policy\Controller\PolicyController::handle
+  methods: [ GET ]
+
+policy_save_policy:
+  path: /policy/savePolicy
+  controller: OrangeHRM\Policy\Controller\SavePolicyController::handle
+  methods: [ GET ]
+
+policy_edit_policy:
+  path: /policy/editPolicy/{id}
+  controller: OrangeHRM\Policy\Controller\SavePolicyController::handle
+  methods: [ GET ]
+  requirements:
+    id: '\d+'
+
+policy_view_acknowledgments:
+  path: /policy/viewPolicyAcknowledgments/{id}
+  controller: OrangeHRM\Policy\Controller\PolicyAcknowledgmentController::handle
+  methods: [ GET ]
+  requirements:
+    id: '\d+'
+
+policy_view_my_policies:
+  path: /policy/viewMyPolicies
+  controller: OrangeHRM\Policy\Controller\MyPolicyController::handle
+  methods: [ GET ]
+
+policy_moodle_config:
+  path: /policy/moodleConfig
+  controller: OrangeHRM\Policy\Controller\MoodleConfigController::handle
+  methods: [ GET ]
+
+policy_learning:
+  path: /policy/viewLearning
+  controller: OrangeHRM\Policy\Controller\LearningController::handle
+  methods: [ GET ]

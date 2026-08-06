@@ -1,3 +1,10 @@
+New & Changed Features for OrangeHRM ver 5.9.5
+    New Features/Changes
+    -----------
+    - Policy - In-HR policy publishing with required employee acknowledgment by all staff or job title
+    - Policy - Moodle LMS integration: Google Workspace SSO guide, job-title→cohort maps, hourly user sync command
+    - Policy - Learning deep-link menu and optional Moodle course URLs on policies
+
 New & Changed Features for OrangeHRM ver 5.9.4
     New Features/Changes
     -----------
