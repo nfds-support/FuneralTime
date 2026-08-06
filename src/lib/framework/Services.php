@@ -463,6 +463,20 @@ final class Services
     public const DISCIPLINE_SERVICE = 'discipline.discipline_service';
 
     ///////////////////////////////////////////////////////////////
+    /// Policy plugin services
+    ///////////////////////////////////////////////////////////////
+
+    /**
+     * @see \OrangeHRM\Policy\Service\PolicyService
+     */
+    public const POLICY_SERVICE = 'policy.policy_service';
+
+    /**
+     * @see \OrangeHRM\Policy\Service\MoodleSyncService
+     */
+    public const MOODLE_SYNC_SERVICE = 'policy.moodle_sync_service';
+
+    ///////////////////////////////////////////////////////////////
     /// OAuth plugin services
     ///////////////////////////////////////////////////////////////
 
