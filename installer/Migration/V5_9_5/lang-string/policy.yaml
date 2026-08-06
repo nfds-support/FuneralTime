@@ -1,0 +1,32 @@
+langStrings:
+  - { unitId: policy, value: 'Policy', note: '' }
+  - { unitId: policies, value: 'Policies', note: '' }
+  - { unitId: my_policies, value: 'My Policies', note: '' }
+  - { unitId: add_policy, value: 'Add Policy', note: '' }
+  - { unitId: edit_policy, value: 'Edit Policy', note: '' }
+  - { unitId: version, value: 'Version', note: '' }
+  - { unitId: audience, value: 'Audience', note: '' }
+  - { unitId: summary, value: 'Summary', note: '' }
+  - { unitId: content, value: 'Content', note: '' }
+  - { unitId: document_url, value: 'Document URL', note: '' }
+  - { unitId: moodle_course_url, value: 'Moodle Course URL', note: '' }
+  - { unitId: effective_date, value: 'Effective Date', note: '' }
+  - { unitId: due_date, value: 'Due Date', note: '' }
+  - { unitId: acknowledgments, value: 'Acknowledgments', note: '' }
+  - { unitId: acknowledge, value: 'I have read, understand and acknowledge', note: '' }
+  - { unitId: acknowledged_on, value: 'Acknowledged on', note: '' }
+  - { unitId: open_document, value: 'Open document', note: '' }
+  - { unitId: open_required_course, value: 'Open required course', note: '' }
+  - { unitId: open_learning, value: 'Learning', note: '' }
+  - { unitId: learning, value: 'Learning', note: '' }
+  - { unitId: learning_help, value: 'Open Moodle with your Google Workspace login to complete role-based courses.', note: '' }
+  - { unitId: open_moodle, value: 'Open Moodle', note: '' }
+  - { unitId: moodle_not_configured, value: 'Moodle is not configured yet. Ask an administrator to set the Moodle base URL.', note: '' }
+  - { unitId: moodle_settings, value: 'Moodle Settings', note: '' }
+  - { unitId: moodle_base_url, value: 'Moodle Base URL', note: '' }
+  - { unitId: moodle_token, value: 'Moodle Web Service Token', note: '' }
+  - { unitId: moodle_sync_enabled, value: 'Enable hourly Moodle user sync', note: '' }
+  - { unitId: cohort_maps, value: 'Job title → Moodle cohort maps', note: '' }
+  - { unitId: moodle_cohort_id, value: 'Moodle Cohort ID', note: '' }
+  - { unitId: moodle_cohort_name, value: 'Moodle Cohort Name', note: '' }
+  - { unitId: add_cohort_map, value: 'Add Cohort Map', note: '' }

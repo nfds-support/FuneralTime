@@ -70,6 +70,10 @@ class ConfigService
     public const KEY_OAUTH_REFRESH_TOKEN_TTL = 'oauth.refresh_token_ttl';
     public const KEY_OAUTH_ACCESS_TOKEN_TTL = 'oauth.access_token_ttl';
 
+    public const KEY_MOODLE_BASE_URL = 'moodle.base_url';
+    public const KEY_MOODLE_WEBSERVICE_TOKEN = 'moodle.webservice_token';
+    public const KEY_MOODLE_SYNC_ENABLED = 'moodle.sync_enabled';
+
     public const MAX_ATTACHMENT_SIZE = 1048576; // 1 MB
     public const ALLOWED_FILE_TYPES = [
         'text/plain',
@@ -618,5 +622,37 @@ class ConfigService
         } catch (Exception $e) {
             return new DateInterval('PT30M');
         }
+    }
+
+    public function getMoodleBaseUrl(): ?string
+    {
+        $value = $this->_getConfigValue(self::KEY_MOODLE_BASE_URL);
+        return $value === null || $value === '' ? null : $value;
+    }
+
+    public function setMoodleBaseUrl(string $baseUrl): void
+    {
+        $this->_setConfigValue(self::KEY_MOODLE_BASE_URL, rtrim($baseUrl, '/'));
+    }
+
+    public function getMoodleWebserviceToken(): ?string
+    {
+        $value = $this->_getConfigValue(self::KEY_MOODLE_WEBSERVICE_TOKEN);
+        return $value === null || $value === '' ? null : $value;
+    }
+
+    public function setMoodleWebserviceToken(string $token): void
+    {
+        $this->_setConfigValue(self::KEY_MOODLE_WEBSERVICE_TOKEN, $token);
+    }
+
+    public function getMoodleSyncEnabled(): bool
+    {
+        return $this->_getConfigValue(self::KEY_MOODLE_SYNC_ENABLED) === 'true';
+    }
+
+    public function setMoodleSyncEnabled(bool $enabled): void
+    {
+        $this->_setConfigValue(self::KEY_MOODLE_SYNC_ENABLED, $enabled ? 'true' : 'false');
     }
 }

@@ -1,0 +1,11 @@
+'UFCW Monthly Remittance':
+  module: time
+  url: viewUfcwRemittanceReport
+  permissions:
+    - { role: Admin, permission: { read: true } }
+
+'UFCW Remittance Settings':
+  module: time
+  url: viewUfcwRemittanceConfig
+  permissions:
+    - { role: Admin, permission: { read: true } }

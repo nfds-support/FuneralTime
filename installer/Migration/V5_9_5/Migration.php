@@ -30,18 +30,17 @@ class Migration extends AbstractMigration
 
     public function up(): void
     {
-        $this->createInitiationFeeTable();
-        $this->seedConfigValues();
-        $this->seedMembership();
-        $this->seedScreens();
-
-        $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
+        $this->createPolicySchema();
+        $this->seedPolicyModule();
         $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
-        $this->insertMenus();
+        $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
+        $this->insertPolicyMenus();
+        $this->getConfigHelper()->setConfigValue('moodle.base_url', '');
+        $this->getConfigHelper()->setConfigValue('moodle.webservice_token', '');
+        $this->getConfigHelper()->setConfigValue('moodle.sync_enabled', 'false');
 
-        if (is_file(__DIR__ . '/lang-string/time.yaml')) {
-            $this->getLangStringHelper()->insertOrUpdateLangStrings(__DIR__, 'time');
-        }
+        $this->insertI18nGroup('policy');
+        $this->getLangStringHelper()->insertOrUpdateLangStrings(__DIR__, 'policy');
     }
 
     public function getVersion(): string
@@ -57,183 +56,299 @@ class Migration extends AbstractMigration
         return $this->langStringHelper;
     }
 
-    private function createInitiationFeeTable(): void
+    private function createPolicySchema(): void
     {
-        if ($this->getSchemaHelper()->tableExists(['ohrm_ufcw_initiation_fee'])) {
-            return;
+        if (!$this->getSchemaHelper()->tableExists(['ohrm_policy'])) {
+            $this->getSchemaHelper()->createTable('ohrm_policy')
+                ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
+                ->addColumn('title', Types::STRING, ['Length' => 255, 'Notnull' => true])
+                ->addColumn('version', Types::STRING, ['Length' => 40, 'Notnull' => true, 'Default' => '1.0'])
+                ->addColumn('summary', Types::TEXT, ['Notnull' => false, 'Default' => null])
+                ->addColumn('content', Types::TEXT, ['Notnull' => false, 'Default' => null])
+                ->addColumn('document_url', Types::STRING, ['Length' => 512, 'Notnull' => false, 'Default' => null])
+                ->addColumn('moodle_course_url', Types::STRING, ['Length' => 512, 'Notnull' => false, 'Default' => null])
+                ->addColumn('audience_type', Types::STRING, ['Length' => 40, 'Notnull' => true, 'Default' => 'ALL'])
+                ->addColumn('status', Types::STRING, ['Length' => 40, 'Notnull' => true, 'Default' => 'DRAFT'])
+                ->addColumn('effective_date', Types::DATE_MUTABLE, ['Notnull' => false, 'Default' => null])
+                ->addColumn('due_date', Types::DATE_MUTABLE, ['Notnull' => false, 'Default' => null])
+                ->addColumn('published_at', Types::DATETIME_MUTABLE, ['Notnull' => false, 'Default' => null])
+                ->addColumn('created_at', Types::DATETIME_MUTABLE, ['Notnull' => true])
+                ->addColumn('updated_at', Types::DATETIME_MUTABLE, ['Notnull' => false, 'Default' => null])
+                ->addColumn('created_by', Types::INTEGER, ['Notnull' => false, 'Default' => null])
+                ->setPrimaryKey(['id'])
+                ->create();
+
+            $this->getSchemaHelper()->addForeignKey(
+                'ohrm_policy',
+                new ForeignKeyConstraint(
+                    ['created_by'],
+                    'hs_hr_employee',
+                    ['emp_number'],
+                    'policy_created_by',
+                    ['onDelete' => 'SET NULL']
+                )
+            );
         }
 
-        $this->getSchemaHelper()->createTable('ohrm_ufcw_initiation_fee')
-            ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
-            ->addColumn('emp_number', Types::INTEGER, ['Notnull' => true])
-            ->addColumn('fee_required', Types::DECIMAL, ['Precision' => 12, 'Scale' => 2, 'Notnull' => true, 'Default' => 0])
-            ->addColumn('amount_paid', Types::DECIMAL, ['Precision' => 12, 'Scale' => 2, 'Notnull' => true, 'Default' => 0])
-            ->setPrimaryKey(['id'])
-            ->addUniqueIndex(['emp_number'], 'ufcw_initiation_fee_emp_unique')
-            ->create();
+        if (!$this->getSchemaHelper()->tableExists(['ohrm_policy_job_title'])) {
+            $this->getSchemaHelper()->createTable('ohrm_policy_job_title')
+                ->addColumn('policy_id', Types::INTEGER, ['Notnull' => true])
+                ->addColumn('job_title_id', Types::INTEGER, ['Notnull' => true])
+                ->setPrimaryKey(['policy_id', 'job_title_id'])
+                ->create();
 
-        $this->getSchemaHelper()->addForeignKey(
-            'ohrm_ufcw_initiation_fee',
-            new ForeignKeyConstraint(
-                ['emp_number'],
-                'hs_hr_employee',
-                ['emp_number'],
-                'ufcw_initiation_fee_emp',
-                ['onDelete' => 'CASCADE']
-            )
-        );
-    }
+            $this->getSchemaHelper()->addForeignKey(
+                'ohrm_policy_job_title',
+                new ForeignKeyConstraint(
+                    ['policy_id'],
+                    'ohrm_policy',
+                    ['id'],
+                    'policy_job_title_policy',
+                    ['onDelete' => 'CASCADE']
+                )
+            );
+            $this->getSchemaHelper()->addForeignKey(
+                'ohrm_policy_job_title',
+                new ForeignKeyConstraint(
+                    ['job_title_id'],
+                    'ohrm_job_title',
+                    ['id'],
+                    'policy_job_title_title',
+                    ['onDelete' => 'CASCADE']
+                )
+            );
+        }
 
-    private function seedConfigValues(): void
-    {
-        $defaults = [
-            'time.ufcw.dues_hourly_multiplier' => '0.6',
-            'time.ufcw.dues_weekly_flat_fee' => '0.25',
-            'time.ufcw.initiation_fee_full_time' => '40',
-            'time.ufcw.initiation_fee_part_time' => '25',
-            'time.ufcw.initiation_weekly_max_full_time' => '10',
-            'time.ufcw.initiation_weekly_max_part_time' => '5',
-            'time.ufcw.employer_name' => 'Timiskaming Funeral Cooperative',
-            'time.ufcw.work_location' => 'Timiskaming Funeral Cooperative',
-            'time.ufcw.work_location_code' => '7297',
-            'time.ufcw.union_contacts' => 'Michael Bernier / Sabrina Qadir',
-            'time.ufcw.membership_name' => 'UFCW Local 175',
-            'time.ufcw.remittance_email' => 'remit@ufcw175.com',
-            'time.ufcw.payroll_email' => '',
-            'time.ufcw.cheque_payable_to' => 'UFCW Local 175',
-            'time.ufcw.cheque_attention' => 'Secretary-Treasurer',
-        ];
+        if (!$this->getSchemaHelper()->tableExists(['ohrm_policy_acknowledgment'])) {
+            $this->getSchemaHelper()->createTable('ohrm_policy_acknowledgment')
+                ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
+                ->addColumn('policy_id', Types::INTEGER, ['Notnull' => true])
+                ->addColumn('emp_number', Types::INTEGER, ['Notnull' => true])
+                ->addColumn('acknowledged_at', Types::DATETIME_MUTABLE, ['Notnull' => true])
+                ->addColumn('ip_address', Types::STRING, ['Length' => 45, 'Notnull' => false, 'Default' => null])
+                ->setPrimaryKey(['id'])
+                ->create();
 
-        foreach ($defaults as $name => $value) {
-            $existing = $this->getConfigHelper()->getConfigValue($name);
-            if ($existing === null || $existing === '') {
-                $this->getConfigHelper()->setConfigValue($name, $value);
-            }
+            $this->getSchemaHelper()->addForeignKey(
+                'ohrm_policy_acknowledgment',
+                new ForeignKeyConstraint(
+                    ['policy_id'],
+                    'ohrm_policy',
+                    ['id'],
+                    'policy_ack_policy',
+                    ['onDelete' => 'CASCADE']
+                )
+            );
+            $this->getSchemaHelper()->addForeignKey(
+                'ohrm_policy_acknowledgment',
+                new ForeignKeyConstraint(
+                    ['emp_number'],
+                    'hs_hr_employee',
+                    ['emp_number'],
+                    'policy_ack_employee',
+                    ['onDelete' => 'CASCADE']
+                )
+            );
+        }
+
+        if (!$this->getSchemaHelper()->tableExists(['ohrm_moodle_cohort_map'])) {
+            $this->getSchemaHelper()->createTable('ohrm_moodle_cohort_map')
+                ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
+                ->addColumn('job_title_id', Types::INTEGER, ['Notnull' => true])
+                ->addColumn('moodle_cohort_id', Types::INTEGER, ['Notnull' => true])
+                ->addColumn('moodle_cohort_name', Types::STRING, ['Length' => 255, 'Notnull' => false, 'Default' => null])
+                ->setPrimaryKey(['id'])
+                ->create();
+
+            $this->getSchemaHelper()->addForeignKey(
+                'ohrm_moodle_cohort_map',
+                new ForeignKeyConstraint(
+                    ['job_title_id'],
+                    'ohrm_job_title',
+                    ['id'],
+                    'moodle_cohort_map_job_title',
+                    ['onDelete' => 'CASCADE']
+                )
+            );
         }
     }
 
-    private function seedMembership(): void
+    private function seedPolicyModule(): void
     {
-        $name = 'UFCW Local 175';
-        $exists = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_membership')
-            ->where('name = :name')
-            ->setParameter('name', $name)
-            ->executeQuery()
-            ->fetchOne();
-        if ($exists) {
-            return;
-        }
-        $this->createQueryBuilder()
-            ->insert('ohrm_membership')
-            ->values(['name' => ':name'])
-            ->setParameter('name', $name)
-            ->executeQuery();
-    }
-
-    private function seedScreens(): void
-    {
-        $moduleId = $this->createQueryBuilder()
+        $exists = $this->getConnection()->createQueryBuilder()
             ->select('id')
             ->from('ohrm_module')
             ->where('name = :name')
-            ->setParameter('name', 'time')
+            ->setParameter('name', 'policy')
             ->executeQuery()
             ->fetchOne();
-        if (!$moduleId) {
-            return;
-        }
 
-        $screens = [
-            ['UFCW Monthly Remittance', 'viewUfcwRemittanceReport'],
-            ['UFCW Remittance Settings', 'viewUfcwRemittanceConfig'],
-        ];
-        foreach ($screens as [$name, $url]) {
-            $exists = $this->createQueryBuilder()
-                ->select('id')
-                ->from('ohrm_screen')
-                ->where('action_url = :url')
-                ->setParameter('url', $url)
-                ->executeQuery()
-                ->fetchOne();
-            if ($exists) {
-                continue;
-            }
-            $this->createQueryBuilder()
-                ->insert('ohrm_screen')
+        if (!$exists) {
+            $this->getConnection()->createQueryBuilder()
+                ->insert('ohrm_module')
                 ->values([
                     'name' => ':name',
-                    'module_id' => ':moduleId',
-                    'action_url' => ':url',
+                    'status' => ':status',
+                    'display_name' => ':display_name',
                 ])
-                ->setParameter('name', $name)
-                ->setParameter('moduleId', $moduleId)
-                ->setParameter('url', $url)
+                ->setParameter('name', 'policy')
+                ->setParameter('status', 1)
+                ->setParameter('display_name', 'Policy')
                 ->executeQuery();
+        }
+
+        $moduleId = $this->getConnection()->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_module')
+            ->where('name = :name')
+            ->setParameter('name', 'policy')
+            ->executeQuery()
+            ->fetchOne();
+
+        $homeExists = $this->getConnection()->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_module_default_page')
+            ->where('module_id = :module_id')
+            ->andWhere('user_role_id = :role')
+            ->setParameter('module_id', $moduleId)
+            ->setParameter('role', 1)
+            ->executeQuery()
+            ->fetchOne();
+
+        if (!$homeExists && $moduleId) {
+            $adminRoleId = $this->getDataGroupHelper()->getUserRoleIdByName('Admin');
+            $essRoleId = $this->getDataGroupHelper()->getUserRoleIdByName('ESS');
+
+            $this->getConnection()->createQueryBuilder()
+                ->insert('ohrm_module_default_page')
+                ->values([
+                    'module_id' => ':module_id',
+                    'user_role_id' => ':user_role_id',
+                    'action' => ':action',
+                    'priority' => ':priority',
+                ])
+                ->setParameter('module_id', $moduleId)
+                ->setParameter('user_role_id', $adminRoleId)
+                ->setParameter('action', 'policy/viewPolicies')
+                ->setParameter('priority', 20)
+                ->executeQuery();
+
+            if ($essRoleId) {
+                $this->getConnection()->createQueryBuilder()
+                    ->insert('ohrm_module_default_page')
+                    ->values([
+                        'module_id' => ':module_id',
+                        'user_role_id' => ':user_role_id',
+                        'action' => ':action',
+                        'priority' => ':priority',
+                    ])
+                    ->setParameter('module_id', $moduleId)
+                    ->setParameter('user_role_id', $essRoleId)
+                    ->setParameter('action', 'policy/viewMyPolicies')
+                    ->setParameter('priority', 20)
+                    ->executeQuery();
+            }
         }
     }
 
-    private function insertMenus(): void
+    private function insertPolicyMenus(): void
     {
-        $timeMenuId = $this->createQueryBuilder()
+        $exists = $this->getConnection()->createQueryBuilder()
             ->select('id')
             ->from('ohrm_menu_item')
             ->where('menu_title = :title')
             ->andWhere('level = 1')
-            ->setParameter('title', 'Time')
+            ->setParameter('title', 'Policy')
             ->executeQuery()
             ->fetchOne();
-        if (!$timeMenuId) {
+
+        if ($exists) {
             return;
         }
 
-        $menus = [
-            ['UFCW Remittance', 'UFCW Monthly Remittance', 950],
-            ['UFCW Remittance Settings', 'UFCW Remittance Settings', 960],
-        ];
-        foreach ($menus as [$title, $screenName, $order]) {
-            $exists = $this->createQueryBuilder()
-                ->select('id')
-                ->from('ohrm_menu_item')
-                ->where('menu_title = :title')
-                ->andWhere('parent_id = :parent')
-                ->setParameter('title', $title)
-                ->setParameter('parent', $timeMenuId)
-                ->executeQuery()
-                ->fetchOne();
-            if ($exists) {
-                continue;
-            }
-            $screenId = $this->createQueryBuilder()
-                ->select('id')
-                ->from('ohrm_screen')
-                ->where('name = :name')
-                ->setParameter('name', $screenName)
-                ->executeQuery()
-                ->fetchOne();
+        $moduleScreenId = $this->getScreenId('View Policy Module');
+        $this->insertMenuItems('Policy', $moduleScreenId, null, 1, 1300, 1, '{"icon":"buzz"}');
 
-            $this->createQueryBuilder()
-                ->insert('ohrm_menu_item')
+        $policyMenuItemId = $this->getConnection()->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_menu_item')
+            ->where('menu_title = :title')
+            ->andWhere('level = 1')
+            ->setParameter('title', 'Policy')
+            ->executeQuery()
+            ->fetchOne();
+
+        $this->insertMenuItems('Policies', $this->getScreenId('Policies'), (int) $policyMenuItemId, 2, 100, 1, null);
+        $this->insertMenuItems('My Policies', $this->getScreenId('My Policies'), (int) $policyMenuItemId, 2, 200, 1, null);
+        $this->insertMenuItems('Learning', $this->getScreenId('Learning'), (int) $policyMenuItemId, 2, 300, 1, null);
+        $this->insertMenuItems('Moodle Settings', $this->getScreenId('Moodle Settings'), (int) $policyMenuItemId, 2, 400, 1, null);
+    }
+
+    private function insertI18nGroup(string $name): void
+    {
+        $exists = $this->getConnection()->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_i18n_group')
+            ->where('name = :name')
+            ->setParameter('name', $name)
+            ->executeQuery()
+            ->fetchOne();
+
+        if (!$exists) {
+            $this->getConnection()->createQueryBuilder()
+                ->insert('ohrm_i18n_group')
                 ->values([
-                    'menu_title' => ':menu_title',
-                    'screen_id' => ':screen_id',
-                    'parent_id' => ':parent_id',
-                    'level' => ':level',
-                    'order_hint' => ':order_hint',
-                    'status' => ':status',
-                    'additional_params' => ':additional_params',
+                    'name' => ':name',
+                    'title' => ':title',
                 ])
-                ->setParameters([
-                    'menu_title' => $title,
-                    'screen_id' => $screenId ?: null,
-                    'parent_id' => $timeMenuId,
-                    'level' => 2,
-                    'order_hint' => $order,
-                    'status' => 1,
-                    'additional_params' => null,
-                ])
+                ->setParameter('name', $name)
+                ->setParameter('title', ucfirst($name))
                 ->executeQuery();
         }
+    }
+
+    private function getScreenId(string $name): ?int
+    {
+        $id = $this->getConnection()->createQueryBuilder()
+            ->select('id')
+            ->from('ohrm_screen')
+            ->where('name = :name')
+            ->setParameter('name', $name)
+            ->executeQuery()
+            ->fetchOne();
+
+        return $id === false ? null : (int) $id;
+    }
+
+    private function insertMenuItems(
+        string $menuTitle,
+        ?int $screenId,
+        ?int $parentId,
+        int $level,
+        int $orderHint,
+        int $status,
+        ?string $additionalParams
+    ): void {
+        $this->getConnection()->createQueryBuilder()
+            ->insert('ohrm_menu_item')
+            ->values([
+                'menu_title' => ':menu_title',
+                'screen_id' => ':screen_id',
+                'parent_id' => ':parent_id',
+                'level' => ':level',
+                'order_hint' => ':order_hint',
+                'status' => ':status',
+                'additional_params' => ':additional_params',
+            ])
+            ->setParameters([
+                'menu_title' => $menuTitle,
+                'screen_id' => $screenId,
+                'parent_id' => $parentId,
+                'level' => $level,
+                'order_hint' => $orderHint,
+                'status' => $status,
+                'additional_params' => $additionalParams,
+            ])
+            ->executeQuery();
     }
 }
