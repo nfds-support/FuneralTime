@@ -1,0 +1,70 @@
+langStrings:
+  -
+    value: 'UFCW Remittance'
+    unitId: menu_ufcw_remittance
+  -
+    value: 'UFCW Remittance Settings'
+    unitId: menu_ufcw_remittance_settings
+  -
+    value: 'UFCW Monthly Remittance'
+    unitId: ufcw_monthly_remittance
+  -
+    value: 'UFCW Remittance Settings'
+    unitId: ufcw_remittance_settings
+  -
+    value: 'Generate Remittance Report'
+    unitId: generate_ufcw_remittance
+  -
+    value: 'Download XLSX'
+    unitId: download_xlsx
+  -
+    value: 'Email to Union & Payroll'
+    unitId: email_ufcw_remittance
+  -
+    value: 'Dues hourly multiplier'
+    unitId: dues_hourly_multiplier
+  -
+    value: 'Dues weekly flat fee'
+    unitId: dues_weekly_flat_fee
+  -
+    value: 'Weekly dues = (Hourly rate × multiplier) + flat fee'
+    unitId: help_dues_formula
+  -
+    value: 'Bargaining-unit membership name'
+    unitId: membership_name
+  -
+    value: 'Employees with this Admin membership are included on the remittance report'
+    unitId: help_membership_name
+  -
+    value: 'Remittance email'
+    unitId: remittance_email
+  -
+    value: 'Payroll email(s)'
+    unitId: payroll_email
+  -
+    value: 'Comma-separated addresses that also receive the monthly workbook'
+    unitId: help_payroll_email
+  -
+    value: 'Prepared by'
+    unitId: prepared_by
+  -
+    value: 'Update initiation-fee balances after send'
+    unitId: update_initiation_balances
+  -
+    value: 'Reason / Notes'
+    unitId: reason_notes
+  -
+    value: 'Review flags'
+    unitId: review_flags
+  -
+    value: 'Remittance due'
+    unitId: remittance_due
+  -
+    value: 'Regular union dues'
+    unitId: regular_union_dues
+  -
+    value: 'Initiation fees'
+    unitId: initiation_fees
+  -
+    value: 'Total remittance'
+    unitId: total_remittance

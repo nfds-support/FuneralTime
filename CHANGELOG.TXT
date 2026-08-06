@@ -1,3 +1,10 @@
+New & Changed Features for OrangeHRM ver 5.9.6
+    New Features/Changes
+    -----------
+    - Time - UFCW monthly dues & membership remittance report (XLSX) with auto-calculated weekly dues, initiation-fee balances, download, and email to union/payroll
+    - Time - UFCW remittance settings (dues multiplier/flat fee, initiation fees, employer/location, recipients) under Time menu
+    - Core - EmailService supports file attachments for remittance workbook delivery
+
 New & Changed Features for OrangeHRM ver 5.9.5
     New Features/Changes
     -----------

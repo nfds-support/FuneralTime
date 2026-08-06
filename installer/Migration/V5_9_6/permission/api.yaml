@@ -1,0 +1,15 @@
+apiv2_time_ufcw_remittance_config:
+  description: 'API-v2 Time - UFCW Remittance Settings'
+  api: OrangeHRM\Time\Api\UfcwRemittanceConfigAPI
+  module: time
+  allowed: { read: true, create: false, update: true, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: true, delete: false, self: false } }
+
+apiv2_time_ufcw_remittance_report:
+  description: 'API-v2 Time - UFCW Monthly Remittance Report'
+  api: OrangeHRM\Time\Api\UfcwRemittanceReportAPI
+  module: time
+  allowed: { read: true, create: true, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: false, delete: false, self: false } }

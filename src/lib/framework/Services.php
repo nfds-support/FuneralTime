@@ -313,6 +313,16 @@ final class Services
     public const BANKED_TIME_SERVICE = 'time.banked_time_service';
 
     /**
+     * @see \OrangeHRM\Time\Service\UfcwRemittanceReportService
+     */
+    public const UFCW_REMITTANCE_REPORT_SERVICE = 'time.ufcw_remittance_report_service';
+
+    /**
+     * @see \OrangeHRM\Time\Service\UfcwRemittanceSettingsService
+     */
+    public const UFCW_REMITTANCE_SETTINGS_SERVICE = 'time.ufcw_remittance_settings_service';
+
+    /**
      * @see \OrangeHRM\Leave\Service\LeaveEntitlementTransactionService
      */
     public const LEAVE_ENTITLEMENT_TRANSACTION_SERVICE = 'leave.leave_entitlement_transaction_service';

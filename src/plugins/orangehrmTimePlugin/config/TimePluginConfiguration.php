@@ -28,6 +28,8 @@ use OrangeHRM\Time\Service\CustomerService;
 use OrangeHRM\Time\Service\PayrollPeriodService;
 use OrangeHRM\Time\Service\ProjectService;
 use OrangeHRM\Time\Service\TimesheetService;
+use OrangeHRM\Time\Service\UfcwRemittanceReportService;
+use OrangeHRM\Time\Service\UfcwRemittanceSettingsService;
 use OrangeHRM\Time\Subscriber\TimesheetPeriodSubscriber;
 
 class TimePluginConfiguration implements PluginConfigurationInterface
@@ -45,6 +47,8 @@ class TimePluginConfiguration implements PluginConfigurationInterface
         $this->getContainer()->register(Services::TIMESHEET_SERVICE, TimesheetService::class);
         $this->getContainer()->register(Services::PAYROLL_PERIOD_SERVICE, PayrollPeriodService::class);
         $this->getContainer()->register(Services::BANKED_TIME_SERVICE, BankedTimeService::class);
+        $this->getContainer()->register(Services::UFCW_REMITTANCE_REPORT_SERVICE, UfcwRemittanceReportService::class);
+        $this->getContainer()->register(Services::UFCW_REMITTANCE_SETTINGS_SERVICE, UfcwRemittanceSettingsService::class);
 
         $this->getEventDispatcher()->addSubscriber(new TimesheetPeriodSubscriber());
     }

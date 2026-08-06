@@ -30,6 +30,8 @@ import EmployeeTimeReport from './pages/reports/EmployeeTimeReport.vue';
 import ProjectActivityReport from './pages/reports/ProjectActivityReport.vue';
 import ActivityDetailsReport from './pages/reports/ActivityDetailsReport.vue';
 import PayrollFillSheetReport from './pages/reports/PayrollFillSheetReport.vue';
+import UfcwRemittanceReport from './pages/reports/UfcwRemittanceReport.vue';
+import UfcwRemittanceConfig from './pages/configure/UfcwRemittanceConfig.vue';
 
 export default {
   'time-sheet-period': TimeSheetPeriodConfig,
@@ -47,4 +49,6 @@ export default {
   'project-activity-report': ProjectActivityReport,
   'activity-details-report': ActivityDetailsReport,
   'payroll-fill-sheet-report': PayrollFillSheetReport,
+  'ufcw-remittance-report': UfcwRemittanceReport,
+  'ufcw-remittance-config': UfcwRemittanceConfig,
 };
