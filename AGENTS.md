@@ -102,3 +102,30 @@ Layer-specific recipes — adding a REST endpoint, a Doctrine entity, a DB migra
 - **DB hostname inside containers is the DB container's name** (e.g. `mariadb103`), not `127.0.0.1`. This trips up devs running CLI commands inside the PHP container.
 - The lint job re-runs `php-cs-fix` and fails on **any** `git status --porcelain` output — leave no other uncommitted changes when running it locally if you want to mirror CI.
 - `OrangeHRM\Entity\` is a multi-path PSR-4 namespace. Forgetting to add a new plugin's `entity/` dir there causes silent "class not found" failures in Doctrine mappings only — code may still autoload via other paths.
+
+## Cursor Cloud specific instructions
+
+This VM runs OrangeHRM **directly on the host** (PHP 8.3 CLI + a `mysql:5.7` Docker container + PHP's built-in web server), **not** via the `orangehrm-os-dev-environment` Docker stack described earlier. Where they conflict, the notes below win for this VM (e.g. the DB host is `127.0.0.1`, not a container name, because PHP runs on the host).
+
+### Baked into the VM snapshot
+- PHP 8.3 CLI + extensions (pdo_mysql, curl, mbstring, zip, xml, gd, ldap, intl, bcmath, opcache) and Composer 2.
+- Docker engine (rootful) with a `mysql:5.7` container named `ohrm-mysql` (CI's primary DB). MariaDB 10.11 is also installed via apt but left stopped — prefer the container.
+- Node 22 + Corepack (Yarn 4.1.0 via each workspace's `packageManager`). The startup **update script** refreshes composer + `src/client` deps; `installer/client` and `src/test/functional` deps are already installed (run `yarn install` there yourself if their `package.json` changed upstream).
+
+### Dev database
+- MySQL 5.7 on `127.0.0.1:3306`, root password `root`. App DB `orangehrm_mysql`, PHPUnit test DB `test_orangehrm_mysql`. Install config: `installer/cli_install_config.yaml` (admin login `Admin` / `Ohrm@1423`).
+
+### Starting services (nothing auto-starts on boot)
+1. Docker daemon (only if `docker info` fails): `sudo bash -c 'nohup dockerd >/tmp/dockerd.log 2>&1 &'` (daemon is configured for `fuse-overlayfs` + iptables-legacy).
+2. Database: `sudo docker start ohrm-mysql`, then wait until `sudo docker exec ohrm-mysql mysqladmin ping -uroot -proot` says alive.
+3. Web app: `php -d memory_limit=512M -S 0.0.0.0:8000 -t /workspace` → open `http://localhost:8000/web/index.php/auth/login`. The repo root is the docroot, so `/web/...` and `/installer/...` resolve and PHP's built-in server handles the `index.php` PATH_INFO routing.
+
+### Known caveats (pre-existing repo issues, not environment problems — do not "fix" unless that is the task)
+- **Frontend build lints on save and this checkout has pre-existing ESLint/Prettier issues**, so `yarn dev` / `yarn build` (in `src/client`) fail before emitting `web/dist`. Produce the bundle with the ESLint plugin skipped (no source edits): `cd src/client && yarn vue-cli-service build --mode development --dest ../../web/dist --skip-plugins @vue/cli-plugin-eslint` (add `--watch` for live rebuild). Note `yarn lint` auto-fixes by default (mutates files) and reports the pre-existing warnings.
+- **Fresh install is broken by migration `installer/Migration/V5_9_1`**: it creates `ohrm_timesheet_day` / `ohrm_timesheet_deduction` with an `INT timesheet_id` FK to `ohrm_timesheet.timesheet_id` (which is `BIGINT`) — rejected by every supported MySQL/MariaDB (errno 150 / 1215) — and its `permission/api.yaml` uses `self: false`, which the installer's `Api` DTO rejects. So `php installer/cli_install.php` fails partway. The app DB is already installed in the snapshot, so usually you only need to start `ohrm-mysql`. To reinstall from scratch: run migrations `3.3.3`→`5.9`, pre-create those two tables with a **`BIGINT timesheet_id`** (+ their FKs) so the migration's `if (!tableExists(...))` guards skip them, then run `5.9.1` after removing the `self: false` entries from `api.yaml` (`self` defaults to false, so semantics are unchanged).
+- **PHPUnit test DB is a `mysqldump` clone of the installed app DB** (`instance:create-test-db` does not re-run migrations), so recreate it after any (re)install: `php devTools/core/console.php i:create-test-db -p root -u root`.
+
+### Lint / test / build quick reference (owning skills — `testing`, `dependencies` — remain the source of truth)
+- PHP style (non-mutating check): `php ./devTools/core/vendor/bin/php-cs-fixer fix --dry-run` (currently reports 0 files to fix).
+- PHPUnit: `./src/vendor/bin/phpunit --testsuite <Plugin>` (needs the test DB above).
+- Frontend unit tests: `cd src/client && yarn test:unit`.
