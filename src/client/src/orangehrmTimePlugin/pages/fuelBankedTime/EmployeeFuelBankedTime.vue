@@ -25,7 +25,7 @@
           {{ $t('time.employee_fuel_for_banked_time') }}
         </oxd-text>
       </div>
-      <oxd-form @submit.valid="onSearch">
+      <oxd-form @submit-valid="onSearch">
         <div class="orangehrm-horizontal-padding orangehrm-vertical-padding">
           <oxd-form-row>
             <oxd-grid :cols="3" class="orangehrm-full-width-grid">
