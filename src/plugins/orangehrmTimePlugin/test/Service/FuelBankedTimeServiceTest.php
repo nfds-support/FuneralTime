@@ -20,9 +20,7 @@
 namespace OrangeHRM\Tests\Time\Service;
 
 use OrangeHRM\Entity\Employee;
-use OrangeHRM\Entity\EmployeeSalary;
 use OrangeHRM\Tests\Util\TestCase;
-use OrangeHRM\Time\Dao\FuelBankedTimeDao;
 use OrangeHRM\Time\Service\BankedTimeService;
 use OrangeHRM\Time\Service\FuelBankedTimeService;
 
@@ -32,29 +30,25 @@ use OrangeHRM\Time\Service\FuelBankedTimeService;
  */
 class FuelBankedTimeServiceTest extends TestCase
 {
-    public function testResolveHourlyRateUsesFirstSalaryAmount(): void
+    public function testResolveHourlyRateUsesEmployeeHourlyRateField(): void
     {
         $employee = new Employee();
         $employee->setEmpNumber(1);
-
-        $salary = $this->getMockBuilder(EmployeeSalary::class)
-            ->disableOriginalConstructor()
-            ->getMock();
-        $salary->method('getAmount')->willReturn('50.00');
-
-        $dao = $this->getMockBuilder(FuelBankedTimeDao::class)
-            ->disableOriginalConstructor()
-            ->onlyMethods(['getEmployeeSalaries'])
-            ->getMock();
-        $dao->expects($this->once())
-            ->method('getEmployeeSalaries')
-            ->with(1)
-            ->willReturn([$salary]);
+        $employee->setPayType('salaried');
+        $employee->setHourlyRate('50.00');
 
         $service = new FuelBankedTimeService();
-        $service->setDao($dao);
-
         $this->assertSame(50.0, $service->resolveHourlyRate($employee));
+    }
+
+    public function testResolveHourlyRateReturnsNullWhenMissing(): void
+    {
+        $employee = new Employee();
+        $employee->setEmpNumber(1);
+        $employee->setPayType('hourly');
+
+        $service = new FuelBankedTimeService();
+        $this->assertNull($service->resolveHourlyRate($employee));
     }
 
     public function testDaysToHoursConversionOnBankedTimeService(): void

@@ -47,6 +47,7 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
     public const PARAMETER_ON_CALL = 'onCall';
     public const PARAMETER_FUEL_FOR_BANKED_TIME_ENABLED = 'fuelForBankedTimeEnabled';
     public const PARAMETER_PAY_TYPE = 'payType';
+    public const PARAMETER_HOURLY_RATE = 'hourlyRate';
     public const PARAMETER_CONTRACTED_HOURS_PER_WEEK = 'contractedHoursPerWeek';
     public const PARAMETER_OVERTIME_THRESHOLD_HOURS = 'overtimeThresholdHours';
     public const PARAMETER_FD_LICENSE_CLASS = 'fdLicenseClass';
@@ -185,6 +186,10 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_PAY_TYPE
         );
+        $hourlyRate = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_HOURLY_RATE
+        );
         $contractedHours = $this->getRequestParams()->getStringOrNull(
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_CONTRACTED_HOURS_PER_WEEK
@@ -220,6 +225,7 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
             $employee->setFuelForBankedTimeEnabled($fuelForBankedTimeEnabled);
         }
         $employee->setPayType($payType);
+        $employee->setHourlyRate($hourlyRate);
         $employee->setContractedHoursPerWeek($contractedHours);
         $employee->setOvertimeThresholdHours($overtimeThreshold);
         $employee->setFdLicenseClass($fdLicenseClass);
@@ -298,6 +304,14 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
                     self::PARAMETER_PAY_TYPE,
                     new Rule(Rules::IN, [self::PAY_TYPES])
                 )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_HOURLY_RATE,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::LENGTH, [null, 20])
+                ),
+                true
             ),
             $this->getValidationDecorator()->notRequiredParamRule(
                 new ParamRule(

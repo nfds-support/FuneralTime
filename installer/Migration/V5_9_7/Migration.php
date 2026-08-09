@@ -31,6 +31,7 @@ class Migration extends AbstractMigration
     public function up(): void
     {
         $this->addEmployeeFuelForBankedTimeFlag();
+        $this->addEmployeeHourlyRate();
         $this->createFuelBankedTimeRequestTable();
         $this->seedScreens();
         $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
@@ -65,6 +66,18 @@ class Migration extends AbstractMigration
                 'fuel_for_banked_time_enabled',
                 Types::BOOLEAN,
                 ['Notnull' => true, 'Default' => false]
+            );
+        }
+    }
+
+    private function addEmployeeHourlyRate(): void
+    {
+        if (!$this->getSchemaHelper()->columnExists('hs_hr_employee', 'hourly_rate')) {
+            $this->getSchemaHelper()->addColumn(
+                'hs_hr_employee',
+                'hourly_rate',
+                Types::DECIMAL,
+                ['Precision' => 12, 'Scale' => 2, 'Notnull' => false]
             );
         }
     }

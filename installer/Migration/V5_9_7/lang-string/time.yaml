@@ -28,7 +28,7 @@ langStrings:
     value: 'Fuel for banked time is not enabled for your employee record. Contact your administrator.'
   -
     unitId: fuel_hourly_rate_missing
-    value: 'An hourly rate is required on your salary record before you can apply fuel for banked time.'
+    value: 'An hourly rate is required on your job record before you can apply fuel for banked time.'
   -
     unitId: employee_fuel_for_banked_time
     value: 'Employee Fuel for Banked Time'

@@ -3,3 +3,7 @@ langStrings:
     unitId: fuel_for_banked_time_enabled
     value: 'Fuel for Banked Time'
     note: 'Employee job setting that allows applying fuel card spend against banked time'
+  -
+    unitId: hourly_rate
+    value: 'Hourly Rate'
+    note: 'Employee job hourly rate used for fuel/banked-time calculations for hourly or salaried staff'

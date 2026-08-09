@@ -411,6 +411,15 @@ class Employee
     private ?string $payType = null;
 
     /**
+     * Hourly rate used for overtime/banked-time calculations for both hourly and salaried employees.
+     *
+     * @var string|null
+     *
+     * @ORM\Column(name="hourly_rate", type="decimal", precision=12, scale=2, nullable=true)
+     */
+    private ?string $hourlyRate = null;
+
+    /**
      * @var string|null
      *
      * @ORM\Column(name="contracted_hours_per_week", type="decimal", precision=5, scale=2, nullable=true)
@@ -1395,6 +1404,16 @@ class Employee
     public function setPayType(?string $payType): void
     {
         $this->payType = $payType;
+    }
+
+    public function getHourlyRate(): ?string
+    {
+        return $this->hourlyRate;
+    }
+
+    public function setHourlyRate(?string $hourlyRate): void
+    {
+        $this->hourlyRate = $hourlyRate;
     }
 
     /**

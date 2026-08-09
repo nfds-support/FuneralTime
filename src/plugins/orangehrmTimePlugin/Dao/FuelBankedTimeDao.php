@@ -20,7 +20,6 @@
 namespace OrangeHRM\Time\Dao;
 
 use OrangeHRM\Core\Dao\BaseDao;
-use OrangeHRM\Entity\EmployeeSalary;
 use OrangeHRM\Entity\FuelBankedTimeRequest;
 use OrangeHRM\ORM\Paginator;
 use OrangeHRM\Time\Dto\FuelBankedTimeRequestSearchFilterParams;
@@ -67,17 +66,5 @@ class FuelBankedTimeDao extends BaseDao
         }
 
         return $this->getPaginator($q);
-    }
-
-    /**
-     * @return EmployeeSalary[]
-     */
-    public function getEmployeeSalaries(int $empNumber): array
-    {
-        $q = $this->createQueryBuilder(EmployeeSalary::class, 'es');
-        $q->andWhere('es.employee = :empNumber')
-            ->setParameter('empNumber', $empNumber)
-            ->orderBy('es.id', 'ASC');
-        return $q->getQuery()->execute();
     }
 }

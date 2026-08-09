@@ -124,6 +124,13 @@
             </oxd-grid-item>
             <oxd-grid-item>
               <oxd-input-field
+                v-model="job.hourlyRate"
+                :label="$t('pim.hourly_rate')"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
                 v-model="job.contractedHoursPerWeek"
                 :label="$t('pim.contracted_hours_per_week')"
                 :disabled="!hasUpdatePermissions"
@@ -286,6 +293,7 @@ const jobDetailsModel = {
   onCall: false,
   fuelForBankedTimeEnabled: false,
   payType: [],
+  hourlyRate: '',
   contractedHoursPerWeek: '',
   overtimeThresholdHours: '44',
   fdLicenseClass: [],
@@ -486,6 +494,7 @@ export default {
             onCall: !!this.job.onCall,
             fuelForBankedTimeEnabled: !!this.job.fuelForBankedTimeEnabled,
             payType: this.job.payType?.id ?? null,
+            hourlyRate: this.job.hourlyRate || null,
             contractedHoursPerWeek: this.job.contractedHoursPerWeek || null,
             overtimeThresholdHours: this.job.overtimeThresholdHours || null,
             fdLicenseClass: this.job.fdLicenseClass?.id ?? null,
@@ -590,6 +599,7 @@ export default {
       this.job.payType = this.payTypeOptions.find(
         (item) => item.id === data.payType,
       );
+      this.job.hourlyRate = data.hourlyRate ?? '';
       this.job.contractedHoursPerWeek = data.contractedHoursPerWeek ?? '';
       this.job.overtimeThresholdHours = data.overtimeThresholdHours ?? '44';
       this.job.fdLicenseClass = this.fdLicenseClassOptions.find(

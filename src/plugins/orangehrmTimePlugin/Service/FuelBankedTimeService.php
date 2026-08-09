@@ -217,13 +217,11 @@ class FuelBankedTimeService
 
     public function resolveHourlyRate(Employee $employee): ?float
     {
-        $salaries = $this->getDao()->getEmployeeSalaries($employee->getEmpNumber());
-        foreach ($salaries as $salary) {
-            $amount = $salary->getAmount();
-            if ($amount !== null && $amount !== '' && is_numeric($amount) && (float) $amount > 0) {
-                return (float) $amount;
-            }
+        $hourlyRate = $employee->getHourlyRate();
+        if ($hourlyRate === null || $hourlyRate === '' || !is_numeric($hourlyRate)) {
+            return null;
         }
-        return null;
+        $rate = (float) $hourlyRate;
+        return $rate > 0 ? $rate : null;
     }
 }
