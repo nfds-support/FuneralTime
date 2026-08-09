@@ -186,7 +186,7 @@ export default {
       {
         name: 'employee',
         slot: 'title',
-        title: $t('general.employee'),
+        title: $t('general.employee_name'),
         style: {flex: 1},
       },
       {name: 'createdAt', title: $t('general.date'), style: {flex: 1}},
