@@ -115,13 +115,47 @@ class BankedTimeService
     /**
      * @return int|null
      */
-    private function getBankedTimeLeaveTypeId(): ?int
+    public function getBankedTimeLeaveTypeId(): ?int
     {
         $value = $this->getConfigService()->getConfigDao()->getValue(self::CONFIG_BANKED_TIME_TYPE_ID);
         if ($value === null || $value === '') {
             return null;
         }
         return (int) $value;
+    }
+
+    public function isBankedTimeLeaveType(int $leaveTypeId): bool
+    {
+        $bankedTypeId = $this->getBankedTimeLeaveTypeId();
+        return $bankedTypeId !== null && $bankedTypeId === $leaveTypeId;
+    }
+
+    /**
+     * @param Employee $employee
+     * @return float
+     */
+    public function getHoursPerDayForEmployee(Employee $employee): float
+    {
+        return $this->getHoursPerDay($employee);
+    }
+
+    /**
+     * Convert leave entitlement days to display hours for Banked Time.
+     */
+    public function daysToHours(float $days, float $hoursPerDay): float
+    {
+        return round($days * $hoursPerDay, 4);
+    }
+
+    /**
+     * Convert hours to leave entitlement days for Banked Time.
+     */
+    public function hoursToDays(float $hours, float $hoursPerDay): float
+    {
+        if ($hoursPerDay <= 0) {
+            $hoursPerDay = self::DEFAULT_HOURS_PER_DAY;
+        }
+        return round($hours / $hoursPerDay, 4);
     }
 
     /**

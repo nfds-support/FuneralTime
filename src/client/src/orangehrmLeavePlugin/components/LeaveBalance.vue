@@ -83,10 +83,23 @@ export default {
     http.setIgnorePath('/api/v2/leave/leave-balance/leave-type');
     const {validateLeaveBalance} = useLeaveValidators(http);
 
+    const displayBalance = computed(() => {
+      const hoursPerDay = Number(state.meta?.hoursPerDay || 8);
+      if (state.meta?.balanceUnit === 'hours') {
+        return state.balance * hoursPerDay;
+      }
+      return state.balance;
+    });
+
     const leaveBalance = computed(() => {
-      return props.leaveData.type?.id
-        ? `${state.balance.toFixed(2)} Day(s)`
-        : '0.00 Day(s)';
+      if (!props.leaveData.type?.id) {
+        return state.meta?.balanceUnit === 'hours'
+          ? '0.00 Hour(s)'
+          : '0.00 Day(s)';
+      }
+      const unit =
+        state.meta?.balanceUnit === 'hours' ? 'Hour(s)' : 'Day(s)';
+      return `${displayBalance.value.toFixed(2)} ${unit}`;
     });
 
     const onModalOpen = () => {

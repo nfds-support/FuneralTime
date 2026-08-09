@@ -1,3 +1,10 @@
+New & Changed Features for OrangeHRM ver 5.9.7
+    New Features/Changes
+    -----------
+    - Time - Employees with Fuel for Banked Time enabled can apply fuel card spend against banked hours; approval deducts hours from Banked Time leave
+    - Time / PIM - Per-employee Fuel for Banked Time job setting; dedicated ESS apply page and Admin/Supervisor approval list under Time
+    - Leave - Banked Time leave balances and entitlements display in hours instead of days
+
 New & Changed Features for OrangeHRM ver 5.9.6
     New Features/Changes
     -----------

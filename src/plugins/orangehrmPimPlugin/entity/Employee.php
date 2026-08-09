@@ -310,6 +310,15 @@ class Employee
     private bool $onCall = false;
 
     /**
+     * When true, the employee can apply fuel card spend against banked time.
+     *
+     * @var bool
+     *
+     * @ORM\Column(name="fuel_for_banked_time_enabled", type="boolean", options={"default" : 0})
+     */
+    private bool $fuelForBankedTimeEnabled = false;
+
+    /**
      * @var string|null
      *
      * @ORM\Column(name="emp_oth_email", type="string", length=50, nullable=true)
@@ -1168,6 +1177,16 @@ class Employee
     public function setOnCall(bool $onCall): void
     {
         $this->onCall = $onCall;
+    }
+
+    public function isFuelForBankedTimeEnabled(): bool
+    {
+        return $this->fuelForBankedTimeEnabled;
+    }
+
+    public function setFuelForBankedTimeEnabled(bool $fuelForBankedTimeEnabled): void
+    {
+        $this->fuelForBankedTimeEnabled = $fuelForBankedTimeEnabled;
     }
 
     /**

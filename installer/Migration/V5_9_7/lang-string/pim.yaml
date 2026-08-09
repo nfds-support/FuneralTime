@@ -1,0 +1,5 @@
+langStrings:
+  -
+    unitId: fuel_for_banked_time_enabled
+    value: 'Fuel for Banked Time'
+    note: 'Employee job setting that allows applying fuel card spend against banked time'

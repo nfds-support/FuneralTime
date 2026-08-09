@@ -1,0 +1,37 @@
+apiv2_time_my_fuel_banked_time_request:
+  description: 'API-v2 Time - My Fuel for Banked Time Requests'
+  api: OrangeHRM\Time\Api\MyFuelBankedTimeRequestAPI
+  module: time
+  allowed: { read: true, create: true, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: ESS, permission: { read: true, create: true, update: false, delete: false } }
+
+apiv2_time_employee_fuel_banked_time_request:
+  description: 'API-v2 Time - Employee Fuel for Banked Time Requests'
+  api: OrangeHRM\Time\Api\EmployeeFuelBankedTimeRequestAPI
+  module: time
+  allowed: { read: true, create: false, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false } }
+
+apiv2_time_fuel_banked_time_request_action:
+  description: 'API-v2 Time - Fuel for Banked Time Request Actions'
+  api: OrangeHRM\Time\Api\FuelBankedTimeRequestActionAPI
+  module: time
+  allowed: { read: false, create: false, update: true, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: false, create: false, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: false, create: false, update: true, delete: false } }
+    - { role: ESS, permission: { read: false, create: false, update: true, delete: false } }
+
+apiv2_time_fuel_banked_time_eligibility:
+  description: 'API-v2 Time - Fuel for Banked Time Eligibility'
+  api: OrangeHRM\Time\Api\FuelBankedTimeEligibilityAPI
+  module: time
+  allowed: { read: true, create: false, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false } }
+    - { role: ESS, permission: { read: true, create: false, update: false, delete: false } }

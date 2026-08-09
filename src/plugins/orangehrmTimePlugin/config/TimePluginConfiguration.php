@@ -25,6 +25,7 @@ use OrangeHRM\Framework\PluginConfigurationInterface;
 use OrangeHRM\Framework\Services;
 use OrangeHRM\Time\Service\BankedTimeService;
 use OrangeHRM\Time\Service\CustomerService;
+use OrangeHRM\Time\Service\FuelBankedTimeService;
 use OrangeHRM\Time\Service\PayrollPeriodService;
 use OrangeHRM\Time\Service\ProjectService;
 use OrangeHRM\Time\Service\TimesheetService;
@@ -47,6 +48,7 @@ class TimePluginConfiguration implements PluginConfigurationInterface
         $this->getContainer()->register(Services::TIMESHEET_SERVICE, TimesheetService::class);
         $this->getContainer()->register(Services::PAYROLL_PERIOD_SERVICE, PayrollPeriodService::class);
         $this->getContainer()->register(Services::BANKED_TIME_SERVICE, BankedTimeService::class);
+        $this->getContainer()->register(Services::FUEL_BANKED_TIME_SERVICE, FuelBankedTimeService::class);
         $this->getContainer()->register(Services::UFCW_REMITTANCE_REPORT_SERVICE, UfcwRemittanceReportService::class);
         $this->getContainer()->register(Services::UFCW_REMITTANCE_SETTINGS_SERVICE, UfcwRemittanceSettingsService::class);
 

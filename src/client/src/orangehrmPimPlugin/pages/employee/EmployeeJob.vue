@@ -104,6 +104,17 @@
             </oxd-grid-item>
             <oxd-grid-item>
               <oxd-input-field
+                v-model="job.fuelForBankedTimeEnabled"
+                type="checkbox"
+                :label="$t('pim.fuel_for_banked_time_enabled')"
+                :option-label="$t('general.yes')"
+                :true-value="true"
+                :false-value="false"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
                 v-model="job.payType"
                 type="select"
                 :label="$t('pim.pay_type')"
@@ -273,6 +284,7 @@ const jobDetailsModel = {
   subunitId: [],
   locationId: [],
   onCall: false,
+  fuelForBankedTimeEnabled: false,
   payType: [],
   contractedHoursPerWeek: '',
   overtimeThresholdHours: '44',
@@ -472,6 +484,7 @@ export default {
             empStatusId: this.job.empStatusId?.id,
             locationId: this.job.locationId?.id,
             onCall: !!this.job.onCall,
+            fuelForBankedTimeEnabled: !!this.job.fuelForBankedTimeEnabled,
             payType: this.job.payType?.id ?? null,
             contractedHoursPerWeek: this.job.contractedHoursPerWeek || null,
             overtimeThresholdHours: this.job.overtimeThresholdHours || null,
@@ -573,6 +586,7 @@ export default {
         (item) => item.id === data.location?.id,
       );
       this.job.onCall = !!data.onCall;
+      this.job.fuelForBankedTimeEnabled = !!data.fuelForBankedTimeEnabled;
       this.job.payType = this.payTypeOptions.find(
         (item) => item.id === data.payType,
       );

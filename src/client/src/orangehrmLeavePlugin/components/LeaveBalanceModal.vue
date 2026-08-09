@@ -148,10 +148,20 @@ export default {
     items() {
       if (this.data) {
         const {taken, scheduled, pending} = this.data;
+        const factor = this.isHours ? this.hoursPerDay : 1;
         return [
-          {status: this.$t('leave.taken'), days: taken.toFixed(2)},
-          {status: this.$t('leave.scheduled'), days: scheduled.toFixed(2)},
-          {status: this.$t('leave.pending_approval'), days: pending.toFixed(2)},
+          {
+            status: this.$t('leave.taken'),
+            days: (taken * factor).toFixed(2),
+          },
+          {
+            status: this.$t('leave.scheduled'),
+            days: (scheduled * factor).toFixed(2),
+          },
+          {
+            status: this.$t('leave.pending_approval'),
+            days: (pending * factor).toFixed(2),
+          },
         ];
       }
       return [];
@@ -172,15 +182,36 @@ export default {
       }
       return '';
     },
+    isHours() {
+      return this.meta?.balanceUnit === 'hours';
+    },
+    hoursPerDay() {
+      return Number(this.meta?.hoursPerDay || 8);
+    },
+    unitLabel() {
+      return this.isHours ? this.$t('leave.hour_s') : 'Day(s)';
+    },
     totalEntitlement() {
-      return this.data?.entitled
-        ? `${parseFloat(this.data.entitled).toFixed(2)} Day(s)`
-        : '0.00 Day(s)';
+      const value = this.data?.entitled ? parseFloat(this.data.entitled) : 0;
+      const display = this.isHours ? value * this.hoursPerDay : value;
+      return `${display.toFixed(2)} ${this.unitLabel}`;
     },
     leaveBalance() {
-      return this.data?.balance
-        ? `${parseFloat(this.data.balance).toFixed(2)} Day(s)`
-        : '0.00 Day(s)';
+      const value = this.data?.balance ? parseFloat(this.data.balance) : 0;
+      const display = this.isHours ? value * this.hoursPerDay : value;
+      return `${display.toFixed(2)} ${this.unitLabel}`;
+    },
+  },
+  watch: {
+    isHours: {
+      immediate: true,
+      handler(isHours) {
+        if (this.headers?.[1]) {
+          this.headers[1].title = isHours
+            ? this.$t('leave.hours')
+            : this.$t('leave.days');
+        }
+      },
     },
   },
   methods: {
