@@ -135,20 +135,51 @@ export default {
     const {jsDateFormat} = useDateFormat();
     const {locale} = useLocale();
 
+    const bankedTimeLeaveTypeId = ref(null);
+    const hoursPerDay = ref(8);
+
+    const eligibilityHttp = new APIService(
+      window.appGlobal.baseUrl,
+      '/api/v2/time/fuel-banked-time/eligibility',
+    );
+    eligibilityHttp
+      .get(0)
+      .then(({data}) => {
+        bankedTimeLeaveTypeId.value = data.data?.bankedTimeLeaveTypeId ?? null;
+        hoursPerDay.value = Number(data.data?.hoursPerDay || 8);
+      })
+      .catch(() => {
+        bankedTimeLeaveTypeId.value = null;
+      });
+
+    const isBankedTimeType = (leaveTypeId, leaveTypeName = null) =>
+      (bankedTimeLeaveTypeId.value != null &&
+        leaveTypeId === bankedTimeLeaveTypeId.value) ||
+      leaveTypeName === 'Banked Time';
+
     const entitlementNormalizer = (data) => {
       return data.map((item) => {
+        const banked = isBankedTimeType(
+          item.leaveType?.id,
+          item.leaveType?.name,
+        );
+        const entitlementValue = banked
+          ? Number(item.entitlement) * hoursPerDay.value
+          : item.entitlement;
         return {
           id: item.id,
           leaveType:
             item.leaveType.name +
             `${item.leaveType.deleted ? $t('general.deleted') : ''}`,
+          leaveTypeId: item.leaveType?.id,
           entitlementType: item.entitlementType.name,
           fromDate: formatDate(parseDate(item.fromDate), jsDateFormat, {
             locale,
           }),
           toDate: formatDate(parseDate(item.toDate), jsDateFormat, {locale}),
-          days: item.entitlement,
+          days: Number(entitlementValue).toFixed(2),
           isSelectable: item.deletable,
+          isBankedTime: banked,
         };
       });
     };
@@ -168,8 +199,26 @@ export default {
       prefetch: props.employee || props.prefetch,
     });
 
+    const showingBankedHours = computed(() => {
+      return isBankedTimeType(
+        filters.value.leaveType?.id,
+        filters.value.leaveType?.label || filters.value.leaveType?.name,
+      );
+    });
+
     const totalEntitlements = computed(() => {
       const sum = response.value.meta?.sum ? response.value.meta.sum : 0;
+      if (showingBankedHours.value) {
+        return `Total ${(parseFloat(sum) * hoursPerDay.value).toFixed(2)} Hour(s)`;
+      }
+      const items = response.value.data || [];
+      if (
+        items.length > 0 &&
+        items.every((item) => item.isBankedTime) &&
+        bankedTimeLeaveTypeId.value != null
+      ) {
+        return `Total ${(parseFloat(sum) * hoursPerDay.value).toFixed(2)} Hour(s)`;
+      }
       return `Total ${parseFloat(sum).toFixed(2)} Day(s)`;
     });
 
@@ -188,6 +237,7 @@ export default {
       filters,
       totalEntitlements,
       showDatatable,
+      showingBankedHours,
     };
   },
 
@@ -221,7 +271,13 @@ export default {
           title: this.$t('leave.valid_to'),
           style: {flex: 1},
         },
-        {name: 'days', title: this.$t('leave.days'), style: {flex: 1}},
+        {
+          name: 'days',
+          title: this.showingBankedHours
+            ? this.$t('leave.hours')
+            : this.$t('leave.days'),
+          style: {flex: 1},
+        },
       ];
       const headerActions = {
         name: 'actions',

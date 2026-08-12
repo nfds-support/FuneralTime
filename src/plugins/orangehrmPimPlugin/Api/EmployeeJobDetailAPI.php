@@ -45,7 +45,9 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
     public const PARAMETER_SUBUNIT_ID = 'subunitId';
     public const PARAMETER_LOCATION_ID = 'locationId';
     public const PARAMETER_ON_CALL = 'onCall';
+    public const PARAMETER_FUEL_FOR_BANKED_TIME_ENABLED = 'fuelForBankedTimeEnabled';
     public const PARAMETER_PAY_TYPE = 'payType';
+    public const PARAMETER_HOURLY_RATE = 'hourlyRate';
     public const PARAMETER_CONTRACTED_HOURS_PER_WEEK = 'contractedHoursPerWeek';
     public const PARAMETER_OVERTIME_THRESHOLD_HOURS = 'overtimeThresholdHours';
     public const PARAMETER_FD_LICENSE_CLASS = 'fdLicenseClass';
@@ -176,9 +178,17 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_ON_CALL
         );
+        $fuelForBankedTimeEnabled = $this->getRequestParams()->getBooleanOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_FUEL_FOR_BANKED_TIME_ENABLED
+        );
         $payType = $this->getRequestParams()->getStringOrNull(
             RequestParams::PARAM_TYPE_BODY,
             self::PARAMETER_PAY_TYPE
+        );
+        $hourlyRate = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_HOURLY_RATE
         );
         $contractedHours = $this->getRequestParams()->getStringOrNull(
             RequestParams::PARAM_TYPE_BODY,
@@ -211,7 +221,11 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
         if (!is_null($onCall)) {
             $employee->setOnCall($onCall);
         }
+        if (!is_null($fuelForBankedTimeEnabled)) {
+            $employee->setFuelForBankedTimeEnabled($fuelForBankedTimeEnabled);
+        }
         $employee->setPayType($payType);
+        $employee->setHourlyRate($hourlyRate);
         $employee->setContractedHoursPerWeek($contractedHours);
         $employee->setOvertimeThresholdHours($overtimeThreshold);
         $employee->setFdLicenseClass($fdLicenseClass);
@@ -281,9 +295,23 @@ class EmployeeJobDetailAPI extends Endpoint implements ResourceEndpoint
             ),
             $this->getValidationDecorator()->notRequiredParamRule(
                 new ParamRule(
+                    self::PARAMETER_FUEL_FOR_BANKED_TIME_ENABLED,
+                    new Rule(Rules::BOOL_VAL)
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
                     self::PARAMETER_PAY_TYPE,
                     new Rule(Rules::IN, [self::PAY_TYPES])
                 )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_HOURLY_RATE,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::LENGTH, [null, 20])
+                ),
+                true
             ),
             $this->getValidationDecorator()->notRequiredParamRule(
                 new ParamRule(

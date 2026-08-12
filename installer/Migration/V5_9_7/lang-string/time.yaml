@@ -1,0 +1,37 @@
+langStrings:
+  -
+    unitId: fuel_for_banked_time
+    value: 'Fuel for Banked Time'
+  -
+    unitId: menu_fuel_for_banked_time
+    value: 'Fuel for Banked Time'
+  -
+    unitId: menu_employee_fuel_requests
+    value: 'Employee Fuel Requests'
+  -
+    unitId: apply_fuel_for_banked_time
+    value: 'Apply Fuel for Banked Time'
+  -
+    unitId: fuel_amount
+    value: 'Fuel Amount'
+  -
+    unitId: hourly_rate
+    value: 'Hourly Rate'
+  -
+    unitId: hours_to_deduct
+    value: 'Hours to Deduct'
+  -
+    unitId: banked_hours_available
+    value: 'Banked Hours Available'
+  -
+    unitId: fuel_for_banked_time_disabled
+    value: 'Fuel for banked time is not enabled for your employee record. Contact your administrator.'
+  -
+    unitId: fuel_hourly_rate_missing
+    value: 'An hourly rate is required on your job record before you can apply fuel for banked time.'
+  -
+    unitId: employee_fuel_for_banked_time
+    value: 'Employee Fuel for Banked Time'
+  -
+    unitId: my_fuel_for_banked_time
+    value: 'My Fuel for Banked Time'

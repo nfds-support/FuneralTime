@@ -362,3 +362,45 @@ time_download_ufcw_remittance_report:
   path: /time/downloadUfcwRemittanceReport
   controller: OrangeHRM\Time\Controller\UfcwRemittanceReportDownloadController::handle
   methods: [ GET, POST ]
+
+apiv2_time_my_fuel_banked_time_requests:
+  path: /api/v2/time/fuel-banked-time/requests
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST ]
+  defaults:
+    _api: OrangeHRM\Time\Api\MyFuelBankedTimeRequestAPI
+
+apiv2_time_employee_fuel_banked_time_requests:
+  path: /api/v2/time/employees/fuel-banked-time/requests
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET ]
+  defaults:
+    _api: OrangeHRM\Time\Api\EmployeeFuelBankedTimeRequestAPI
+
+apiv2_time_fuel_banked_time_request_action:
+  path: /api/v2/time/fuel-banked-time/requests/{id}/action
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ PUT ]
+  defaults:
+    _api: OrangeHRM\Time\Api\FuelBankedTimeRequestActionAPI
+    _key: id
+  requirements:
+    id: '\d+'
+
+apiv2_time_fuel_banked_time_eligibility:
+  path: /api/v2/time/fuel-banked-time/eligibility
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET ]
+  defaults:
+    id: 0
+    _api: OrangeHRM\Time\Api\FuelBankedTimeEligibilityAPI
+
+time_my_fuel_banked_time:
+  path: /time/viewMyFuelBankedTime
+  controller: OrangeHRM\Time\Controller\MyFuelBankedTimeController::handle
+  methods: [ GET ]
+
+time_employee_fuel_banked_time:
+  path: /time/viewEmployeeFuelBankedTime
+  controller: OrangeHRM\Time\Controller\EmployeeFuelBankedTimeController::handle
+  methods: [ GET ]

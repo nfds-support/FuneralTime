@@ -46,6 +46,7 @@ use OrangeHRM\Leave\Service\LeaveApplicationService;
 use OrangeHRM\Leave\Traits\Service\LeaveEntitlementServiceTrait;
 use OrangeHRM\Leave\Traits\Service\LeaveTypeServiceTrait;
 use OrangeHRM\Pim\Traits\Service\EmployeeServiceTrait;
+use OrangeHRM\Time\Traits\Service\BankedTimeServiceTrait;
 
 class LeaveBalanceAPI extends Endpoint implements ResourceEndpoint
 {
@@ -56,11 +57,15 @@ class LeaveBalanceAPI extends Endpoint implements ResourceEndpoint
     use NormalizerServiceTrait;
     use DateTimeHelperTrait;
     use AuthUserTrait;
+    use BankedTimeServiceTrait;
 
     public const PARAMETER_BALANCE = 'balance';
 
     public const META_PARAMETER_LEAVE_TYPE = 'leaveType';
     public const META_PARAMETER_EMPLOYEE = 'employee';
+    public const META_PARAMETER_BALANCE_UNIT = 'balanceUnit';
+    public const META_PARAMETER_HOURS_PER_DAY = 'hoursPerDay';
+    public const META_PARAMETER_BANKED_TIME_LEAVE_TYPE_ID = 'bankedTimeLeaveTypeId';
 
     private ?LeaveApplicationService $leaveApplicationService = null;
 
@@ -220,6 +225,12 @@ class LeaveBalanceAPI extends Endpoint implements ResourceEndpoint
             ];
         }
 
+        $employee = $this->getEmployeeService()->getEmployeeByEmpNumber($empNumber);
+        $hoursPerDay = $employee !== null
+            ? $this->getBankedTimeService()->getHoursPerDayForEmployee($employee)
+            : \OrangeHRM\Time\Service\BankedTimeService::DEFAULT_HOURS_PER_DAY;
+        $isBankedTime = $this->getBankedTimeService()->isBankedTimeLeaveType($leaveTypeId);
+
         return new EndpointResourceResult(
             ArrayModel::class,
             $result,
@@ -227,6 +238,10 @@ class LeaveBalanceAPI extends Endpoint implements ResourceEndpoint
                 [
                     self::META_PARAMETER_EMPLOYEE => $this->getEmployeeService()->getEmployeeAsArray($empNumber),
                     self::META_PARAMETER_LEAVE_TYPE => $this->getLeaveTypeAsArray($leaveTypeId),
+                    self::META_PARAMETER_BALANCE_UNIT => $isBankedTime ? 'hours' : 'days',
+                    self::META_PARAMETER_HOURS_PER_DAY => $hoursPerDay,
+                    self::META_PARAMETER_BANKED_TIME_LEAVE_TYPE_ID => $this->getBankedTimeService()
+                        ->getBankedTimeLeaveTypeId(),
                 ]
             )
         );

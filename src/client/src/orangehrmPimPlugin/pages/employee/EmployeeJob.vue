@@ -104,10 +104,28 @@
             </oxd-grid-item>
             <oxd-grid-item>
               <oxd-input-field
+                v-model="job.fuelForBankedTimeEnabled"
+                type="checkbox"
+                :label="$t('pim.fuel_for_banked_time_enabled')"
+                :option-label="$t('general.yes')"
+                :true-value="true"
+                :false-value="false"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
                 v-model="job.payType"
                 type="select"
                 :label="$t('pim.pay_type')"
                 :options="payTypeOptions"
+                :disabled="!hasUpdatePermissions"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item>
+              <oxd-input-field
+                v-model="job.hourlyRate"
+                :label="$t('pim.hourly_rate')"
                 :disabled="!hasUpdatePermissions"
               />
             </oxd-grid-item>
@@ -273,7 +291,9 @@ const jobDetailsModel = {
   subunitId: [],
   locationId: [],
   onCall: false,
+  fuelForBankedTimeEnabled: false,
   payType: [],
+  hourlyRate: '',
   contractedHoursPerWeek: '',
   overtimeThresholdHours: '44',
   fdLicenseClass: [],
@@ -472,7 +492,9 @@ export default {
             empStatusId: this.job.empStatusId?.id,
             locationId: this.job.locationId?.id,
             onCall: !!this.job.onCall,
+            fuelForBankedTimeEnabled: !!this.job.fuelForBankedTimeEnabled,
             payType: this.job.payType?.id ?? null,
+            hourlyRate: this.job.hourlyRate || null,
             contractedHoursPerWeek: this.job.contractedHoursPerWeek || null,
             overtimeThresholdHours: this.job.overtimeThresholdHours || null,
             fdLicenseClass: this.job.fdLicenseClass?.id ?? null,
@@ -573,9 +595,11 @@ export default {
         (item) => item.id === data.location?.id,
       );
       this.job.onCall = !!data.onCall;
+      this.job.fuelForBankedTimeEnabled = !!data.fuelForBankedTimeEnabled;
       this.job.payType = this.payTypeOptions.find(
         (item) => item.id === data.payType,
       );
+      this.job.hourlyRate = data.hourlyRate ?? '';
       this.job.contractedHoursPerWeek = data.contractedHoursPerWeek ?? '';
       this.job.overtimeThresholdHours = data.overtimeThresholdHours ?? '44';
       this.job.fdLicenseClass = this.fdLicenseClassOptions.find(

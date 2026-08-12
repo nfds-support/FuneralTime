@@ -310,6 +310,15 @@ class Employee
     private bool $onCall = false;
 
     /**
+     * When true, the employee can apply fuel card spend against banked time.
+     *
+     * @var bool
+     *
+     * @ORM\Column(name="fuel_for_banked_time_enabled", type="boolean", options={"default" : 0})
+     */
+    private bool $fuelForBankedTimeEnabled = false;
+
+    /**
      * @var string|null
      *
      * @ORM\Column(name="emp_oth_email", type="string", length=50, nullable=true)
@@ -400,6 +409,15 @@ class Employee
      * @ORM\Column(name="pay_type", type="string", length=20, nullable=true)
      */
     private ?string $payType = null;
+
+    /**
+     * Hourly rate used for overtime/banked-time calculations for both hourly and salaried employees.
+     *
+     * @var string|null
+     *
+     * @ORM\Column(name="hourly_rate", type="decimal", precision=12, scale=2, nullable=true)
+     */
+    private ?string $hourlyRate = null;
 
     /**
      * @var string|null
@@ -1170,6 +1188,16 @@ class Employee
         $this->onCall = $onCall;
     }
 
+    public function isFuelForBankedTimeEnabled(): bool
+    {
+        return $this->fuelForBankedTimeEnabled;
+    }
+
+    public function setFuelForBankedTimeEnabled(bool $fuelForBankedTimeEnabled): void
+    {
+        $this->fuelForBankedTimeEnabled = $fuelForBankedTimeEnabled;
+    }
+
     /**
      * @return string|null
      */
@@ -1376,6 +1404,16 @@ class Employee
     public function setPayType(?string $payType): void
     {
         $this->payType = $payType;
+    }
+
+    public function getHourlyRate(): ?string
+    {
+        return $this->hourlyRate;
+    }
+
+    public function setHourlyRate(?string $hourlyRate): void
+    {
+        $this->hourlyRate = $hourlyRate;
     }
 
     /**

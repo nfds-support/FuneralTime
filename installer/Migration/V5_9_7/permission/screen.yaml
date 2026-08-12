@@ -1,0 +1,13 @@
+'My Fuel for Banked Time':
+  module: time
+  url: viewMyFuelBankedTime
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: ESS, permission: { read: true, create: true, update: false, delete: false } }
+
+'Employee Fuel for Banked Time':
+  module: time
+  url: viewEmployeeFuelBankedTime
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: true, delete: false } }

@@ -1,0 +1,7 @@
+langStrings:
+  -
+    unitId: hour_s
+    value: 'Hour(s)'
+  -
+    unitId: hours
+    value: 'Hours'

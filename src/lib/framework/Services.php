@@ -313,6 +313,11 @@ final class Services
     public const BANKED_TIME_SERVICE = 'time.banked_time_service';
 
     /**
+     * @see \OrangeHRM\Time\Service\FuelBankedTimeService
+     */
+    public const FUEL_BANKED_TIME_SERVICE = 'time.fuel_banked_time_service';
+
+    /**
      * @see \OrangeHRM\Time\Service\UfcwRemittanceReportService
      */
     public const UFCW_REMITTANCE_REPORT_SERVICE = 'time.ufcw_remittance_report_service';
