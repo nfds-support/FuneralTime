@@ -1,3 +1,10 @@
+New & Changed Features for OrangeHRM ver 5.9.9
+    New Features/Changes
+    -----------
+    - Discipline - Complaint source (team member / client / general public), more details, manager notes, and action plan on cases
+    - Performance - BambooHR-style monthly self-assessment and manager review (My Monthly Assessments / Team Monthly Assessments)
+    - Core / UI - Rich text editing (bold, lists, links, headings) on long-form fields: policies, discipline cases, monthly assessments, job titles, vacancies, and performance comments; HTML sanitized on save
+
 New & Changed Features for OrangeHRM ver 5.9.8
     New Features/Changes
     -----------

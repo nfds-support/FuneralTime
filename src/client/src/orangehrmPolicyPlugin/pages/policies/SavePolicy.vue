@@ -64,16 +64,14 @@
               <date-input v-model="form.dueDate" :label="$t('policy.due_date')" />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.summary"
-                type="textarea"
                 :label="$t('policy.summary')"
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.content"
-                type="textarea"
                 :label="$t('policy.content')"
               />
             </oxd-grid-item>

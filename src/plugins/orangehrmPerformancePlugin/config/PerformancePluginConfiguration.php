@@ -21,6 +21,7 @@ use OrangeHRM\Performance\Service\KpiService;
 use OrangeHRM\Performance\Service\PerformanceTrackerLogService;
 use OrangeHRM\Performance\Service\PerformanceTrackerService;
 use OrangeHRM\Performance\Service\PerformanceReviewService;
+use OrangeHRM\Performance\Service\MonthlyAssessmentService;
 use OrangeHRM\Core\Traits\ServiceContainerTrait;
 use OrangeHRM\Framework\PluginConfigurationInterface;
 use OrangeHRM\Framework\Http\Request;
@@ -50,6 +51,10 @@ class PerformancePluginConfiguration implements PluginConfigurationInterface
         $this->getContainer()->register(
             Services::PERFORMANCE_TRACKER_LOG_SERVICE,
             PerformanceTrackerLogService::class
+        );
+        $this->getContainer()->register(
+            Services::MONTHLY_ASSESSMENT_SERVICE,
+            MonthlyAssessmentService::class
         );
     }
 }

@@ -101,6 +101,7 @@ export default {
           id: item.id,
           caseType: item.caseType,
           subject: item.subject,
+          complaintSource: item.complaintSource,
           status: item.status,
           severity: item.severity,
           incidentDate: item.incidentDate,
@@ -162,6 +163,11 @@ export default {
           name: 'subject',
           title: this.$t('discipline.case_subject'),
           sortField: 'disciplineCase.subject',
+          style: {flex: 1},
+        },
+        {
+          name: 'complaintSource',
+          title: this.$t('discipline.complaint_source'),
           style: {flex: 1},
         },
         {

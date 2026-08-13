@@ -35,14 +35,11 @@
         <oxd-text class="orangehrm-vacancy-description" tag="p">
           {{ $t('general.description') }}
         </oxd-text>
-        <oxd-text tag="p" :class="descriptionClasses">
-          <pre class="orangehrm-applicant-card-pre-tag"
-            >{{ vacancyDescription }}
-        </pre
-          >
-        </oxd-text>
+        <div :class="descriptionClasses">
+          <rich-text-display :html="vacancyDescription" />
+        </div>
         <div
-          v-if="vacancyDescription.length > descriptionLength"
+          v-if="plainDescriptionLength > descriptionLength"
           class="orangehrm-vacancy-card-footer"
         >
           <oxd-text
@@ -320,6 +317,16 @@ export default {
     descriptionLength() {
       if (this.isMobile) return 150;
       return this.windowWidth < 1920 ? 250 : 400;
+    },
+    plainDescriptionLength() {
+      if (!this.vacancyDescription) {
+        return 0;
+      }
+      return String(this.vacancyDescription)
+        .replace(/<[^>]+>/g, ' ')
+        .replace(/&nbsp;/gi, ' ')
+        .replace(/\s+/g, ' ')
+        .trim().length;
     },
     formattedFileSize() {
       return Math.round((this.maxFileSize / (1024 * 1024)) * 100) / 100;

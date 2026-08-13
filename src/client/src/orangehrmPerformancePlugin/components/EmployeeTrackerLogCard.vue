@@ -60,9 +60,10 @@
           />
         </div>
         <div class="orangehrm-employee-tracker-log-body">
-          <oxd-text tag="p" class="orangehrm-employee-tracker-log-body-text">
-            {{ trackerLog.comment }}
-          </oxd-text>
+          <rich-text-display
+            class="orangehrm-employee-tracker-log-body-text"
+            :html="trackerLog.comment"
+          />
         </div>
       </div>
       <div class="orangehrm-employee-tracker-log-reviewer-date">

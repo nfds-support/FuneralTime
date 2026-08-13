@@ -56,10 +56,8 @@
         <oxd-text type="subtitle-2">
           {{ $t('performance.final_comments') }}
         </oxd-text>
-        <oxd-input-field
+        <rich-text-input
           v-if="editable"
-          rows="1"
-          type="textarea"
           :model-value="finalComment"
           :rules="rules.finalComment"
           @update:model-value="$emit('update:finalComment', $event)"

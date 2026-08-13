@@ -1,0 +1,89 @@
+langStrings:
+  -
+    unitId: my_monthly_assessments
+    value: 'My Monthly Assessments'
+    note: ''
+  -
+    unitId: team_monthly_assessments
+    value: 'Team Monthly Assessments'
+    note: ''
+  -
+    unitId: start_assessment
+    value: 'Start Assessment'
+    note: ''
+  -
+    unitId: edit_monthly_assessment
+    value: 'Edit Monthly Assessment'
+    note: ''
+  -
+    unitId: assessment_period
+    value: 'Period'
+    note: ''
+  -
+    unitId: self_assessment
+    value: 'Self Assessment'
+    note: ''
+  -
+    unitId: manager_assessment
+    value: 'Manager Assessment'
+    note: ''
+  -
+    unitId: self_rating
+    value: 'Self Rating'
+    note: ''
+  -
+    unitId: manager_rating
+    value: 'Manager Rating'
+    note: ''
+  -
+    unitId: overall_rating
+    value: 'Overall Rating'
+    note: ''
+  -
+    unitId: engagement_rating
+    value: 'Engagement'
+    note: ''
+  -
+    unitId: accomplishments
+    value: 'What went well this month?'
+    note: ''
+  -
+    unitId: areas_to_improve
+    value: 'What could be improved?'
+    note: ''
+  -
+    unitId: goals_next_month
+    value: 'Goals for next month'
+    note: ''
+  -
+    unitId: support_needed
+    value: 'Support needed from manager'
+    note: ''
+  -
+    unitId: strengths
+    value: 'Strengths / what they did well'
+    note: ''
+  -
+    unitId: goals_support
+    value: 'How will you support their goals?'
+    note: ''
+  -
+    unitId: follow_up_notes
+    value: 'Follow-up notes'
+    note: ''
+  -
+    unitId: save_draft
+    value: 'Save Draft'
+    note: ''
+  -
+    unitId: submit_assessment
+    value: 'Submit Assessment'
+    note: ''
+  -
+    unitId: month
+    value: 'Month'
+    note: ''
+  -
+    unitId: year
+    value: 'Year'
+    note: ''

@@ -47,6 +47,11 @@ class DisciplineCase
     public const SEVERITY_HIGH = 'HIGH';
     public const SEVERITY_CRITICAL = 'CRITICAL';
 
+    public const SOURCE_TEAM_MEMBER = 'TEAM_MEMBER';
+    public const SOURCE_CLIENT = 'CLIENT';
+    public const SOURCE_GENERAL_PUBLIC = 'GENERAL_PUBLIC';
+    public const SOURCE_OTHER = 'OTHER';
+
     /**
      * @var int
      *
@@ -99,6 +104,34 @@ class DisciplineCase
      * @ORM\Column(name="description", type="text", nullable=true)
      */
     private ?string $description = null;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name="complaint_source", type="string", length=40, nullable=true)
+     */
+    private ?string $complaintSource = null;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name="details", type="text", nullable=true)
+     */
+    private ?string $details = null;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name="manager_notes", type="text", nullable=true)
+     */
+    private ?string $managerNotes = null;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name="action_plan", type="text", nullable=true)
+     */
+    private ?string $actionPlan = null;
 
     /**
      * @var DateTime|null
@@ -215,6 +248,46 @@ class DisciplineCase
     public function setDescription(?string $description): void
     {
         $this->description = $description;
+    }
+
+    public function getComplaintSource(): ?string
+    {
+        return $this->complaintSource;
+    }
+
+    public function setComplaintSource(?string $complaintSource): void
+    {
+        $this->complaintSource = $complaintSource;
+    }
+
+    public function getDetails(): ?string
+    {
+        return $this->details;
+    }
+
+    public function setDetails(?string $details): void
+    {
+        $this->details = $details;
+    }
+
+    public function getManagerNotes(): ?string
+    {
+        return $this->managerNotes;
+    }
+
+    public function setManagerNotes(?string $managerNotes): void
+    {
+        $this->managerNotes = $managerNotes;
+    }
+
+    public function getActionPlan(): ?string
+    {
+        return $this->actionPlan;
+    }
+
+    public function setActionPlan(?string $actionPlan): void
+    {
+        $this->actionPlan = $actionPlan;
     }
 
     public function getIncidentDate(): ?DateTime

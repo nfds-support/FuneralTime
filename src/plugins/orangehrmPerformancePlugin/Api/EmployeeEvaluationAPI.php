@@ -241,8 +241,10 @@ class EmployeeEvaluationAPI extends SupervisorEvaluationAPI
      */
     protected function setReviewRatingsParams(PerformanceReview $review): void
     {
-        $ratings = $this->getRequestParams()
-            ->getArray(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_RATINGS);
+        $ratings = $this->sanitizeRichTextCommentsInRatings(
+            $this->getRequestParams()
+                ->getArray(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_RATINGS)
+        );
         $this->getPerformanceReviewService()->saveAndUpdateReviewRatings(
             $review,
             $ratings,

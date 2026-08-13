@@ -69,6 +69,26 @@ export const shouldNotExceedCharLength = function (charLength: number) {
   };
 };
 
+/**
+ * Length check against visible text only (ignores HTML tags from rich-text fields).
+ */
+export const shouldNotExceedPlainTextLength = function (charLength: number) {
+  return function (value: string): boolean | string {
+    if (!value) {
+      return true;
+    }
+    const plain = String(value)
+      .replace(/<[^>]+>/g, ' ')
+      .replace(/&nbsp;/gi, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+    return (
+      plain.length <= charLength ||
+      translate('general.should_be_less_n_characters', {amount: charLength})
+    );
+  };
+};
+
 export const validDateFormat = function (
   displayFormat = 'yyyy-mm-dd',
   dateFormat = 'yyyy-MM-dd',

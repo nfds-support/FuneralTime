@@ -1,0 +1,33 @@
+langStrings:
+  -
+    unitId: complaint_source
+    value: 'Complaint Source'
+    note: ''
+  -
+    unitId: source_team_member
+    value: 'Other Team Member'
+    note: ''
+  -
+    unitId: source_client
+    value: 'Client'
+    note: ''
+  -
+    unitId: source_general_public
+    value: 'General Public'
+    note: ''
+  -
+    unitId: source_other
+    value: 'Other'
+    note: ''
+  -
+    unitId: more_details
+    value: 'More Details'
+    note: ''
+  -
+    unitId: manager_notes
+    value: 'Manager Notes'
+    note: ''
+  -
+    unitId: action_plan
+    value: 'Action Plan'
+    note: ''

@@ -1,0 +1,30 @@
+'My Monthly Assessments':
+  module: performance
+  url: viewMyMonthlyAssessments
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: ESS, permission: { read: true, create: true, update: true, delete: false } }
+
+'Team Monthly Assessments':
+  module: performance
+  url: viewTeamMonthlyAssessments
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
+
+'Save Monthly Assessment':
+  module: performance
+  url: saveMonthlyAssessment
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: ESS, permission: { read: true, create: true, update: true, delete: false } }
+
+'Edit Monthly Assessment':
+  module: performance
+  url: editMonthlyAssessment/{id}
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: ESS, permission: { read: true, create: true, update: true, delete: false } }
