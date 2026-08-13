@@ -71,6 +71,7 @@ import ProviderList from './pages/socialMediaAuth/ProviderList.vue';
 import AddProvider from './pages/socialMediaAuth/AddProvider.vue';
 import EditProvider from './pages/socialMediaAuth/EditProvider.vue';
 import FixLanguageErrors from './pages/languageImport/FixLanguageStringErrors.vue';
+import OrangeHRMDataImport from './pages/orangehrmDataImport/OrangeHRMDataImport.vue';
 
 export default {
   'job-title-list': JobTitle,
@@ -129,4 +130,5 @@ export default {
   'add-auth-provider': AddProvider,
   'edit-auth-provider': EditProvider,
   'fix-language-errors': FixLanguageErrors,
+  'orangehrm-data-import': OrangeHRMDataImport,
 };

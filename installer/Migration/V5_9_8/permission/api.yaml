@@ -1,0 +1,15 @@
+apiv2_admin_orangehrm_import_csv:
+  description: 'API-v2 Admin - OrangeHRM employee CSV import'
+  api: OrangeHRM\Admin\Api\OrangeHRMDataImportCsvAPI
+  module: admin
+  allowed: { read: false, create: true, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: false, create: true, update: false, delete: false } }
+
+apiv2_admin_orangehrm_import_database:
+  description: 'API-v2 Admin - OrangeHRM database import'
+  api: OrangeHRM\Admin\Api\OrangeHRMDataImportDatabaseAPI
+  module: admin
+  allowed: { read: false, create: true, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: false, create: true, update: false, delete: false } }

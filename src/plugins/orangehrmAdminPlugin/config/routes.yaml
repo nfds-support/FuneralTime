@@ -640,3 +640,22 @@ admin_workspace_notification_configuration:
   path: /admin/workspaceNotificationConfiguration
   controller: OrangeHRM\Admin\Controller\WorkspaceNotificationConfigurationController::handle
   methods: [ GET ]
+
+apiv2_admin_orangehrm_import_csv:
+  path: /api/v2/admin/orangehrm-import/csv
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ POST ]
+  defaults:
+    _api: OrangeHRM\Admin\Api\OrangeHRMDataImportCsvAPI
+
+apiv2_admin_orangehrm_import_database:
+  path: /api/v2/admin/orangehrm-import/database
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ POST ]
+  defaults:
+    _api: OrangeHRM\Admin\Api\OrangeHRMDataImportDatabaseAPI
+
+admin_orangehrm_data_import:
+  path: /admin/viewOrangeHRMDataImport
+  controller: OrangeHRM\Admin\Controller\OrangeHRMDataImportController::handle
+  methods: [ GET ]
