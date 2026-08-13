@@ -398,6 +398,11 @@ final class Services
      */
     public const PERFORMANCE_TRACKER_LOG_SERVICE = 'performance.performance_tracker_log_service';
 
+    /**
+     * @see \OrangeHRM\Performance\Service\MonthlyAssessmentService
+     */
+    public const MONTHLY_ASSESSMENT_SERVICE = 'performance.monthly_assessment_service';
+
     ///////////////////////////////////////////////////////////////
     /// Dashboard plugin services
     ///////////////////////////////////////////////////////////////

@@ -51,6 +51,10 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_CATEGORY = 'category';
     public const PARAMETER_SUBJECT = 'subject';
     public const PARAMETER_DESCRIPTION = 'description';
+    public const PARAMETER_COMPLAINT_SOURCE = 'complaintSource';
+    public const PARAMETER_DETAILS = 'details';
+    public const PARAMETER_MANAGER_NOTES = 'managerNotes';
+    public const PARAMETER_ACTION_PLAN = 'actionPlan';
     public const PARAMETER_INCIDENT_DATE = 'incidentDate';
     public const PARAMETER_STATUS = 'status';
     public const PARAMETER_SEVERITY = 'severity';
@@ -233,6 +237,26 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
                 new ParamRule(self::PARAMETER_DESCRIPTION, new Rule(Rules::STRING_TYPE))
             ),
             $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_COMPLAINT_SOURCE,
+                    new Rule(Rules::IN, [[
+                        DisciplineCase::SOURCE_TEAM_MEMBER,
+                        DisciplineCase::SOURCE_CLIENT,
+                        DisciplineCase::SOURCE_GENERAL_PUBLIC,
+                        DisciplineCase::SOURCE_OTHER,
+                    ]])
+                )
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(self::PARAMETER_DETAILS, new Rule(Rules::STRING_TYPE))
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(self::PARAMETER_MANAGER_NOTES, new Rule(Rules::STRING_TYPE))
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(self::PARAMETER_ACTION_PLAN, new Rule(Rules::STRING_TYPE))
+            ),
+            $this->getValidationDecorator()->notRequiredParamRule(
                 new ParamRule(self::PARAMETER_INCIDENT_DATE, new Rule(Rules::API_DATE))
             ),
             $this->getValidationDecorator()->notRequiredParamRule(
@@ -306,6 +330,18 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
         );
         $case->setDescription(
             $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_DESCRIPTION)
+        );
+        $case->setComplaintSource(
+            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_COMPLAINT_SOURCE)
+        );
+        $case->setDetails(
+            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_DETAILS)
+        );
+        $case->setManagerNotes(
+            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_MANAGER_NOTES)
+        );
+        $case->setActionPlan(
+            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_ACTION_PLAN)
         );
         $case->setIncidentDate(
             $this->getRequestParams()->getDateTimeOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_INCIDENT_DATE)

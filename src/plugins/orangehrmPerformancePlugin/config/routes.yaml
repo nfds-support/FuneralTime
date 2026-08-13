@@ -227,3 +227,38 @@ performance_review_evaluate_self:
   path: /performance/reviewEvaluate/id/{id}
   controller: OrangeHRM\Performance\Controller\SelfEvaluationController::handle
   methods: [ GET ]
+
+apiv2_performance_monthly_assessments:
+  path: /api/v2/performance/monthly-assessments
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Performance\Api\MonthlyAssessmentAPI
+
+apiv2_performance_monthly_assessment:
+  path: /api/v2/performance/monthly-assessments/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Performance\Api\MonthlyAssessmentAPI
+    _key: id
+
+performance_my_monthly_assessments:
+  path: /performance/viewMyMonthlyAssessments
+  controller: OrangeHRM\Performance\Controller\MyMonthlyAssessmentController::handle
+  methods: [ GET ]
+
+performance_team_monthly_assessments:
+  path: /performance/viewTeamMonthlyAssessments
+  controller: OrangeHRM\Performance\Controller\TeamMonthlyAssessmentController::handle
+  methods: [ GET ]
+
+performance_save_monthly_assessment:
+  path: /performance/saveMonthlyAssessment
+  controller: OrangeHRM\Performance\Controller\SaveMonthlyAssessmentController::handle
+  methods: [ GET ]
+
+performance_edit_monthly_assessment:
+  path: /performance/editMonthlyAssessment/{id}
+  controller: OrangeHRM\Performance\Controller\SaveMonthlyAssessmentController::handle
+  methods: [ GET ]

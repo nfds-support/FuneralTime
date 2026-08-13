@@ -31,6 +31,9 @@ import ReviewSearch from './pages/ReviewSearch.vue';
 import EmployeeTrackerLogs from './pages/EmployeeTrackerLogs.vue';
 import AdminEvaluation from './pages/AdminEvaluation.vue';
 import SelfEvaluation from './pages/SelfEvaluation.vue';
+import MyMonthlyAssessments from './pages/monthlyAssessments/MyMonthlyAssessments.vue';
+import TeamMonthlyAssessments from './pages/monthlyAssessments/TeamMonthlyAssessments.vue';
+import SaveMonthlyAssessment from './pages/monthlyAssessments/SaveMonthlyAssessment.vue';
 
 export default {
   'my-tracker': MyTracker,
@@ -49,4 +52,8 @@ export default {
   'employee-tracker-logs': EmployeeTrackerLogs,
   'admin-evaluation': AdminEvaluation,
   'self-evaluation': SelfEvaluation,
+  'my-monthly-assessments': MyMonthlyAssessments,
+  'team-monthly-assessments': TeamMonthlyAssessments,
+  'monthly-assessment-save': SaveMonthlyAssessment,
+  'monthly-assessment-edit': SaveMonthlyAssessment,
 };

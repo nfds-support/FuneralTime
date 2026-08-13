@@ -22,10 +22,10 @@
     <div class="orangehrm-paper-container">
       <div class="orangehrm-header-container">
         <oxd-text tag="h6" class="orangehrm-main-title">
-          {{ $t('discipline.cases') }}
+          {{ $t('performance.team_monthly_assessments') }}
         </oxd-text>
         <oxd-button
-          :label="$t('discipline.add_case')"
+          :label="$t('performance.start_assessment')"
           icon-name="plus"
           display-type="secondary"
           @click="onClickAdd"
@@ -41,10 +41,9 @@
         <oxd-card-table
           v-model:selected="checkedItems"
           v-model:order="sortDefinition"
-          :items="items.data"
           :headers="headers"
+          :items="items?.data"
           :selectable="true"
-          :clickable="false"
           :loading="isLoading"
           row-decorator="oxd-table-decorator-card"
         />
@@ -63,21 +62,33 @@
 
 <script>
 import {computed, ref} from 'vue';
-import {navigate} from '@/core/util/helper/navigation';
-import useSort from '@ohrm/core/util/composable/useSort';
 import {APIService} from '@/core/util/services/api.service';
 import usePaginate from '@ohrm/core/util/composable/usePaginate';
+import useSort from '@ohrm/core/util/composable/useSort';
+import {navigate} from '@/core/util/helper/navigation';
 import useEmployeeNameTranslate from '@/core/util/composable/useEmployeeNameTranslate';
 import DeleteConfirmationDialog from '@ohrm/components/dialogs/DeleteConfirmationDialog';
 
-const defaultFilters = {
-  caseType: null,
-  status: null,
+const defaultSortOrder = {
+  'monthlyAssessment.periodYear': 'DESC',
+  'monthlyAssessment.periodMonth': 'DESC',
 };
 
-const defaultSortOrder = {
-  'disciplineCase.createdAt': 'DESC',
-};
+const monthNames = [
+  '',
+  'January',
+  'February',
+  'March',
+  'April',
+  'May',
+  'June',
+  'July',
+  'August',
+  'September',
+  'October',
+  'November',
+  'December',
+];
 
 export default {
   components: {
@@ -85,44 +96,44 @@ export default {
   },
   setup() {
     const {$tEmpName} = useEmployeeNameTranslate();
-    const filters = ref({...defaultFilters});
     const {sortDefinition, sortField, sortOrder, onSort} = useSort({
       sortDefinition: defaultSortOrder,
     });
+    const checkedItems = ref([]);
 
     const http = new APIService(
       window.appGlobal.baseUrl,
-      '/api/v2/discipline/cases',
+      '/api/v2/performance/monthly-assessments',
     );
 
-    const getNormalizer = (data) => {
-      return data.map((item) => {
-        return {
-          id: item.id,
-          caseType: item.caseType,
-          subject: item.subject,
-          complaintSource: item.complaintSource,
-          status: item.status,
-          severity: item.severity,
-          incidentDate: item.incidentDate,
-          employee: $tEmpName(item.employee),
-        };
-      });
-    };
+    const query = computed(() => ({
+      sortField: sortField.value,
+      sortOrder: sortOrder.value,
+    }));
+
+    const normalizer = (data) =>
+      data.map((item) => ({
+        id: item.id,
+        employee: $tEmpName(item.employee),
+        period: `${monthNames[item.periodMonth] || item.periodMonth} ${
+          item.periodYear
+        }`,
+        status: item.status,
+        employeeRating: item.employeeOverallRating,
+        managerRating: item.managerOverallRating,
+      }));
 
     const {
-      showPaginator,
       currentPage,
       total,
+      showPaginator,
       pages,
-      pageSize,
       response,
-      isLoading,
       execQuery,
+      isLoading,
     } = usePaginate(http, {
-      query: filters,
-      normalizer: getNormalizer,
-      prefetch: true,
+      query,
+      normalizer,
       toastNoRecords: false,
     });
 
@@ -130,17 +141,15 @@ export default {
 
     return {
       http,
+      total,
+      isLoading,
       items: response,
       sortDefinition,
-      filters,
-      total,
-      pages,
-      pageSize,
       showPaginator,
+      pages,
       currentPage,
-      isLoading,
+      checkedItems,
       execQuery,
-      checkedItems: ref([]),
     };
   },
   data() {
@@ -150,36 +159,26 @@ export default {
           name: 'employee',
           slot: 'title',
           title: this.$t('general.employee_name'),
-          sortField: 'employee.lastName',
           style: {flex: 1},
         },
         {
-          name: 'caseType',
-          title: this.$t('discipline.case_type'),
-          sortField: 'disciplineCase.caseType',
-          style: {flex: 1},
-        },
-        {
-          name: 'subject',
-          title: this.$t('discipline.case_subject'),
-          sortField: 'disciplineCase.subject',
-          style: {flex: 1},
-        },
-        {
-          name: 'complaintSource',
-          title: this.$t('discipline.complaint_source'),
+          name: 'period',
+          title: this.$t('performance.assessment_period'),
           style: {flex: 1},
         },
         {
           name: 'status',
           title: this.$t('general.status'),
-          sortField: 'disciplineCase.status',
           style: {flex: 1},
         },
         {
-          name: 'incidentDate',
-          title: this.$t('discipline.incident_date'),
-          sortField: 'disciplineCase.incidentDate',
+          name: 'employeeRating',
+          title: this.$t('performance.self_rating'),
+          style: {flex: 1},
+        },
+        {
+          name: 'managerRating',
+          title: this.$t('performance.manager_rating'),
           style: {flex: 1},
         },
         {
@@ -191,16 +190,12 @@ export default {
           cellConfig: {
             edit: {
               onClick: this.onClickEdit,
-              props: {
-                name: 'pencil-fill',
-              },
+              props: {name: 'pencil-fill'},
             },
             delete: {
               onClick: this.onClickDelete,
               component: 'oxd-icon-button',
-              props: {
-                name: 'trash',
-              },
+              props: {name: 'trash'},
             },
           },
         },
@@ -209,10 +204,14 @@ export default {
   },
   methods: {
     onClickAdd() {
-      navigate('/discipline/saveDisciplineCase');
+      navigate('/performance/saveMonthlyAssessment', undefined, {
+        mode: 'manager',
+      });
     },
     onClickEdit(item) {
-      navigate('/discipline/editDisciplineCase/{id}', {id: item.id});
+      navigate('/performance/editMonthlyAssessment/{id}', {id: item.id}, {
+        mode: 'manager',
+      });
     },
     onClickDelete(item) {
       this.$refs.deleteConfirmation.showDialog().then((confirmation) => {
@@ -239,6 +238,9 @@ export default {
         .then(() => {
           this.checkedItems = [];
           return this.execQuery();
+        })
+        .finally(() => {
+          this.isLoading = false;
         });
     },
   },

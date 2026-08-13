@@ -57,6 +57,16 @@
                 :rules="rules.subject"
               />
             </oxd-grid-item>
+            <oxd-grid-item v-if="showComplaintSource">
+              <oxd-input-field
+                v-model="caseData.complaintSource"
+                type="select"
+                required
+                :label="$t('discipline.complaint_source')"
+                :options="complaintSourceOptions"
+                :rules="rules.complaintSource"
+              />
+            </oxd-grid-item>
             <oxd-grid-item>
               <date-input
                 v-model="caseData.incidentDate"
@@ -84,6 +94,27 @@
                 v-model="caseData.description"
                 type="textarea"
                 :label="$t('general.description')"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item class=" --span-column-2">
+              <oxd-input-field
+                v-model="caseData.details"
+                type="textarea"
+                :label="$t('discipline.more_details')"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item v-if="!myCase" class=" --span-column-2">
+              <oxd-input-field
+                v-model="caseData.managerNotes"
+                type="textarea"
+                :label="$t('discipline.manager_notes')"
+              />
+            </oxd-grid-item>
+            <oxd-grid-item v-if="!myCase" class=" --span-column-2">
+              <oxd-input-field
+                v-model="caseData.actionPlan"
+                type="textarea"
+                :label="$t('discipline.action_plan')"
               />
             </oxd-grid-item>
             <oxd-grid-item v-if="!myCase" class=" --span-column-2">
@@ -121,10 +152,14 @@ const defaultCase = {
   employee: null,
   caseType: null,
   subject: '',
+  complaintSource: null,
   description: '',
+  details: '',
   incidentDate: null,
   status: null,
   severity: null,
+  managerNotes: '',
+  actionPlan: '',
   actionTaken: '',
 };
 
@@ -158,6 +193,7 @@ export default {
         employee: [required],
         caseType: [required],
         subject: [required],
+        complaintSource: [required],
       },
       caseTypeOptions: [
         {id: 'COMPLAINT', label: this.$t('discipline.complaint')},
@@ -165,6 +201,18 @@ export default {
           id: 'DISCIPLINARY',
           label: this.$t('discipline.disciplinary_action'),
         },
+      ],
+      complaintSourceOptions: [
+        {
+          id: 'TEAM_MEMBER',
+          label: this.$t('discipline.source_team_member'),
+        },
+        {id: 'CLIENT', label: this.$t('discipline.source_client')},
+        {
+          id: 'GENERAL_PUBLIC',
+          label: this.$t('discipline.source_general_public'),
+        },
+        {id: 'OTHER', label: this.$t('discipline.source_other')},
       ],
       statusOptions: [
         {id: 'OPEN', label: this.$t('discipline.open')},
@@ -184,6 +232,9 @@ export default {
     isEdit() {
       return this.caseId !== null;
     },
+    showComplaintSource() {
+      return this.caseData.caseType?.id === 'COMPLAINT';
+    },
   },
   beforeMount() {
     if (this.isEdit) {
@@ -201,7 +252,11 @@ export default {
             (o) => o.id === data.caseType,
           );
           this.caseData.subject = data.subject;
+          this.caseData.complaintSource = this.complaintSourceOptions.find(
+            (o) => o.id === data.complaintSource,
+          );
           this.caseData.description = data.description;
+          this.caseData.details = data.details;
           this.caseData.incidentDate = data.incidentDate;
           this.caseData.status = this.statusOptions.find(
             (o) => o.id === data.status,
@@ -209,6 +264,8 @@ export default {
           this.caseData.severity = this.severityOptions.find(
             (o) => o.id === data.severity,
           );
+          this.caseData.managerNotes = data.managerNotes;
+          this.caseData.actionPlan = data.actionPlan;
           this.caseData.actionTaken = data.actionTaken;
         })
         .finally(() => {
@@ -237,10 +294,16 @@ export default {
           : this.caseData.employee?.id,
         caseType: this.caseData.caseType?.id,
         subject: this.caseData.subject,
+        complaintSource: this.showComplaintSource
+          ? this.caseData.complaintSource?.id || null
+          : null,
         description: this.caseData.description || null,
+        details: this.caseData.details || null,
         incidentDate: this.caseData.incidentDate || null,
         status: this.caseData.status?.id || 'OPEN',
         severity: this.caseData.severity?.id || null,
+        managerNotes: this.caseData.managerNotes || null,
+        actionPlan: this.caseData.actionPlan || null,
         actionTaken: this.caseData.actionTaken || null,
       };
       const request = this.isEdit
