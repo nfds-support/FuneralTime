@@ -8,8 +8,8 @@ apiv2_time_payroll_periods:
     update: true
     delete: true
   permissions:
-    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
-    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false } }
 
 apiv2_time_payroll_fill_sheet:
   description: 'API-v2 Time - Payroll Fill Sheet Report'
@@ -21,8 +21,8 @@ apiv2_time_payroll_fill_sheet:
     update: false
     delete: false
   permissions:
-    - { role: Admin, permission: { read: true, create: false, update: false, delete: false, self: false } }
-    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false } }
 
 apiv2_leave_entitlement_transactions:
   description: 'API-v2 Leave - Entitlement Transaction History'
@@ -34,6 +34,6 @@ apiv2_leave_entitlement_transactions:
     update: false
     delete: false
   permissions:
-    - { role: Admin, permission: { read: true, create: true, update: false, delete: false, self: false } }
-    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false } }
     - { role: ESS, permission: { read: true, create: false, update: false, delete: false, self: true } }

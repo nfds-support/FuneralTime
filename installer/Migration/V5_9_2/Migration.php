@@ -111,44 +111,67 @@ class Migration extends AbstractMigration
 
     private function createLeaveEntitlementTransactionTable(): void
     {
-        if ($this->getSchemaHelper()->tableExists(['ohrm_leave_entitlement_transaction'])) {
-            return;
+        if (!$this->getSchemaHelper()->tableExists(['ohrm_leave_entitlement_transaction'])) {
+            $this->getSchemaHelper()->createTable('ohrm_leave_entitlement_transaction')
+                ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
+                ->addColumn('emp_number', Types::INTEGER, ['Notnull' => true])
+                // Must match ohrm_leave_type.id (INT UNSIGNED) or MySQL rejects the FK (errno 1215).
+                ->addColumn('leave_type_id', Types::INTEGER, ['Unsigned' => true, 'Notnull' => true])
+                ->addColumn('entitlement_id', Types::INTEGER, ['Notnull' => false, 'Default' => null])
+                ->addColumn('transaction_type', Types::STRING, ['Length' => 20, 'Notnull' => true])
+                ->addColumn('days', Types::DECIMAL, ['Precision' => 8, 'Scale' => 4, 'Notnull' => true])
+                ->addColumn('balance_after', Types::DECIMAL, ['Precision' => 8, 'Scale' => 4, 'Notnull' => false, 'Default' => null])
+                ->addColumn('note', Types::STRING, ['Length' => 255, 'Notnull' => false, 'Default' => null])
+                ->addColumn('created_by', Types::INTEGER, ['Notnull' => false, 'Default' => null])
+                ->addColumn('created_at', Types::DATETIMETZ_MUTABLE, ['Notnull' => true])
+                ->setPrimaryKey(['id'])
+                ->create();
+        } else {
+            // Repair half-applied installs that created the table with a signed leave_type_id.
+            $column = $this->getSchemaHelper()->getTableColumn(
+                'ohrm_leave_entitlement_transaction',
+                'leave_type_id'
+            );
+            if ($column !== null && !$column->getUnsigned()) {
+                $this->getSchemaHelper()->changeColumn(
+                    'ohrm_leave_entitlement_transaction',
+                    'leave_type_id',
+                    ['Unsigned' => true]
+                );
+            }
         }
 
-        $this->getSchemaHelper()->createTable('ohrm_leave_entitlement_transaction')
-            ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
-            ->addColumn('emp_number', Types::INTEGER, ['Notnull' => true])
-            ->addColumn('leave_type_id', Types::INTEGER, ['Notnull' => true])
-            ->addColumn('entitlement_id', Types::INTEGER, ['Notnull' => false, 'Default' => null])
-            ->addColumn('transaction_type', Types::STRING, ['Length' => 20, 'Notnull' => true])
-            ->addColumn('days', Types::DECIMAL, ['Precision' => 8, 'Scale' => 4, 'Notnull' => true])
-            ->addColumn('balance_after', Types::DECIMAL, ['Precision' => 8, 'Scale' => 4, 'Notnull' => false, 'Default' => null])
-            ->addColumn('note', Types::STRING, ['Length' => 255, 'Notnull' => false, 'Default' => null])
-            ->addColumn('created_by', Types::INTEGER, ['Notnull' => false, 'Default' => null])
-            ->addColumn('created_at', Types::DATETIMETZ_MUTABLE, ['Notnull' => true])
-            ->setPrimaryKey(['id'])
-            ->create();
+        $existingFkNames = array_map(
+            static fn (ForeignKeyConstraint $fk) => $fk->getName(),
+            $this->getSchemaHelper()->getSchemaManager()->listTableForeignKeys(
+                'ohrm_leave_entitlement_transaction'
+            )
+        );
 
-        $this->getSchemaHelper()->addForeignKey(
-            'ohrm_leave_entitlement_transaction',
-            new ForeignKeyConstraint(
-                ['emp_number'],
-                'hs_hr_employee',
-                ['emp_number'],
-                'leave_entitlement_txn_emp_number',
-                ['onDelete' => 'CASCADE']
-            )
-        );
-        $this->getSchemaHelper()->addForeignKey(
-            'ohrm_leave_entitlement_transaction',
-            new ForeignKeyConstraint(
-                ['leave_type_id'],
-                'ohrm_leave_type',
-                ['id'],
-                'leave_entitlement_txn_leave_type',
-                ['onDelete' => 'CASCADE']
-            )
-        );
+        if (!in_array('leave_entitlement_txn_emp_number', $existingFkNames, true)) {
+            $this->getSchemaHelper()->addForeignKey(
+                'ohrm_leave_entitlement_transaction',
+                new ForeignKeyConstraint(
+                    ['emp_number'],
+                    'hs_hr_employee',
+                    ['emp_number'],
+                    'leave_entitlement_txn_emp_number',
+                    ['onDelete' => 'CASCADE']
+                )
+            );
+        }
+        if (!in_array('leave_entitlement_txn_leave_type', $existingFkNames, true)) {
+            $this->getSchemaHelper()->addForeignKey(
+                'ohrm_leave_entitlement_transaction',
+                new ForeignKeyConstraint(
+                    ['leave_type_id'],
+                    'ohrm_leave_type',
+                    ['id'],
+                    'leave_entitlement_txn_leave_type',
+                    ['onDelete' => 'CASCADE']
+                )
+            );
+        }
     }
 
     private function seedEntitlementTypes(): void
@@ -170,7 +193,7 @@ class Migration extends AbstractMigration
                 ])
                 ->setParameter('id', 2)
                 ->setParameter('name', 'Deduction')
-                ->setParameter('editable', true)
+                ->setParameter('editable', 1)
                 ->executeQuery();
         }
         if (!in_array('correction', $names, true)) {
@@ -183,7 +206,7 @@ class Migration extends AbstractMigration
                 ])
                 ->setParameter('id', 3)
                 ->setParameter('name', 'Correction')
-                ->setParameter('editable', true)
+                ->setParameter('editable', 1)
                 ->executeQuery();
         }
     }
@@ -212,8 +235,8 @@ class Migration extends AbstractMigration
                 'operational_country_id' => ':country',
             ])
             ->setParameter('name', 'Banked Time')
-            ->setParameter('deleted', false)
-            ->setParameter('exclude', false)
+            ->setParameter('deleted', 0)
+            ->setParameter('exclude', 0)
             ->setParameter('country', null)
             ->executeQuery();
 

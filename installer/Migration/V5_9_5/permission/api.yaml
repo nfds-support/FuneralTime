@@ -4,8 +4,8 @@ apiv2_policy_policies:
   module: policy
   allowed: { read: true, create: true, update: true, delete: true }
   permissions:
-    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
-    - { role: ESS, permission: { read: false, create: false, update: false, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
 
 apiv2_policy_my_policies:
   description: 'API-v2 Policy - My Policies'
@@ -22,8 +22,8 @@ apiv2_policy_acknowledgments:
   module: policy
   allowed: { read: true, create: false, update: false, delete: false }
   permissions:
-    - { role: Admin, permission: { read: true, create: false, update: false, delete: false, self: false } }
-    - { role: ESS, permission: { read: false, create: false, update: false, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
 
 apiv2_policy_moodle_cohort_maps:
   description: 'API-v2 Policy - Moodle Cohort Maps'
@@ -31,8 +31,8 @@ apiv2_policy_moodle_cohort_maps:
   module: policy
   allowed: { read: true, create: true, update: true, delete: true }
   permissions:
-    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
-    - { role: ESS, permission: { read: false, create: false, update: false, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
 
 apiv2_policy_moodle_config:
   description: 'API-v2 Policy - Moodle Config'
@@ -40,5 +40,5 @@ apiv2_policy_moodle_config:
   module: policy
   allowed: { read: true, create: false, update: true, delete: false }
   permissions:
-    - { role: Admin, permission: { read: true, create: false, update: true, delete: false, self: false } }
-    - { role: ESS, permission: { read: false, create: false, update: false, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: false, update: true, delete: false } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
