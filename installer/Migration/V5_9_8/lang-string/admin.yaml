@@ -1,0 +1,73 @@
+langStrings:
+  -
+    value: 'Import from OrangeHRM'
+    unitId: import_from_orangehrm
+  -
+    value: 'Import from OrangeHRM'
+    unitId: menu_import_from_orangehrm
+  -
+    value: 'Bring employee and organization records from a standard OrangeHRM installation into this system.'
+    unitId: import_from_orangehrm_intro
+  -
+    value: 'CSV tab uses the same employee CSV format as PIM → Configuration → Data Import (download the sample for the exact column order).'
+    unitId: import_from_orangehrm_csv_hint
+  -
+    value: 'Database tab connects read-only to another OrangeHRM MySQL database and copies job titles, employment statuses, job categories, locations, and employees. Existing records matched by name or employee ID / email are skipped.'
+    unitId: import_from_orangehrm_db_hint
+  -
+    value: 'CSV file'
+    unitId: import_csv_tab
+  -
+    value: 'Source database'
+    unitId: import_database_tab
+  -
+    value: 'Source database settings'
+    unitId: source_database_settings
+  -
+    value: 'Database name'
+    unitId: database_name
+  -
+    value: 'Import options'
+    unitId: import_options
+  -
+    value: 'Import job titles'
+    unitId: import_job_titles
+  -
+    value: 'Import employment statuses'
+    unitId: import_employment_statuses
+  -
+    value: 'Import job categories'
+    unitId: import_job_categories
+  -
+    value: 'Import locations'
+    unitId: import_locations
+  -
+    value: 'Import employees'
+    unitId: import_employees
+  -
+    value: 'Active employees only'
+    unitId: active_employees_only
+  -
+    value: 'Preview'
+    unitId: preview_import
+  -
+    value: 'Run import'
+    unitId: run_import
+  -
+    value: 'Import preview'
+    unitId: import_preview_title
+  -
+    value: 'Import complete'
+    unitId: import_complete_title
+  -
+    value: 'Records found in source'
+    unitId: preview_counts
+  -
+    value: 'Imported'
+    unitId: imported_counts
+  -
+    value: 'Skipped (already present)'
+    unitId: skipped_counts
+  -
+    value: 'Import failed. Check the source details and try again.'
+    unitId: import_failed

@@ -1,3 +1,8 @@
+New & Changed Features for OrangeHRM ver 5.9.8
+    New Features/Changes
+    -----------
+    - Admin - Import from OrangeHRM: admins can import employee CSV (standard OrangeHRM format) or pull job titles, employment statuses, job categories, locations, and employees from another OrangeHRM MySQL database
+
 New & Changed Features for OrangeHRM ver 5.9.7
     New Features/Changes
     -----------

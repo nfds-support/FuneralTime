@@ -1,0 +1,5 @@
+'Admin - OrangeHRM Data Import':
+  module: admin
+  url: viewOrangeHRMDataImport
+  permissions:
+    - { role: Admin, permission: { read: true } }
