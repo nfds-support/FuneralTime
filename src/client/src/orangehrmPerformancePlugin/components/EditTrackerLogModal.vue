@@ -86,6 +86,7 @@ import {OxdDialog} from '@ohrm/oxd';
 import {
   required,
   shouldNotExceedCharLength,
+  shouldNotExceedPlainTextLength,
 } from '@/core/util/validation/rules';
 import {APIService} from '@/core/util/services/api.service';
 import TrackerLogRatingButton from '@/orangehrmPerformancePlugin/components/TrackerLogRatingButton';
@@ -128,7 +129,7 @@ export default {
       trackerLog: {...trackerLogModel},
       rules: {
         log: [required, shouldNotExceedCharLength(150)],
-        comment: [required, shouldNotExceedCharLength(3000)],
+        comment: [required, shouldNotExceedPlainTextLength(3000)],
       },
     };
   },
