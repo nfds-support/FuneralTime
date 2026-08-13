@@ -37,9 +37,8 @@
         </oxd-form-row>
 
         <oxd-form-row>
-          <oxd-input-field
+          <rich-text-input
             v-model="jobTitle.description"
-            type="textarea"
             :label="$t('admin.job_description')"
             :placeholder="$t('general.type_description_here')"
             :rules="rules.description"
@@ -60,9 +59,8 @@
         </oxd-form-row>
 
         <oxd-form-row>
-          <oxd-input-field
+          <rich-text-input
             v-model="jobTitle.note"
-            type="textarea"
             :label="$t('general.note')"
             :placeholder="$t('general.add_note')"
             :rules="rules.note"
@@ -92,6 +90,7 @@ import {APIService} from '@/core/util/services/api.service';
 import {
   required,
   shouldNotExceedCharLength,
+  shouldNotExceedPlainTextLength,
   validFileTypes,
   maxFileSize,
 } from '@ohrm/core/util/validation/rules';
@@ -158,7 +157,7 @@ export default {
           this.jobTitleUniqueValidation,
           shouldNotExceedCharLength(100),
         ],
-        description: [shouldNotExceedCharLength(400)],
+        description: [shouldNotExceedPlainTextLength(400)],
         specification: [
           (v) => {
             if (this.jobTitle.method == 'replaceCurrent') {
@@ -170,7 +169,7 @@ export default {
           validFileTypes(this.allowedFileTypes),
           maxFileSize(this.maxFileSize),
         ],
-        note: [shouldNotExceedCharLength(400)],
+        note: [shouldNotExceedPlainTextLength(400)],
       },
     };
   },

@@ -38,6 +38,7 @@ use OrangeHRM\Core\Api\V2\Validator\ParamRule;
 use OrangeHRM\Core\Api\V2\Validator\ParamRuleCollection;
 use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
+use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Core\Api\V2\Validator\Rules\EntityUniquePropertyOption;
 use OrangeHRM\Core\Dto\Base64Attachment;
 use OrangeHRM\Entity\JobSpecificationAttachment;
@@ -45,6 +46,8 @@ use OrangeHRM\Entity\JobTitle;
 
 class JobTitleAPI extends Endpoint implements CrudEndpoint
 {
+    use HtmlSanitizerTrait;
+
     /**
      * @var null|JobTitleService
      */
@@ -58,8 +61,8 @@ class JobTitleAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_CURRENT_JOB_SPECIFICATION = 'currentJobSpecification';
 
     public const PARAM_RULE_TITLE_MAX_LENGTH = 100;
-    public const PARAM_RULE_DESCRIPTION_MAX_LENGTH = 400;
-    public const PARAM_RULE_NOTE_MAX_LENGTH = 400;
+    public const PARAM_RULE_DESCRIPTION_MAX_LENGTH = 10000;
+    public const PARAM_RULE_NOTE_MAX_LENGTH = 10000;
     public const PARAM_RULE_SPECIFICATION_FILE_NAME_MAX_LENGTH = 200;
 
     public const JOB_SPECIFICATION_KEEP_CURRENT = 'keepCurrent';
@@ -267,18 +270,8 @@ class JobTitleAPI extends Endpoint implements CrudEndpoint
                 self::PARAMETER_TITLE
             )
         );
-        $jobTitle->setJobDescription(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_DESCRIPTION
-            )
-        );
-        $jobTitle->setNote(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_NOTE
-            )
-        );
+        $jobTitle->setJobDescription($this->getSanitizedRichTextOrNull(self::PARAMETER_DESCRIPTION));
+        $jobTitle->setNote($this->getSanitizedRichTextOrNull(self::PARAMETER_NOTE));
     }
 
     /**

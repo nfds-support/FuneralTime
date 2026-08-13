@@ -55,9 +55,8 @@
         </div>
       </oxd-form-row>
       <oxd-form-row>
-        <oxd-input-field
+        <rich-text-input
           v-model="trackerLog.comment"
-          type="textarea"
           :label="$t('general.comment')"
           :placeholder="$t('general.type_here')"
           :rules="rules.comment"

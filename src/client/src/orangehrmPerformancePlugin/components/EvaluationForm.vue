@@ -141,10 +141,8 @@
             >
               {{ $t('general.comment') }}
             </oxd-text>
-            <oxd-input-field
+            <rich-text-input
               class="orangehrm-evaluation-grid-comment"
-              rows="2"
-              type="textarea"
               :disabled="!editable"
               :rules="commentValidators"
               :model-value="modelValue.kpis[index].comment"
@@ -165,10 +163,8 @@
           </oxd-text>
         </oxd-grid-item>
         <oxd-grid-item class="--span-column-2">
-          <oxd-input-field
+          <rich-text-input
             class="orangehrm-evaluation-grid-comment"
-            rows="2"
-            type="textarea"
             :disabled="!editable"
             :rules="commentValidators"
             :model-value="modelValue.generalComment"
@@ -184,7 +180,7 @@
 <script>
 import {computed, ref} from 'vue';
 import usei18n from '@/core/util/composable/usei18n';
-import {shouldNotExceedCharLength} from '@/core/util/validation/rules';
+import {shouldNotExceedPlainTextLength} from '@/core/util/validation/rules';
 import useEmployeeNameTranslate from '@/core/util/composable/useEmployeeNameTranslate';
 import {OxdDivider} from '@ohrm/oxd';
 
@@ -245,7 +241,7 @@ export default {
     const {$t} = usei18n();
     const {$tEmpName} = useEmployeeNameTranslate();
     const isCollapsed = ref(props.collapsed);
-    const commentValidators = [shouldNotExceedCharLength(2000)];
+    const commentValidators = [shouldNotExceedPlainTextLength(2000)];
 
     const profileImgSrc = computed(() => {
       return props.employee.empNumber

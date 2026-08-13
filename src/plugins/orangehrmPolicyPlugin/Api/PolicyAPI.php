@@ -34,6 +34,7 @@ use OrangeHRM\Core\Api\V2\Validator\ParamRuleCollection;
 use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
+use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Entity\Policy;
 use OrangeHRM\Policy\Api\Model\PolicyModel;
 use OrangeHRM\Policy\Dto\PolicySearchFilterParams;
@@ -43,6 +44,7 @@ class PolicyAPI extends Endpoint implements CrudEndpoint
 {
     use PolicyServiceTrait;
     use AuthUserTrait;
+    use HtmlSanitizerTrait;
 
     public const PARAMETER_TITLE = 'title';
     public const PARAMETER_VERSION = 'version';
@@ -220,12 +222,8 @@ class PolicyAPI extends Endpoint implements CrudEndpoint
                 $isCreate ? '1.0' : $policy->getVersion()
             )
         );
-        $policy->setSummary(
-            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_SUMMARY)
-        );
-        $policy->setContent(
-            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_CONTENT)
-        );
+        $policy->setSummary($this->getSanitizedRichTextOrNull(self::PARAMETER_SUMMARY));
+        $policy->setContent($this->getSanitizedRichTextOrNull(self::PARAMETER_CONTENT));
         $policy->setDocumentUrl(
             $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_DOCUMENT_URL)
         );

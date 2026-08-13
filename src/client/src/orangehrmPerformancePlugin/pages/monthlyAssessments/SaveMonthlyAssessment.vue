@@ -89,33 +89,29 @@
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.employeeAccomplishments"
-                type="textarea"
                 :label="$t('performance.accomplishments')"
                 :disabled="!canEditSelf"
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.employeeImprovements"
-                type="textarea"
                 :label="$t('performance.areas_to_improve')"
                 :disabled="!canEditSelf"
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.employeeGoals"
-                type="textarea"
                 :label="$t('performance.goals_next_month')"
                 :disabled="!canEditSelf"
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.employeeSupportNeeded"
-                type="textarea"
                 :label="$t('performance.support_needed')"
                 :disabled="!canEditSelf"
               />
@@ -139,33 +135,29 @@
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.managerStrengths"
-                type="textarea"
                 :label="$t('performance.strengths')"
                 :disabled="!canEditManagerCore"
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.managerImprovements"
-                type="textarea"
                 :label="$t('performance.areas_to_improve')"
                 :disabled="!canEditManagerCore"
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.managerGoalsSupport"
-                type="textarea"
                 :label="$t('performance.goals_support')"
                 :disabled="!canEditManagerCore"
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="form.managerFollowUpNotes"
-                type="textarea"
                 :label="$t('performance.follow_up_notes')"
                 :disabled="!canEditFollowUp"
               />
