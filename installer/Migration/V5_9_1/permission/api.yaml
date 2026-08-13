@@ -4,8 +4,8 @@ apiv2_discipline_cases:
   module: discipline
   allowed: { read: true, create: true, update: true, delete: true }
   permissions:
-    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
-    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
     - { role: ESS, permission: { read: true, create: true, update: false, delete: false, self: true } }
 
 apiv2_time_timesheet_days:
@@ -14,8 +14,8 @@ apiv2_time_timesheet_days:
   module: time
   allowed: { read: true, create: false, update: true, delete: false }
   permissions:
-    - { role: Admin, permission: { read: true, create: false, update: true, delete: false, self: false } }
-    - { role: Supervisor, permission: { read: true, create: false, update: true, delete: false, self: false } }
+    - { role: Admin, permission: { read: true, create: false, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: true, delete: false } }
     - { role: ESS, permission: { read: true, create: false, update: true, delete: false, self: true } }
 
 apiv2_time_timesheet_deductions:
@@ -24,6 +24,6 @@ apiv2_time_timesheet_deductions:
   module: time
   allowed: { read: true, create: true, update: true, delete: true }
   permissions:
-    - { role: Admin, permission: { read: true, create: true, update: true, delete: true, self: false } }
-    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: true, self: false } }
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: true } }
     - { role: ESS, permission: { read: true, create: true, update: true, delete: true, self: true } }

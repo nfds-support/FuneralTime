@@ -35,10 +35,19 @@ class Migration extends AbstractMigration
         $this->extendExpenseQuantityKm();
         $this->createClaimExpenseLimitTable();
         $this->seedExpenseTypes();
-        $this->seedScreens();
+        // insertScreenPermissions creates ohrm_screen rows — do not also seedScreens()
+        // or ScreenDao::getScreen() throws NonUniqueResultException (HTTP 500).
+        $this->cleanupDuplicateScreens([
+            'viewEmployeeExpenseLimits',
+            'viewMonthlyExpenseReport',
+        ]);
 
-        $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
-        $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+        if (!$this->dataGroupExists('apiv2_claim_employee_expense_limits')) {
+            $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
+        }
+        if (!$this->screenExistsByActionUrl('viewEmployeeExpenseLimits')) {
+            $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+        }
         $this->insertMenus();
 
         foreach (['claim', 'pim'] as $group) {
@@ -173,7 +182,7 @@ class Migration extends AbstractMigration
                     ->set('status', ':status')
                     ->where('id = :id')
                     ->setParameter('column', $column)
-                    ->setParameter('status', true)
+                    ->setParameter('status', 1)
                     ->setParameter('id', $existingId)
                     ->executeQuery();
                 continue;
@@ -189,8 +198,8 @@ class Migration extends AbstractMigration
             $qb = $this->createQueryBuilder()->insert('ohrm_expense_type')->values($values)
                 ->setParameter('name', $name)
                 ->setParameter('description', $description)
-                ->setParameter('status', true)
-                ->setParameter('deleted', false)
+                ->setParameter('status', 1)
+                ->setParameter('deleted', 0)
                 ->setParameter('column', $column);
 
             if ($adminUserId) {
@@ -200,46 +209,66 @@ class Migration extends AbstractMigration
         }
     }
 
-    private function seedScreens(): void
+    private function cleanupDuplicateScreens(array $actionUrls): void
     {
-        $moduleId = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_module')
-            ->where('name = :name')
-            ->setParameter('name', 'claim')
-            ->executeQuery()
-            ->fetchOne();
-        if (!$moduleId) {
-            return;
-        }
-
-        $screens = [
-            ['Employee Expense Limits', 'viewEmployeeExpenseLimits'],
-            ['Monthly Expense Report', 'viewMonthlyExpenseReport'],
-        ];
-        foreach ($screens as [$name, $url]) {
-            $exists = $this->createQueryBuilder()
-                ->select('id')
-                ->from('ohrm_screen')
-                ->where('action_url = :url')
-                ->setParameter('url', $url)
+        foreach ($actionUrls as $actionUrl) {
+            $ids = $this->createQueryBuilder()
+                ->select('s.id')
+                ->from('ohrm_screen', 's')
+                ->where('s.action_url = :url')
+                ->setParameter('url', $actionUrl)
+                ->orderBy('s.id', 'ASC')
                 ->executeQuery()
-                ->fetchOne();
-            if ($exists) {
+                ->fetchFirstColumn();
+            if (count($ids) <= 1) {
                 continue;
             }
-            $this->createQueryBuilder()
-                ->insert('ohrm_screen')
-                ->values([
-                    'name' => ':name',
-                    'module_id' => ':moduleId',
-                    'action_url' => ':url',
-                ])
-                ->setParameter('name', $name)
-                ->setParameter('moduleId', $moduleId)
-                ->setParameter('url', $url)
-                ->executeQuery();
+            $keepId = (int) array_shift($ids);
+            foreach ($ids as $duplicateId) {
+                $duplicateId = (int) $duplicateId;
+                $this->createQueryBuilder()
+                    ->update('ohrm_menu_item')
+                    ->set('screen_id', ':keepId')
+                    ->where('screen_id = :duplicateId')
+                    ->setParameter('keepId', $keepId)
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+                $this->createQueryBuilder()
+                    ->delete('ohrm_user_role_screen')
+                    ->where('screen_id = :duplicateId')
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+                $this->createQueryBuilder()
+                    ->delete('ohrm_screen')
+                    ->where('id = :duplicateId')
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+            }
         }
+    }
+
+    private function dataGroupExists(string $name): bool
+    {
+        return (bool) $this->createQueryBuilder()
+            ->select('dg.id')
+            ->from('ohrm_data_group', 'dg')
+            ->where('dg.name = :name')
+            ->setParameter('name', $name)
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchOne();
+    }
+
+    private function screenExistsByActionUrl(string $actionUrl): bool
+    {
+        return (bool) $this->createQueryBuilder()
+            ->select('s.id')
+            ->from('ohrm_screen', 's')
+            ->where('s.action_url = :url')
+            ->setParameter('url', $actionUrl)
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchOne();
     }
 
     private function insertMenus(): void
@@ -257,10 +286,10 @@ class Migration extends AbstractMigration
         }
 
         $menus = [
-            ['Expense Limits', 'Employee Expense Limits', 850],
-            ['Monthly Expense Report', 'Monthly Expense Report', 900],
+            ['Expense Limits', 'viewEmployeeExpenseLimits', 850],
+            ['Monthly Expense Report', 'viewMonthlyExpenseReport', 900],
         ];
-        foreach ($menus as [$title, $screenName, $order]) {
+        foreach ($menus as [$title, $actionUrl, $order]) {
             $exists = $this->createQueryBuilder()
                 ->select('id')
                 ->from('ohrm_menu_item')
@@ -276,8 +305,10 @@ class Migration extends AbstractMigration
             $screenId = $this->createQueryBuilder()
                 ->select('id')
                 ->from('ohrm_screen')
-                ->where('name = :name')
-                ->setParameter('name', $screenName)
+                ->where('action_url = :url')
+                ->setParameter('url', $actionUrl)
+                ->orderBy('id', 'ASC')
+                ->setMaxResults(1)
                 ->executeQuery()
                 ->fetchOne();
 
