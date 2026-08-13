@@ -34,6 +34,7 @@ use OrangeHRM\Core\Api\V2\Validator\ParamRuleCollection;
 use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
+use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Discipline\Api\Model\DisciplineCaseModel;
 use OrangeHRM\Discipline\Dto\DisciplineCaseSearchFilterParams;
@@ -45,6 +46,7 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
     use DisciplineServiceTrait;
     use AuthUserTrait;
     use UserRoleManagerTrait;
+    use HtmlSanitizerTrait;
 
     public const PARAMETER_EMP_NUMBER = 'empNumber';
     public const PARAMETER_CASE_TYPE = 'caseType';
@@ -328,21 +330,13 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
         $case->setCategory(
             $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_CATEGORY)
         );
-        $case->setDescription(
-            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_DESCRIPTION)
-        );
+        $case->setDescription($this->getSanitizedRichTextOrNull(self::PARAMETER_DESCRIPTION));
         $case->setComplaintSource(
             $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_COMPLAINT_SOURCE)
         );
-        $case->setDetails(
-            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_DETAILS)
-        );
-        $case->setManagerNotes(
-            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_MANAGER_NOTES)
-        );
-        $case->setActionPlan(
-            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_ACTION_PLAN)
-        );
+        $case->setDetails($this->getSanitizedRichTextOrNull(self::PARAMETER_DETAILS));
+        $case->setManagerNotes($this->getSanitizedRichTextOrNull(self::PARAMETER_MANAGER_NOTES));
+        $case->setActionPlan($this->getSanitizedRichTextOrNull(self::PARAMETER_ACTION_PLAN));
         $case->setIncidentDate(
             $this->getRequestParams()->getDateTimeOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_INCIDENT_DATE)
         );
@@ -356,9 +350,7 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
         $case->setSeverity(
             $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_SEVERITY)
         );
-        $case->setActionTaken(
-            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_ACTION_TAKEN)
-        );
+        $case->setActionTaken($this->getSanitizedRichTextOrNull(self::PARAMETER_ACTION_TAKEN));
     }
 
     private function assertCaseAccessible(DisciplineCase $case, bool $forUpdate = false): void

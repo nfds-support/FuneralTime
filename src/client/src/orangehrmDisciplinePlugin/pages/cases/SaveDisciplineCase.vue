@@ -90,37 +90,32 @@
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="caseData.description"
-                type="textarea"
                 :label="$t('general.description')"
               />
             </oxd-grid-item>
             <oxd-grid-item class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="caseData.details"
-                type="textarea"
                 :label="$t('discipline.more_details')"
               />
             </oxd-grid-item>
             <oxd-grid-item v-if="!myCase" class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="caseData.managerNotes"
-                type="textarea"
                 :label="$t('discipline.manager_notes')"
               />
             </oxd-grid-item>
             <oxd-grid-item v-if="!myCase" class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="caseData.actionPlan"
-                type="textarea"
                 :label="$t('discipline.action_plan')"
               />
             </oxd-grid-item>
             <oxd-grid-item v-if="!myCase" class=" --span-column-2">
-              <oxd-input-field
+              <rich-text-input
                 v-model="caseData.actionTaken"
-                type="textarea"
                 :label="$t('discipline.action_taken')"
               />
             </oxd-grid-item>

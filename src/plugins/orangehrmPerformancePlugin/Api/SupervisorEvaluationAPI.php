@@ -33,6 +33,7 @@ use OrangeHRM\Core\Api\V2\Validator\ParamRuleCollection;
 use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
+use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Core\Traits\ORM\EntityManagerHelperTrait;
 use OrangeHRM\Core\Traits\Service\NormalizerServiceTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
@@ -58,6 +59,7 @@ class SupervisorEvaluationAPI extends Endpoint implements CrudEndpoint
     use NormalizerServiceTrait;
     use EntityManagerHelperTrait;
     use AuthUserTrait;
+    use HtmlSanitizerTrait;
 
     public const PARAMETER_REVIEW_ID = 'reviewId';
     public const PARAMETER_KPIS = 'kpis';
@@ -400,10 +402,7 @@ class SupervisorEvaluationAPI extends Endpoint implements CrudEndpoint
                 throw $this->getForbiddenException();
             }
 
-            $comment = $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_GENERAL_COMMENT,
-            );
+            $comment = $this->getSanitizedRichTextOrNull(self::PARAMETER_GENERAL_COMMENT);
 
             $this->setReviewRatingsParams($review);
             $this->updateReviewerStatus($review);
@@ -430,8 +429,10 @@ class SupervisorEvaluationAPI extends Endpoint implements CrudEndpoint
      */
     protected function setReviewRatingsParams(PerformanceReview $review): void
     {
-        $ratings = $this->getRequestParams()
-            ->getArray(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_RATINGS);
+        $ratings = $this->sanitizeRichTextCommentsInRatings(
+            $this->getRequestParams()
+                ->getArray(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_RATINGS)
+        );
         $this->getPerformanceReviewService()->saveAndUpdateReviewRatings(
             $review,
             $ratings,

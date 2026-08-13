@@ -46,10 +46,12 @@
         <oxd-text tag="h6">{{ selected.title }}</oxd-text>
       </div>
       <oxd-divider />
-      <oxd-text tag="p">{{ selected.summary }}</oxd-text>
-      <oxd-text v-if="selected.content" tag="p" class="orangehrm-acknowledge-content">
-        {{ selected.content }}
-      </oxd-text>
+      <rich-text-display :html="selected.summary" />
+      <rich-text-display
+        v-if="selected.content"
+        class="orangehrm-acknowledge-content"
+        :html="selected.content"
+      />
       <div v-if="selected.documentUrl" class="orangehrm-horizontal-padding">
         <a :href="selected.documentUrl" target="_blank" rel="noopener">
           {{ $t('policy.open_document') }}

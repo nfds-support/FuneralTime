@@ -33,6 +33,7 @@ use OrangeHRM\Core\Api\V2\Validator\ParamRule;
 use OrangeHRM\Core\Api\V2\Validator\ParamRuleCollection;
 use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
+use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Core\Traits\Service\DateTimeHelperTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\Employee;
@@ -46,6 +47,8 @@ use OrangeHRM\Recruitment\Traits\Service\VacancyServiceTrait;
 
 class VacancyAPI extends Endpoint implements CrudEndpoint
 {
+    use HtmlSanitizerTrait;
+
     use VacancyServiceTrait;
     use DateTimeHelperTrait;
     use UserRoleManagerTrait;
@@ -414,12 +417,8 @@ class VacancyAPI extends Endpoint implements CrudEndpoint
                 self::PARAMETER_NAME
             )
         );
-        $vacancy->setDescription(
-            $this->getRequestParams()->getString(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_DESCRIPTION
-            )
-        );
+        $description = $this->getSanitizedRichTextOrNull(self::PARAMETER_DESCRIPTION);
+        $vacancy->setDescription($description ?? '');
         $vacancy->setNumOfPositions(
             $this->getRequestParams()->getIntOrNull(
                 RequestParams::PARAM_TYPE_BODY,

@@ -33,6 +33,7 @@ use OrangeHRM\Core\Api\V2\Validator\ParamRuleCollection;
 use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
+use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Core\Traits\Service\DateTimeHelperTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\PerformanceTracker;
@@ -48,6 +49,7 @@ class PerformanceTrackerLogAPI extends Endpoint implements CrudEndpoint
     use PerformanceTrackerLogServiceTrait;
     use DateTimeHelperTrait;
     use PerformanceTrackerServiceTrait;
+    use HtmlSanitizerTrait;
     use UserRoleManagerTrait;
 
     public const PARAMETER_TRACKER_ID = 'trackerId';
@@ -57,7 +59,7 @@ class PerformanceTrackerLogAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_COMMENT = 'comment';
     public const PARAMETER_ACHIEVEMENT = 'achievement';
     public const PARAM_RULE_TRACKER_LOG_LOG_MAX_LENGTH = 150;
-    public const PARAM_RULE_TRACKER_LOG_COMMENT_MAX_LENGTH = 3000;
+    public const PARAM_RULE_TRACKER_LOG_COMMENT_MAX_LENGTH = 15000;
 
     /**
      * @OA\Get(
@@ -238,9 +240,8 @@ class PerformanceTrackerLogAPI extends Endpoint implements CrudEndpoint
         $performanceTrackerLog->setAchievement(
             $this->getRequestParams()->getInt(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_ACHIEVEMENT)
         );
-        $performanceTrackerLog->setComment(
-            $this->getRequestParams()->getString(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_COMMENT)
-        );
+        $comment = $this->getSanitizedRichTextOrNull(self::PARAMETER_COMMENT);
+        $performanceTrackerLog->setComment($comment ?? '');
         $performanceTrackerLog->setStatus(PerformanceTrackerLog::STATUS_NOT_DELETED);
     }
 

@@ -123,9 +123,7 @@
               @update:model-value="onUpdateEmployeeRating($event, index)"
             />
             <oxd-text type="subtitle-2">{{ $t('general.comment') }}</oxd-text>
-            <oxd-input-field
-              rows="2"
-              type="textarea"
+            <rich-text-input
               :disabled="!employeeEditable"
               :rules="commentValidators"
               :model-value="employeeReview.kpis[index].comment"
@@ -163,9 +161,7 @@
               @update:model-value="onUpdateSupervisorRating($event, index)"
             />
             <oxd-text type="subtitle-2">{{ $t('general.comment') }}</oxd-text>
-            <oxd-input-field
-              rows="2"
-              type="textarea"
+            <rich-text-input
               :disabled="!supervisorEditable"
               :rules="commentValidators"
               :model-value="supervisorReview.kpis[index].comment"
@@ -189,10 +185,8 @@
       </oxd-text>
       <div class="orangehrm-side-by-side-general-columns">
         <div>
-          <oxd-input-field
+          <rich-text-input
             v-if="showEmployeeAssessment"
-            rows="2"
-            type="textarea"
             :disabled="!employeeEditable"
             :rules="commentValidators"
             :model-value="employeeReview.generalComment"
@@ -207,10 +201,8 @@
           </oxd-text>
         </div>
         <div>
-          <oxd-input-field
+          <rich-text-input
             v-if="showSupervisorAssessment"
-            rows="2"
-            type="textarea"
             :disabled="!supervisorEditable"
             :rules="commentValidators"
             :model-value="supervisorReview.generalComment"
@@ -234,7 +226,7 @@
 <script>
 import {computed} from 'vue';
 import usei18n from '@/core/util/composable/usei18n';
-import {shouldNotExceedCharLength} from '@/core/util/validation/rules';
+import {shouldNotExceedPlainTextLength} from '@/core/util/validation/rules';
 import useEmployeeNameTranslate from '@/core/util/composable/useEmployeeNameTranslate';
 import {OxdDivider} from '@ohrm/oxd';
 
@@ -304,7 +296,7 @@ export default {
   setup(props, context) {
     const {$t} = usei18n();
     const {$tEmpName} = useEmployeeNameTranslate();
-    const commentValidators = [shouldNotExceedCharLength(2000)];
+    const commentValidators = [shouldNotExceedPlainTextLength(2000)];
 
     const statusOpts = [
       {id: 1, label: $t('performance.evaluation_activated')},

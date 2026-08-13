@@ -55,9 +55,8 @@
         </div>
       </oxd-form-row>
       <oxd-form-row>
-        <oxd-input-field
+        <rich-text-input
           v-model="trackerLog.comment"
-          type="textarea"
           :label="$t('general.comment')"
           :placeholder="$t('general.type_here')"
           :rules="rules.comment"
@@ -87,6 +86,7 @@ import {OxdDialog} from '@ohrm/oxd';
 import {
   required,
   shouldNotExceedCharLength,
+  shouldNotExceedPlainTextLength,
 } from '@/core/util/validation/rules';
 import {APIService} from '@/core/util/services/api.service';
 import TrackerLogRatingButton from '@/orangehrmPerformancePlugin/components/TrackerLogRatingButton';
@@ -129,7 +129,7 @@ export default {
       trackerLog: {...trackerLogModel},
       rules: {
         log: [required, shouldNotExceedCharLength(150)],
-        comment: [required, shouldNotExceedCharLength(3000)],
+        comment: [required, shouldNotExceedPlainTextLength(3000)],
       },
     };
   },

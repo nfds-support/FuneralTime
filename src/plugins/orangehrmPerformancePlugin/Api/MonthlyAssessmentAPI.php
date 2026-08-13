@@ -34,6 +34,7 @@ use OrangeHRM\Core\Api\V2\Validator\ParamRuleCollection;
 use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
+use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\Employee;
 use OrangeHRM\Entity\MonthlyAssessment;
@@ -46,6 +47,7 @@ class MonthlyAssessmentAPI extends Endpoint implements CrudEndpoint
     use MonthlyAssessmentServiceTrait;
     use AuthUserTrait;
     use UserRoleManagerTrait;
+    use HtmlSanitizerTrait;
 
     public const PARAMETER_EMP_NUMBER = 'empNumber';
     public const PARAMETER_MANAGER_EMP_NUMBER = 'managerEmpNumber';
@@ -411,28 +413,28 @@ class MonthlyAssessmentAPI extends Endpoint implements CrudEndpoint
         }
 
         $assessment->setEmployeeAccomplishments(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrKeep(
+                $assessment->getEmployeeAccomplishments(),
                 self::PARAMETER_EMPLOYEE_ACCOMPLISHMENTS
-            ) ?? $assessment->getEmployeeAccomplishments()
+            )
         );
         $assessment->setEmployeeImprovements(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrKeep(
+                $assessment->getEmployeeImprovements(),
                 self::PARAMETER_EMPLOYEE_IMPROVEMENTS
-            ) ?? $assessment->getEmployeeImprovements()
+            )
         );
         $assessment->setEmployeeGoals(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrKeep(
+                $assessment->getEmployeeGoals(),
                 self::PARAMETER_EMPLOYEE_GOALS
-            ) ?? $assessment->getEmployeeGoals()
+            )
         );
         $assessment->setEmployeeSupportNeeded(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrKeep(
+                $assessment->getEmployeeSupportNeeded(),
                 self::PARAMETER_EMPLOYEE_SUPPORT_NEEDED
-            ) ?? $assessment->getEmployeeSupportNeeded()
+            )
         );
     }
 
@@ -440,12 +442,10 @@ class MonthlyAssessmentAPI extends Endpoint implements CrudEndpoint
     {
         if ($assessment->getManagerSubmittedAt() !== null) {
             // Follow-up notes remain editable after manager submission (BambooHR-style).
-            $followUp = $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
-                self::PARAMETER_MANAGER_FOLLOW_UP_NOTES
-            );
-            if (!is_null($followUp)) {
-                $assessment->setManagerFollowUpNotes($followUp);
+            if ($this->getRequestParams()->has(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_MANAGER_FOLLOW_UP_NOTES)) {
+                $assessment->setManagerFollowUpNotes(
+                    $this->getSanitizedRichTextOrNull(self::PARAMETER_MANAGER_FOLLOW_UP_NOTES)
+                );
             }
             return;
         }
@@ -459,28 +459,28 @@ class MonthlyAssessmentAPI extends Endpoint implements CrudEndpoint
         }
 
         $assessment->setManagerStrengths(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrKeep(
+                $assessment->getManagerStrengths(),
                 self::PARAMETER_MANAGER_STRENGTHS
-            ) ?? $assessment->getManagerStrengths()
+            )
         );
         $assessment->setManagerImprovements(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrKeep(
+                $assessment->getManagerImprovements(),
                 self::PARAMETER_MANAGER_IMPROVEMENTS
-            ) ?? $assessment->getManagerImprovements()
+            )
         );
         $assessment->setManagerGoalsSupport(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrKeep(
+                $assessment->getManagerGoalsSupport(),
                 self::PARAMETER_MANAGER_GOALS_SUPPORT
-            ) ?? $assessment->getManagerGoalsSupport()
+            )
         );
         $assessment->setManagerFollowUpNotes(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrKeep(
+                $assessment->getManagerFollowUpNotes(),
                 self::PARAMETER_MANAGER_FOLLOW_UP_NOTES
-            ) ?? $assessment->getManagerFollowUpNotes()
+            )
         );
     }
 

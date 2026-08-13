@@ -31,6 +31,7 @@ use OrangeHRM\Core\Api\V2\Validator\Rule;
 use OrangeHRM\Core\Api\V2\Validator\Rules;
 use OrangeHRM\Core\Api\V2\Validator\Rules\InAccessibleEntityIdOption;
 use OrangeHRM\Core\Authorization\UserRole\EssUserRole;
+use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Core\Traits\ORM\EntityManagerHelperTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\PerformanceReview;
@@ -43,6 +44,7 @@ class PerformanceReviewFinalEvaluationAPI extends Endpoint implements ResourceEn
 {
     use EntityManagerHelperTrait;
     use UserRoleManagerTrait;
+    use HtmlSanitizerTrait;
     use PerformanceReviewServiceTrait;
 
     public const PARAMETER_REVIEW_ID = 'reviewId';
@@ -220,8 +222,7 @@ class PerformanceReviewFinalEvaluationAPI extends Endpoint implements ResourceEn
             )
         );
         $performanceReview->setFinalComment(
-            $this->getRequestParams()->getStringOrNull(
-                RequestParams::PARAM_TYPE_BODY,
+            $this->getSanitizedRichTextOrNull(
                 self::PARAMETER_FINAL_COMMENT
             )
         );
