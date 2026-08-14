@@ -128,6 +128,25 @@ apiv2_claim_employee_expense_limit:
     empNumber: '\d+'
     id: '\d+'
 
+apiv2_claim_employee_commissions:
+  path: /api/v2/claim/employees/{empNumber}/commissions
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Claim\Api\EmployeeCommissionAPI
+  requirements:
+    empNumber: '\d+'
+
+apiv2_claim_employee_commission:
+  path: /api/v2/claim/employees/{empNumber}/commissions/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Claim\Api\EmployeeCommissionAPI
+  requirements:
+    empNumber: '\d+'
+    id: '\d+'
+
 ##########################
 #        Screens
 ##########################
@@ -205,6 +224,16 @@ claim_employee_expense_limits:
 claim_monthly_expense_report:
   path: /claim/viewMonthlyExpenseReport
   controller: OrangeHRM\Claim\Controller\MonthlyExpenseReportController::handle
+  methods: [ GET ]
+
+claim_assign_commissions:
+  path: /claim/viewAssignCommissions
+  controller: OrangeHRM\Claim\Controller\AssignCommissionsController::handle
+  methods: [ GET ]
+
+claim_my_commissions:
+  path: /claim/viewMyCommissions
+  controller: OrangeHRM\Claim\Controller\MyCommissionsController::handle
   methods: [ GET ]
 
 ##########################

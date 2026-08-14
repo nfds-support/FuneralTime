@@ -1,7 +1,13 @@
-New & Changed Features for OrangeHRM ver 5.9.10
+New & Changed Features for OrangeHRM ver 5.9.11
     New Features/Changes
     -----------
     - Time - Configurable email reminders for staff to submit the current timesheet (by job title and/or selected employees)
+
+New & Changed Features for OrangeHRM ver 5.9.10
+    New Features/Changes
+    -----------
+    - Claim - Managers and Admins can assign sales commissions to employees; staff see a read-only statement
+    - Claim - Monthly expense report includes a combined commission total dated the last day of the month
 
 New & Changed Features for OrangeHRM ver 5.9.9
     New Features/Changes

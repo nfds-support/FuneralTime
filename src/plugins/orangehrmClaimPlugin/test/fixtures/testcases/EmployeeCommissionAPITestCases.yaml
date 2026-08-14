@@ -1,0 +1,157 @@
+Create:
+  'Create commission - Admin':
+    userId: 1
+    services:
+      claim.employee_commission_service: OrangeHRM\Claim\Service\EmployeeCommissionService
+      admin.user_service: \OrangeHRM\Admin\Service\UserService
+      pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
+      core.config_service: \OrangeHRM\Core\Service\ConfigService
+      core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
+    factories:
+      core.authorization.user_role_manager: [ '\OrangeHRM\Core\Authorization\Manager\UserRoleManagerFactory', 'getNewUserRoleManager' ]
+    attributes:
+      empNumber: 1
+    body:
+      saleDate: '2024-06-25'
+      amount: 150.25
+      description: 'Urn sale'
+    data:
+      id: 5
+      saleDate: '2024-06-25'
+      amount: 150.25
+      description: 'Urn sale'
+    meta:
+      empNumber: 1
+
+  'Create commission - ESS forbidden':
+    userId: 2
+    services:
+      claim.employee_commission_service: OrangeHRM\Claim\Service\EmployeeCommissionService
+      admin.user_service: \OrangeHRM\Admin\Service\UserService
+      pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
+      core.config_service: \OrangeHRM\Core\Service\ConfigService
+      core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
+    factories:
+      core.authorization.user_role_manager: [ '\OrangeHRM\Core\Authorization\Manager\UserRoleManagerFactory', 'getNewUserRoleManager' ]
+    attributes:
+      empNumber: 1
+    body:
+      saleDate: '2024-06-25'
+      amount: 50
+      description: 'Self assign'
+    exception:
+      class: '\OrangeHRM\Core\Api\V2\Exception\ForbiddenException'
+      message: 'Unauthorized'
+
+  'Create commission - Supervisor inaccessible employee':
+    userId: 3
+    services:
+      claim.employee_commission_service: OrangeHRM\Claim\Service\EmployeeCommissionService
+      admin.user_service: \OrangeHRM\Admin\Service\UserService
+      pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
+      core.config_service: \OrangeHRM\Core\Service\ConfigService
+      core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
+    factories:
+      core.authorization.user_role_manager: [ '\OrangeHRM\Core\Authorization\Manager\UserRoleManagerFactory', 'getNewUserRoleManager' ]
+    attributes:
+      empNumber: 4
+    body:
+      saleDate: '2024-06-25'
+      amount: 50
+      description: 'Not a subordinate'
+    exception:
+      class: '\OrangeHRM\Core\Api\V2\Exception\InvalidParamException'
+      message: 'Invalid Parameter'
+
+GetAll:
+  'List commissions for June':
+    userId: 1
+    services:
+      claim.employee_commission_service: OrangeHRM\Claim\Service\EmployeeCommissionService
+      admin.user_service: \OrangeHRM\Admin\Service\UserService
+      pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
+      core.config_service: \OrangeHRM\Core\Service\ConfigService
+    factories:
+      core.authorization.user_role_manager: [ '\OrangeHRM\Core\Authorization\Manager\UserRoleManagerFactory', 'getNewUserRoleManager' ]
+    attributes:
+      empNumber: 1
+    query:
+      year: 2024
+      month: 6
+    data:
+      - id: 1
+        saleDate: '2024-06-10'
+        amount: 100
+        description: 'Casket package'
+      - id: 2
+        saleDate: '2024-06-20'
+        amount: 75.5
+        description: 'Memorial service'
+    meta:
+      total: 2
+      empNumber: 1
+      totalAmount: 175.5
+
+GetOne:
+  'Get one commission':
+    userId: 1
+    services:
+      claim.employee_commission_service: OrangeHRM\Claim\Service\EmployeeCommissionService
+      admin.user_service: \OrangeHRM\Admin\Service\UserService
+      pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
+      core.config_service: \OrangeHRM\Core\Service\ConfigService
+    factories:
+      core.authorization.user_role_manager: [ '\OrangeHRM\Core\Authorization\Manager\UserRoleManagerFactory', 'getNewUserRoleManager' ]
+    attributes:
+      empNumber: 1
+      id: 1
+    data:
+      id: 1
+      saleDate: '2024-06-10'
+      amount: 100
+      description: 'Casket package'
+    meta:
+      empNumber: 1
+
+Update:
+  'Update commission - Admin':
+    userId: 1
+    services:
+      claim.employee_commission_service: OrangeHRM\Claim\Service\EmployeeCommissionService
+      admin.user_service: \OrangeHRM\Admin\Service\UserService
+      pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
+      core.config_service: \OrangeHRM\Core\Service\ConfigService
+      core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
+    factories:
+      core.authorization.user_role_manager: [ '\OrangeHRM\Core\Authorization\Manager\UserRoleManagerFactory', 'getNewUserRoleManager' ]
+    attributes:
+      empNumber: 1
+      id: 1
+    body:
+      saleDate: '2024-06-12'
+      amount: 110
+      description: 'Updated casket package'
+    data:
+      id: 1
+      saleDate: '2024-06-12'
+      amount: 110
+      description: 'Updated casket package'
+    meta:
+      empNumber: 1
+
+Delete:
+  'Delete commission - Admin':
+    userId: 1
+    services:
+      claim.employee_commission_service: OrangeHRM\Claim\Service\EmployeeCommissionService
+      admin.user_service: \OrangeHRM\Admin\Service\UserService
+      pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
+      core.config_service: \OrangeHRM\Core\Service\ConfigService
+      core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
+    factories:
+      core.authorization.user_role_manager: [ '\OrangeHRM\Core\Authorization\Manager\UserRoleManagerFactory', 'getNewUserRoleManager' ]
+    attributes:
+      empNumber: 1
+    body:
+      ids: [3]
+    data: [3]

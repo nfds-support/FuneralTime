@@ -30,23 +30,16 @@ class Migration extends AbstractMigration
 
     public function up(): void
     {
-        $this->createTimesheetReminderTables();
-        $this->seedDefaultConfig();
-        // insertScreenPermissions creates ohrm_screen rows — do not also seedScreens()
-        // or ScreenDao::getScreen() throws NonUniqueResultException (HTTP 500).
-        $this->cleanupDuplicateScreens(['viewTimesheetReminderConfig']);
+        $this->createEmployeeCommissionTable();
 
-        if (!$this->dataGroupExists('apiv2_time_timesheet_reminder_config')) {
+        if (!$this->dataGroupExists('apiv2_claim_employee_commissions')) {
             $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
         }
-        if (!$this->screenExistsByActionUrl('viewTimesheetReminderConfig')) {
+        if (!$this->screenExistsByActionUrl('viewAssignCommissions')) {
             $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
         }
         $this->insertMenus();
-
-        if (is_file(__DIR__ . '/lang-string/time.yaml')) {
-            $this->getLangStringHelper()->insertOrUpdateLangStrings(__DIR__, 'time');
-        }
+        $this->getLangStringHelper()->insertOrUpdateLangStrings(__DIR__, 'claim');
     }
 
     public function getVersion(): string
@@ -62,141 +55,44 @@ class Migration extends AbstractMigration
         return $this->langStringHelper;
     }
 
-    private function createTimesheetReminderTables(): void
+    private function createEmployeeCommissionTable(): void
     {
-        if (!$this->getSchemaHelper()->tableExists(['ohrm_timesheet_reminder_config'])) {
-            $this->getSchemaHelper()->createTable('ohrm_timesheet_reminder_config')
-                ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
-                ->addColumn('enabled', Types::BOOLEAN, ['Notnull' => true, 'Default' => false])
-                ->addColumn('weekday', Types::SMALLINT, ['Notnull' => true, 'Default' => 5])
-                ->addColumn('send_time', Types::STRING, ['Length' => 5, 'Notnull' => true, 'Default' => '16:00'])
-                ->addColumn('timezone', Types::STRING, ['Length' => 64, 'Notnull' => true, 'Default' => 'UTC'])
-                ->setPrimaryKey(['id'])
-                ->create();
-        }
-
-        if (!$this->getSchemaHelper()->tableExists(['ohrm_timesheet_reminder_job_title'])) {
-            $this->getSchemaHelper()->createTable('ohrm_timesheet_reminder_job_title')
-                ->addColumn('config_id', Types::INTEGER, ['Notnull' => true])
-                ->addColumn('job_title_id', Types::INTEGER, ['Notnull' => true])
-                ->setPrimaryKey(['config_id', 'job_title_id'])
-                ->create();
-
-            $this->getSchemaHelper()->addForeignKey(
-                'ohrm_timesheet_reminder_job_title',
-                new ForeignKeyConstraint(
-                    ['config_id'],
-                    'ohrm_timesheet_reminder_config',
-                    ['id'],
-                    'ts_reminder_jt_config_fk',
-                    ['onDelete' => 'CASCADE']
-                )
-            );
-            $this->getSchemaHelper()->addForeignKey(
-                'ohrm_timesheet_reminder_job_title',
-                new ForeignKeyConstraint(
-                    ['job_title_id'],
-                    'ohrm_job_title',
-                    ['id'],
-                    'ts_reminder_jt_title_fk',
-                    ['onDelete' => 'CASCADE']
-                )
-            );
-        }
-
-        if (!$this->getSchemaHelper()->tableExists(['ohrm_timesheet_reminder_employee'])) {
-            $this->getSchemaHelper()->createTable('ohrm_timesheet_reminder_employee')
-                ->addColumn('config_id', Types::INTEGER, ['Notnull' => true])
-                ->addColumn('emp_number', Types::INTEGER, ['Notnull' => true])
-                ->setPrimaryKey(['config_id', 'emp_number'])
-                ->create();
-
-            $this->getSchemaHelper()->addForeignKey(
-                'ohrm_timesheet_reminder_employee',
-                new ForeignKeyConstraint(
-                    ['config_id'],
-                    'ohrm_timesheet_reminder_config',
-                    ['id'],
-                    'ts_reminder_emp_config_fk',
-                    ['onDelete' => 'CASCADE']
-                )
-            );
-            $this->getSchemaHelper()->addForeignKey(
-                'ohrm_timesheet_reminder_employee',
-                new ForeignKeyConstraint(
-                    ['emp_number'],
-                    'hs_hr_employee',
-                    ['emp_number'],
-                    'ts_reminder_emp_emp_fk',
-                    ['onDelete' => 'CASCADE']
-                )
-            );
-        }
-    }
-
-    private function seedDefaultConfig(): void
-    {
-        $exists = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_timesheet_reminder_config')
-            ->setMaxResults(1)
-            ->executeQuery()
-            ->fetchOne();
-        if ($exists) {
+        if ($this->getSchemaHelper()->tableExists(['ohrm_employee_commission'])) {
             return;
         }
 
-        $this->createQueryBuilder()
-            ->insert('ohrm_timesheet_reminder_config')
-            ->values([
-                'enabled' => ':enabled',
-                'weekday' => ':weekday',
-                'send_time' => ':sendTime',
-                'timezone' => ':timezone',
-            ])
-            ->setParameter('enabled', 0)
-            ->setParameter('weekday', 5)
-            ->setParameter('sendTime', '16:00')
-            ->setParameter('timezone', 'UTC')
-            ->executeQuery();
-    }
+        $this->getSchemaHelper()->createTable('ohrm_employee_commission')
+            ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
+            ->addColumn('emp_number', Types::INTEGER, ['Notnull' => true])
+            ->addColumn('sale_date', Types::DATE_MUTABLE, ['Notnull' => true])
+            ->addColumn('amount', Types::DECIMAL, ['Precision' => 12, 'Scale' => 2, 'Notnull' => true])
+            ->addColumn('description', Types::STRING, ['Length' => 1000, 'Notnull' => false, 'Default' => null])
+            ->addColumn('assigned_by', Types::INTEGER, ['Notnull' => false, 'Default' => null])
+            ->addColumn('created_at', Types::DATETIME_MUTABLE, ['Notnull' => true])
+            ->setPrimaryKey(['id'])
+            ->addIndex(['emp_number', 'sale_date'], 'employee_commission_emp_date')
+            ->create();
 
-    private function cleanupDuplicateScreens(array $actionUrls): void
-    {
-        foreach ($actionUrls as $actionUrl) {
-            $ids = $this->createQueryBuilder()
-                ->select('s.id')
-                ->from('ohrm_screen', 's')
-                ->where('s.action_url = :url')
-                ->setParameter('url', $actionUrl)
-                ->orderBy('s.id', 'ASC')
-                ->executeQuery()
-                ->fetchFirstColumn();
-            if (count($ids) <= 1) {
-                continue;
-            }
-            $keepId = (int) array_shift($ids);
-            foreach ($ids as $duplicateId) {
-                $duplicateId = (int) $duplicateId;
-                $this->createQueryBuilder()
-                    ->update('ohrm_menu_item')
-                    ->set('screen_id', ':keepId')
-                    ->where('screen_id = :duplicateId')
-                    ->setParameter('keepId', $keepId)
-                    ->setParameter('duplicateId', $duplicateId)
-                    ->executeQuery();
-                $this->createQueryBuilder()
-                    ->delete('ohrm_user_role_screen')
-                    ->where('screen_id = :duplicateId')
-                    ->setParameter('duplicateId', $duplicateId)
-                    ->executeQuery();
-                $this->createQueryBuilder()
-                    ->delete('ohrm_screen')
-                    ->where('id = :duplicateId')
-                    ->setParameter('duplicateId', $duplicateId)
-                    ->executeQuery();
-            }
-        }
+        $this->getSchemaHelper()->addForeignKey(
+            'ohrm_employee_commission',
+            new ForeignKeyConstraint(
+                ['emp_number'],
+                'hs_hr_employee',
+                ['emp_number'],
+                'employee_commission_emp',
+                ['onDelete' => 'CASCADE']
+            )
+        );
+        $this->getSchemaHelper()->addForeignKey(
+            'ohrm_employee_commission',
+            new ForeignKeyConstraint(
+                ['assigned_by'],
+                'ohrm_user',
+                ['id'],
+                'employee_commission_assigned_by',
+                ['onDelete' => 'SET NULL']
+            )
+        );
     }
 
     private function dataGroupExists(string $name): bool
@@ -225,59 +121,66 @@ class Migration extends AbstractMigration
 
     private function insertMenus(): void
     {
-        $timeMenuId = $this->createQueryBuilder()
+        $claimMenuId = $this->createQueryBuilder()
             ->select('id')
             ->from('ohrm_menu_item')
             ->where('menu_title = :title')
             ->andWhere('level = 1')
-            ->setParameter('title', 'Time')
+            ->setParameter('title', 'Claim')
             ->executeQuery()
             ->fetchOne();
-        if (!$timeMenuId) {
+        if (!$claimMenuId) {
             return;
         }
 
-        $exists = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_menu_item')
-            ->where('menu_title = :title')
-            ->andWhere('parent_id = :parent')
-            ->setParameter('title', 'Timesheet Reminders')
-            ->setParameter('parent', $timeMenuId)
-            ->executeQuery()
-            ->fetchOne();
-        if ($exists) {
-            return;
+        $menus = [
+            ['Assign Commissions', 'viewAssignCommissions', 800],
+            ['My Commissions', 'viewMyCommissions', 810],
+        ];
+        foreach ($menus as [$title, $actionUrl, $order]) {
+            $exists = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_menu_item')
+                ->where('menu_title = :title')
+                ->andWhere('parent_id = :parent')
+                ->setParameter('title', $title)
+                ->setParameter('parent', $claimMenuId)
+                ->executeQuery()
+                ->fetchOne();
+            if ($exists) {
+                continue;
+            }
+            $screenId = $this->createQueryBuilder()
+                ->select('id')
+                ->from('ohrm_screen')
+                ->where('action_url = :url')
+                ->setParameter('url', $actionUrl)
+                ->orderBy('id', 'ASC')
+                ->setMaxResults(1)
+                ->executeQuery()
+                ->fetchOne();
+
+            $this->createQueryBuilder()
+                ->insert('ohrm_menu_item')
+                ->values([
+                    'menu_title' => ':menu_title',
+                    'screen_id' => ':screen_id',
+                    'parent_id' => ':parent_id',
+                    'level' => ':level',
+                    'order_hint' => ':order_hint',
+                    'status' => ':status',
+                    'additional_params' => ':additional_params',
+                ])
+                ->setParameters([
+                    'menu_title' => $title,
+                    'screen_id' => $screenId ?: null,
+                    'parent_id' => $claimMenuId,
+                    'level' => 2,
+                    'order_hint' => $order,
+                    'status' => 1,
+                    'additional_params' => null,
+                ])
+                ->executeQuery();
         }
-
-        $screenId = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_screen')
-            ->where('name = :name')
-            ->setParameter('name', 'Timesheet Reminders')
-            ->executeQuery()
-            ->fetchOne();
-
-        $this->createQueryBuilder()
-            ->insert('ohrm_menu_item')
-            ->values([
-                'menu_title' => ':menu_title',
-                'screen_id' => ':screen_id',
-                'parent_id' => ':parent_id',
-                'level' => ':level',
-                'order_hint' => ':order_hint',
-                'status' => ':status',
-                'additional_params' => ':additional_params',
-            ])
-            ->setParameters([
-                'menu_title' => 'Timesheet Reminders',
-                'screen_id' => $screenId ?: null,
-                'parent_id' => $timeMenuId,
-                'level' => 2,
-                'order_hint' => 970,
-                'status' => 1,
-                'additional_params' => null,
-            ])
-            ->executeQuery();
     }
 }

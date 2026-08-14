@@ -1,0 +1,7 @@
+apiv2_time_timesheet_reminder_config:
+  description: 'API-v2 Time - Timesheet Reminder Settings'
+  api: OrangeHRM\Time\Api\TimesheetReminderConfigAPI
+  module: time
+  allowed: { read: true, create: false, update: true, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: true, delete: false } }

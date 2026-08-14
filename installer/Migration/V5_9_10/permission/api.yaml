@@ -1,7 +1,9 @@
-apiv2_time_timesheet_reminder_config:
-  description: 'API-v2 Time - Timesheet Reminder Settings'
-  api: OrangeHRM\Time\Api\TimesheetReminderConfigAPI
-  module: time
-  allowed: { read: true, create: false, update: true, delete: false }
+apiv2_claim_employee_commissions:
+  description: 'API-v2 Claim - Employee Commissions'
+  api: OrangeHRM\Claim\Api\EmployeeCommissionAPI
+  module: claim
+  allowed: { read: true, create: true, update: true, delete: true }
   permissions:
-    - { role: Admin, permission: { read: true, create: false, update: true, delete: false } }
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: ESS, permission: { read: true, create: false, update: false, delete: false, self: true } }

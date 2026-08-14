@@ -1,0 +1,46 @@
+Config:
+  - { name: 'authorize_user_role_manager_class', value: 'BasicUserRoleManager' }
+
+Employee:
+  0: { empNumber: 1, firstName: 'Kayla', lastName: 'Abbey', joinedDate: '2021-10-25' }
+  1: { empNumber: 2, firstName: 'Ashley', lastName: 'Abel', middleName: 'Aldis',  joinedDate: '2016-10-28' }
+  2: { empNumber: 3, firstName: 'Tyler', lastName: 'Abraham',  joinedDate: '2020-01-05' }
+  3: { empNumber: 4, firstName: 'Landon', lastName: 'Abrahams', joinedDate: '2016-12-31' }
+
+ReportingMethod:
+  - { "reporting_method_id": "1","reporting_method_name": "Direct" }
+
+ReportTo:
+  - { "erep_sup_emp_number": "2","erep_sub_emp_number": "1","erep_reporting_mode": "1" }
+
+UserRole:
+  - { id: 1, name: Admin, display_name: Admin, is_assignable: 1, is_predefined: 1 }
+  - { id: 2, name: ESS, display_name: ESS, is_assignable: 1, is_predefined: 1 }
+  - { id: 3, name: Supervisor, display_name: Supervisor, is_assignable: 0, is_predefined: 1 }
+
+User:
+  - { "id": 1, "user_role_id": 1, "emp_number": 4, "user_name": "admin","user_password": "admin","deleted": "0","status": "1","date_modified": "2022-09-15 16:51:16","modified_user_id": "1" }
+  - { "id": 2, "user_role_id": 2, "emp_number": 1, "user_name": "Adalwin","user_password": "Adalwin","deleted": "0","status": "1","date_entered": "2022-09-15 16:47:14","created_by": "1" }
+  - { "id": 3, "user_role_id": 2, "emp_number": 2, "user_name": "Ashley","user_password": "Ashley","deleted": "0","status": "1","date_entered": "2022-09-15 16:47:14","created_by": "1" }
+  - { "id": 4, "user_role_id": 2, "emp_number": 3, "user_name": "Tyler","user_password": "Tyler","deleted": "0","status": "1","date_entered": "2022-09-15 16:47:14","created_by": "1" }
+
+ExpenseType:
+  0: { id: 1, name: "transport", description: "travel and other transport expenses", status: true, report_column: "travelling" }
+
+CurrencyType:
+  0: { code: 1, currency_id: "CAD", currency_name: "Canadian Dollar" }
+
+ClaimEvent:
+  0: { id: 1, name: "Office Rent", description: "Monthly rent for office space", status: true }
+
+ClaimRequest:
+  0: { id: 1, emp_number: 1, added_by: 1, reference_id: 202406010000001, event_type_id: 1, description: "Approved travel", currency_id: CAD, is_deleted: false, status: 'APPROVED', created_date: "2024-06-01 12:00:00", submitted_date: "2024-06-02 17:00:00" }
+
+ClaimExpense:
+  0: { id: 1, request_id: 1, expense_type_id: 1, amount: 50.00, note: "Taxi", is_deleted: false, date: "2024-06-05 12:00:00" }
+
+EmployeeCommission:
+  0: { id: 1, emp_number: 1, sale_date: '2024-06-10', amount: 100.00, description: 'Casket package', assigned_by: 1, created_at: '2024-06-10 10:00:00' }
+  1: { id: 2, emp_number: 1, sale_date: '2024-06-20', amount: 75.50, description: 'Memorial service', assigned_by: 1, created_at: '2024-06-20 11:00:00' }
+  2: { id: 3, emp_number: 1, sale_date: '2024-07-02', amount: 40.00, description: 'July sale', assigned_by: 1, created_at: '2024-07-02 09:00:00' }
+  3: { id: 4, emp_number: 2, sale_date: '2024-06-15', amount: 200.00, description: 'Other employee', assigned_by: 1, created_at: '2024-06-15 09:00:00' }

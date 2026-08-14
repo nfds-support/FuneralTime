@@ -1,0 +1,34 @@
+langStrings:
+  -
+    value: 'Assign Commissions'
+    unitId: menu_assign_commissions
+  -
+    value: 'My Commissions'
+    unitId: menu_my_commissions
+  -
+    value: 'Assign Commissions'
+    unitId: assign_commissions
+  -
+    value: 'My Commissions'
+    unitId: my_commissions
+  -
+    value: 'Commission'
+    unitId: commission
+  -
+    value: 'Commissions'
+    unitId: commissions
+  -
+    value: 'Sale Date'
+    unitId: sale_date
+  -
+    value: 'Product / Service'
+    unitId: product_service
+  -
+    value: 'Add Commission'
+    unitId: add_commission
+  -
+    value: 'Edit Commission'
+    unitId: edit_commission
+  -
+    value: 'Monthly Total'
+    unitId: monthly_total

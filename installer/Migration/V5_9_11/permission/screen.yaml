@@ -1,0 +1,5 @@
+'Timesheet Reminders':
+  module: time
+  url: viewTimesheetReminderConfig
+  permissions:
+    - { role: Admin, permission: { read: true } }

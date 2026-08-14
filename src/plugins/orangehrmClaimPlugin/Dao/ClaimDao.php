@@ -24,6 +24,7 @@ use OrangeHRM\Claim\Dto\ClaimEventSearchFilterParams;
 use OrangeHRM\Claim\Dto\ClaimExpenseSearchFilterParams;
 use OrangeHRM\Claim\Dto\ClaimExpenseTypeSearchFilterParams;
 use OrangeHRM\Claim\Dto\ClaimRequestSearchFilterParams;
+use OrangeHRM\Claim\Dto\EmployeeCommissionSearchFilterParams;
 use OrangeHRM\Claim\Dto\PartialClaimAttachment;
 use Doctrine\DBAL\LockMode;
 use OrangeHRM\Core\Dao\BaseDao;
@@ -33,7 +34,9 @@ use OrangeHRM\Entity\ClaimEvent;
 use OrangeHRM\Entity\ClaimExpense;
 use OrangeHRM\Entity\ClaimExpenseLimit;
 use OrangeHRM\Entity\ClaimRequest;
+use OrangeHRM\Entity\EmployeeCommission;
 use OrangeHRM\Entity\ExpenseType;
+use Doctrine\ORM\QueryBuilder;
 use OrangeHRM\ORM\Paginator;
 
 class ClaimDao extends BaseDao
@@ -823,5 +826,107 @@ class ClaimDao extends BaseDao
             ->orderBy('claimAttachment.requestId', 'ASC')
             ->addOrderBy('claimAttachment.attachId', 'ASC');
         return $q->getQuery()->execute();
+    }
+
+    /**
+     * @param EmployeeCommission $commission
+     * @return EmployeeCommission
+     */
+    public function saveEmployeeCommission(EmployeeCommission $commission): EmployeeCommission
+    {
+        $this->persist($commission);
+        return $commission;
+    }
+
+    /**
+     * @param int $id
+     * @return EmployeeCommission|null
+     */
+    public function getEmployeeCommissionById(int $id): ?EmployeeCommission
+    {
+        return $this->getRepository(EmployeeCommission::class)->find($id);
+    }
+
+    /**
+     * @param EmployeeCommissionSearchFilterParams $filterParams
+     * @return EmployeeCommission[]
+     */
+    public function getEmployeeCommissionList(EmployeeCommissionSearchFilterParams $filterParams): array
+    {
+        return $this->getEmployeeCommissionPaginator($filterParams)->getQuery()->execute();
+    }
+
+    /**
+     * @param EmployeeCommissionSearchFilterParams $filterParams
+     * @return int
+     */
+    public function getEmployeeCommissionCount(EmployeeCommissionSearchFilterParams $filterParams): int
+    {
+        return $this->getEmployeeCommissionPaginator($filterParams)->count();
+    }
+
+    /**
+     * @param EmployeeCommissionSearchFilterParams $filterParams
+     * @return Paginator
+     */
+    private function getEmployeeCommissionPaginator(EmployeeCommissionSearchFilterParams $filterParams): Paginator
+    {
+        $q = $this->createQueryBuilder(EmployeeCommission::class, 'commission');
+        $q->andWhere('IDENTITY(commission.employee) = :empNumber')
+            ->setParameter('empNumber', $filterParams->getEmpNumber());
+        $this->addCommissionMonthFilter($q, $filterParams->getYear(), $filterParams->getMonth());
+        $this->setSortingAndPaginationParams($q, $filterParams);
+        return $this->getPaginator($q);
+    }
+
+    /**
+     * @param int[] $ids
+     * @return int
+     */
+    public function deleteEmployeeCommissionsByIds(array $ids): int
+    {
+        if (empty($ids)) {
+            return 0;
+        }
+        $q = $this->createQueryBuilder(EmployeeCommission::class, 'commission');
+        $q->delete()
+            ->where($q->expr()->in('commission.id', ':ids'))
+            ->setParameter('ids', $ids);
+        return $q->getQuery()->execute();
+    }
+
+    /**
+     * @param int $empNumber
+     * @param int $year
+     * @param int $month
+     * @return float
+     */
+    public function getCommissionSumForMonth(int $empNumber, int $year, int $month): float
+    {
+        $q = $this->createQueryBuilder(EmployeeCommission::class, 'commission');
+        $q->select('SUM(commission.amount)')
+            ->andWhere('IDENTITY(commission.employee) = :empNumber')
+            ->setParameter('empNumber', $empNumber);
+        $this->addCommissionMonthFilter($q, $year, $month);
+        $result = $q->getQuery()->getSingleScalarResult();
+        return $result === null ? 0.0 : (float) $result;
+    }
+
+    /**
+     * @param QueryBuilder $q
+     * @param int|null $year
+     * @param int|null $month
+     */
+    private function addCommissionMonthFilter(QueryBuilder $q, ?int $year, ?int $month): void
+    {
+        if ($year === null || $month === null) {
+            return;
+        }
+        $fromDate = new DateTime(sprintf('%04d-%02d-01 00:00:00', $year, $month));
+        $toDate = (clone $fromDate)->modify('last day of this month')->setTime(23, 59, 59);
+        $q->andWhere($q->expr()->gte('commission.saleDate', ':fromDate'))
+            ->andWhere($q->expr()->lte('commission.saleDate', ':toDate'))
+            ->setParameter('fromDate', $fromDate)
+            ->setParameter('toDate', $toDate);
     }
 }

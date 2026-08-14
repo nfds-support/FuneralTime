@@ -17,26 +17,25 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-use OrangeHRM\Claim\Service\ClaimService;
-use OrangeHRM\Claim\Service\EmployeeCommissionService;
-use OrangeHRM\Claim\Service\ExpenseClaimLimitService;
-use OrangeHRM\Claim\Service\ExpenseClaimReportService;
-use OrangeHRM\Core\Traits\ServiceContainerTrait;
-use OrangeHRM\Framework\Http\Request;
-use OrangeHRM\Framework\PluginConfigurationInterface;
-use OrangeHRM\Framework\Services;
+namespace OrangeHRM\Claim\Controller;
 
-class ClaimPluginConfiguration implements PluginConfigurationInterface
+use OrangeHRM\Core\Controller\AbstractVueController;
+use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
+use OrangeHRM\Core\Vue\Component;
+use OrangeHRM\Core\Vue\Prop;
+use OrangeHRM\Framework\Http\Request;
+
+class MyCommissionsController extends AbstractVueController
 {
-    use ServiceContainerTrait;
+    use AuthUserTrait;
+
     /**
      * @inheritDoc
      */
-    public function initialize(Request $request): void
+    public function preRender(Request $request): void
     {
-        $this->getContainer()->register(Services::CLAIM_SERVICE, ClaimService::class);
-        $this->getContainer()->register(Services::EXPENSE_CLAIM_LIMIT_SERVICE, ExpenseClaimLimitService::class);
-        $this->getContainer()->register(Services::EXPENSE_CLAIM_REPORT_SERVICE, ExpenseClaimReportService::class);
-        $this->getContainer()->register(Services::CLAIM_COMMISSION_SERVICE, EmployeeCommissionService::class);
+        $component = new Component('my-commissions');
+        $component->addProp(new Prop('emp-number', Prop::TYPE_NUMBER, $this->getAuthUser()->getEmpNumber()));
+        $this->setComponent($component);
     }
 }
