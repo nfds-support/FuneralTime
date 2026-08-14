@@ -256,3 +256,13 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+.orangehrm-header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+</style>

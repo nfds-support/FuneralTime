@@ -32,10 +32,16 @@ class Migration extends AbstractMigration
     {
         $this->createTimesheetReminderTables();
         $this->seedDefaultConfig();
-        $this->seedScreens();
+        // insertScreenPermissions creates ohrm_screen rows — do not also seedScreens()
+        // or ScreenDao::getScreen() throws NonUniqueResultException (HTTP 500).
+        $this->cleanupDuplicateScreens(['viewTimesheetReminderConfig']);
 
-        $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
-        $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+        if (!$this->dataGroupExists('apiv2_time_timesheet_reminder_config')) {
+            $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
+        }
+        if (!$this->screenExistsByActionUrl('viewTimesheetReminderConfig')) {
+            $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+        }
         $this->insertMenus();
 
         if (is_file(__DIR__ . '/lang-string/time.yaml')) {
@@ -155,41 +161,66 @@ class Migration extends AbstractMigration
             ->executeQuery();
     }
 
-    private function seedScreens(): void
+    private function cleanupDuplicateScreens(array $actionUrls): void
     {
-        $moduleId = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_module')
-            ->where('name = :name')
-            ->setParameter('name', 'time')
+        foreach ($actionUrls as $actionUrl) {
+            $ids = $this->createQueryBuilder()
+                ->select('s.id')
+                ->from('ohrm_screen', 's')
+                ->where('s.action_url = :url')
+                ->setParameter('url', $actionUrl)
+                ->orderBy('s.id', 'ASC')
+                ->executeQuery()
+                ->fetchFirstColumn();
+            if (count($ids) <= 1) {
+                continue;
+            }
+            $keepId = (int) array_shift($ids);
+            foreach ($ids as $duplicateId) {
+                $duplicateId = (int) $duplicateId;
+                $this->createQueryBuilder()
+                    ->update('ohrm_menu_item')
+                    ->set('screen_id', ':keepId')
+                    ->where('screen_id = :duplicateId')
+                    ->setParameter('keepId', $keepId)
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+                $this->createQueryBuilder()
+                    ->delete('ohrm_user_role_screen')
+                    ->where('screen_id = :duplicateId')
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+                $this->createQueryBuilder()
+                    ->delete('ohrm_screen')
+                    ->where('id = :duplicateId')
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+            }
+        }
+    }
+
+    private function dataGroupExists(string $name): bool
+    {
+        return (bool) $this->createQueryBuilder()
+            ->select('dg.id')
+            ->from('ohrm_data_group', 'dg')
+            ->where('dg.name = :name')
+            ->setParameter('name', $name)
+            ->setMaxResults(1)
             ->executeQuery()
             ->fetchOne();
-        if (!$moduleId) {
-            return;
-        }
+    }
 
-        $exists = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_screen')
-            ->where('action_url = :url')
-            ->setParameter('url', 'viewTimesheetReminderConfig')
+    private function screenExistsByActionUrl(string $actionUrl): bool
+    {
+        return (bool) $this->createQueryBuilder()
+            ->select('s.id')
+            ->from('ohrm_screen', 's')
+            ->where('s.action_url = :url')
+            ->setParameter('url', $actionUrl)
+            ->setMaxResults(1)
             ->executeQuery()
             ->fetchOne();
-        if ($exists) {
-            return;
-        }
-
-        $this->createQueryBuilder()
-            ->insert('ohrm_screen')
-            ->values([
-                'name' => ':name',
-                'module_id' => ':moduleId',
-                'action_url' => ':url',
-            ])
-            ->setParameter('name', 'Timesheet Reminders')
-            ->setParameter('moduleId', $moduleId)
-            ->setParameter('url', 'viewTimesheetReminderConfig')
-            ->executeQuery();
     }
 
     private function insertMenus(): void
