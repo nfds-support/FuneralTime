@@ -96,7 +96,7 @@ class SendTimesheetRemindersCommandTest extends KernelTestCase
         $this->assertSame(0, $exitCode);
         $display = $tester->getDisplay();
         $this->assertStringContainsString('Period 2026-08-10 to 2026-08-16', $display);
-        $this->assertStringContainsString('considered 7, sent 5, skipped 2, failed 0', $display);
+        $this->assertMatchesRegularExpression('/considered\s+7,\s+sent\s+5,\s+skipped\s+2,\s+failed\s+0/s', $display);
         $this->assertStringContainsString('kayla@xample.com', $display);
         $this->assertStringContainsString('sandeepa@xample.com', $display);
         $this->assertStringNotContainsString('ashley@xample.com', $display);

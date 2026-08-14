@@ -41,7 +41,6 @@ use OrangeHRM\Time\Service\TimesheetService;
 use OrangeHRM\Time\Service\UfcwRemittanceReportService;
 use OrangeHRM\Time\Service\UfcwRemittanceSettingsService;
 use OrangeHRM\Time\Subscriber\TimesheetPeriodSubscriber;
-use Throwable;
 
 class TimePluginConfiguration implements
     PluginConfigurationInterface,
