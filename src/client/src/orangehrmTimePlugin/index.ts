@@ -32,6 +32,7 @@ import ActivityDetailsReport from './pages/reports/ActivityDetailsReport.vue';
 import PayrollFillSheetReport from './pages/reports/PayrollFillSheetReport.vue';
 import UfcwRemittanceReport from './pages/reports/UfcwRemittanceReport.vue';
 import UfcwRemittanceConfig from './pages/configure/UfcwRemittanceConfig.vue';
+import TimesheetReminderConfig from './pages/configure/TimesheetReminderConfig.vue';
 import MyFuelBankedTime from './pages/fuelBankedTime/MyFuelBankedTime.vue';
 import EmployeeFuelBankedTime from './pages/fuelBankedTime/EmployeeFuelBankedTime.vue';
 
@@ -53,6 +54,7 @@ export default {
   'payroll-fill-sheet-report': PayrollFillSheetReport,
   'ufcw-remittance-report': UfcwRemittanceReport,
   'ufcw-remittance-config': UfcwRemittanceConfig,
+  'timesheet-reminder-config': TimesheetReminderConfig,
   'my-fuel-banked-time': MyFuelBankedTime,
   'employee-fuel-banked-time': EmployeeFuelBankedTime,
 };

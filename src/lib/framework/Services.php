@@ -328,6 +328,11 @@ final class Services
     public const UFCW_REMITTANCE_SETTINGS_SERVICE = 'time.ufcw_remittance_settings_service';
 
     /**
+     * @see \OrangeHRM\Time\Service\TimesheetReminderService
+     */
+    public const TIMESHEET_REMINDER_SERVICE = 'time.timesheet_reminder_service';
+
+    /**
      * @see \OrangeHRM\Leave\Service\LeaveEntitlementTransactionService
      */
     public const LEAVE_ENTITLEMENT_TRANSACTION_SERVICE = 'leave.leave_entitlement_transaction_service';

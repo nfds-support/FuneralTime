@@ -1,0 +1,31 @@
+langStrings:
+  -
+    value: 'Timesheet Reminders'
+    unitId: menu_timesheet_reminders
+  -
+    value: 'Timesheet Reminders'
+    unitId: timesheet_reminders
+  -
+    value: 'Send email reminders to staff to submit their current timesheet.'
+    unitId: timesheet_reminders_hint
+  -
+    value: 'Day of week'
+    unitId: reminder_weekday
+  -
+    value: 'Send time'
+    unitId: reminder_send_time
+  -
+    value: 'Job titles'
+    unitId: reminder_job_titles
+  -
+    value: 'Employees with these job titles receive a reminder unless their timesheet is already submitted or approved.'
+    unitId: help_reminder_job_titles
+  -
+    value: 'Selected employees'
+    unitId: reminder_employees
+  -
+    value: 'Manually selected staff are included in addition to any job titles above.'
+    unitId: help_reminder_employees
+  -
+    value: 'Select at least one job title or employee when reminders are enabled.'
+    unitId: reminder_recipients_required

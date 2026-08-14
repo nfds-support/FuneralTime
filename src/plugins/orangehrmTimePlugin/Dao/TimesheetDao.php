@@ -123,6 +123,18 @@ class TimesheetDao extends BaseDao
         return $this->getPaginator($q)->count() > 0;
     }
 
+    public function getTimesheetByEmployeeAndStartDate(int $employeeNumber, DateTime $date): ?Timesheet
+    {
+        $q = $this->createQueryBuilder(Timesheet::class, 'timesheet');
+        $q->andWhere('timesheet.startDate = :date');
+        $q->andWhere('timesheet.employee = :employeeNumber');
+        $q->setParameter('date', $date);
+        $q->setParameter('employeeNumber', $employeeNumber);
+        $q->setMaxResults(1);
+
+        return $q->getQuery()->getOneOrNullResult();
+    }
+
     /**
      * @param int $timesheetId
      * @param TimesheetActionLogSearchFilterParams $timesheetActionLogParamHolder

@@ -35,8 +35,15 @@ class Timesheet
     use DecoratorTrait;
 
     public const STATE_INITIAL = "INITIAL";
+    public const STATE_NOT_SUBMITTED = "NOT SUBMITTED";
+    public const STATE_SUBMITTED = "SUBMITTED";
     public const STATE_APPROVED = "APPROVED";
     public const RESET_ACTION = "RESET";
+
+    public const STATES_ALREADY_SUBMITTED = [
+        self::STATE_SUBMITTED,
+        self::STATE_APPROVED,
+    ];
 
     /**
      * @var int
