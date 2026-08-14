@@ -17,26 +17,20 @@
  * If not, see <https://www.gnu.org/licenses/>.
  */
 
-use OrangeHRM\Claim\Service\ClaimService;
-use OrangeHRM\Claim\Service\EmployeeCommissionService;
-use OrangeHRM\Claim\Service\ExpenseClaimLimitService;
-use OrangeHRM\Claim\Service\ExpenseClaimReportService;
-use OrangeHRM\Core\Traits\ServiceContainerTrait;
-use OrangeHRM\Framework\Http\Request;
-use OrangeHRM\Framework\PluginConfigurationInterface;
-use OrangeHRM\Framework\Services;
+namespace OrangeHRM\Claim\Controller;
 
-class ClaimPluginConfiguration implements PluginConfigurationInterface
+use OrangeHRM\Core\Controller\AbstractVueController;
+use OrangeHRM\Core\Vue\Component;
+use OrangeHRM\Framework\Http\Request;
+
+class AssignCommissionsController extends AbstractVueController
 {
-    use ServiceContainerTrait;
     /**
      * @inheritDoc
      */
-    public function initialize(Request $request): void
+    public function preRender(Request $request): void
     {
-        $this->getContainer()->register(Services::CLAIM_SERVICE, ClaimService::class);
-        $this->getContainer()->register(Services::EXPENSE_CLAIM_LIMIT_SERVICE, ExpenseClaimLimitService::class);
-        $this->getContainer()->register(Services::EXPENSE_CLAIM_REPORT_SERVICE, ExpenseClaimReportService::class);
-        $this->getContainer()->register(Services::CLAIM_COMMISSION_SERVICE, EmployeeCommissionService::class);
+        $component = new Component('assign-commissions');
+        $this->setComponent($component);
     }
 }

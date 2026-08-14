@@ -1,0 +1,14 @@
+'Assign Commissions':
+  module: claim
+  url: viewAssignCommissions
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: true } }
+
+'My Commissions':
+  module: claim
+  url: viewMyCommissions
+  permissions:
+    - { role: Admin, permission: { read: true } }
+    - { role: Supervisor, permission: { read: true } }
+    - { role: ESS, permission: { read: true } }
