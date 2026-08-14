@@ -96,6 +96,27 @@ class ExpenseClaimReportService
         foreach ($expenses as $expense) {
             $rows[] = $this->mapExpenseToRow($expense);
         }
+
+        $commissionTotal = $this->getClaimDao()->getCommissionSumForMonth($empNumber, $year, $month);
+        if ($commissionTotal > 0) {
+            $monthEnd = (new DateTime(sprintf('%04d-%02d-01', $year, $month)))
+                ->modify('last day of this month');
+            $rows[] = [
+                'date' => $monthEnd->format('Y-m-d'),
+                'km' => null,
+                'mileageCost' => null,
+                'gas' => null,
+                'vehicle' => null,
+                'wellness' => null,
+                'cellular' => null,
+                'office' => null,
+                'meal' => null,
+                'travelling' => null,
+                'other' => $commissionTotal,
+                'otherNote' => 'Commission',
+            ];
+        }
+
         return $rows;
     }
 

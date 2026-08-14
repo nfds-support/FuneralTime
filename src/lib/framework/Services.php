@@ -473,6 +473,11 @@ final class Services
      */
     public const EXPENSE_CLAIM_REPORT_SERVICE = 'claim.expense_claim_report_service';
 
+    /**
+     * @see \OrangeHRM\Claim\Service\EmployeeCommissionService
+     */
+    public const CLAIM_COMMISSION_SERVICE = 'claim.employee_commission_service';
+
     ///////////////////////////////////////////////////////////////
     /// Discipline plugin services
     ///////////////////////////////////////////////////////////////

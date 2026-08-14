@@ -29,6 +29,8 @@ import AssignClaim from '@/orangehrmClaimPlugin/pages/assignClaim/AssignClaim.vu
 import EmployeeClaims from '@/orangehrmClaimPlugin/pages/employeeClaims/EmployeeClaims.vue';
 import EmployeeExpenseLimits from '@/orangehrmClaimPlugin/pages/EmployeeExpenseLimits.vue';
 import MonthlyExpenseReport from '@/orangehrmClaimPlugin/pages/MonthlyExpenseReport.vue';
+import AssignCommissions from '@/orangehrmClaimPlugin/pages/AssignCommissions.vue';
+import MyCommissions from '@/orangehrmClaimPlugin/pages/MyCommissions.vue';
 
 export default {
   'claim-event': ClaimEvent,
@@ -45,4 +47,6 @@ export default {
   'employee-claim': EmployeeClaims,
   'employee-expense-limits': EmployeeExpenseLimits,
   'monthly-expense-report': MonthlyExpenseReport,
+  'assign-commissions': AssignCommissions,
+  'my-commissions': MyCommissions,
 };
