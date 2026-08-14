@@ -53,8 +53,6 @@ class ExpenseClaimReportServiceTest extends KernelTestCase
     public function testBuildRowsOmitsCommissionWhenNoneExist(): void
     {
         $rows = $this->service->buildRows(1, 2024, 1);
-        foreach ($rows as $row) {
-            $this->assertNotSame('Commission', $row['otherNote']);
-        }
+        $this->assertSame([], $rows);
     }
 }

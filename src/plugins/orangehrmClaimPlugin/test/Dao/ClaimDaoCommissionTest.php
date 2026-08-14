@@ -83,6 +83,7 @@ class ClaimDaoCommissionTest extends KernelTestCase
 
         $deleted = $this->claimDao->deleteEmployeeCommissionsByIds([$saved->getId()]);
         $this->assertEquals(1, $deleted);
+        $this->getEntityManager()->clear();
         $this->assertNull($this->claimDao->getEmployeeCommissionById($saved->getId()));
     }
 }
