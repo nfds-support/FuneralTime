@@ -94,6 +94,17 @@ class TimesheetDaoTest extends KernelTestCase
         $this->assertTrue($resultTrue);
     }
 
+    public function testGetTimesheetByEmployeeAndStartDate(): void
+    {
+        $found = $this->timesheetDao->getTimesheetByEmployeeAndStartDate(1, new DateTime('2011-04-18'));
+        $this->assertInstanceOf(Timesheet::class, $found);
+        $this->assertSame(1, $found->getId());
+        $this->assertSame('CREATED', $found->getState());
+
+        $missing = $this->timesheetDao->getTimesheetByEmployeeAndStartDate(1, new DateTime('2011-01-01'));
+        $this->assertNull($missing);
+    }
+
     public function testGetTimesheetActionLogs(): void
     {
         $this->fixture = Config::get(Config::PLUGINS_DIR) . '/orangehrmTimePlugin/test/fixtures/TimesheetActionLogDao.yml';

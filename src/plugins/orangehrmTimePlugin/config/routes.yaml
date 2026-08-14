@@ -341,6 +341,14 @@ apiv2_time_ufcw_remittance_config:
     id: 0
     _api: OrangeHRM\Time\Api\UfcwRemittanceConfigAPI
 
+apiv2_time_timesheet_reminder_config:
+  path: /api/v2/time/config/timesheet-reminders
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    id: 0
+    _api: OrangeHRM\Time\Api\TimesheetReminderConfigAPI
+
 apiv2_time_ufcw_remittance_report:
   path: /api/v2/time/ufcw-remittance/report
   controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
@@ -356,6 +364,11 @@ time_ufcw_remittance_report:
 time_ufcw_remittance_config:
   path: /time/viewUfcwRemittanceConfig
   controller: OrangeHRM\Time\Controller\UfcwRemittanceConfigController::handle
+  methods: [ GET ]
+
+time_timesheet_reminder_config:
+  path: /time/viewTimesheetReminderConfig
+  controller: OrangeHRM\Time\Controller\TimesheetReminderConfigController::handle
   methods: [ GET ]
 
 time_download_ufcw_remittance_report:

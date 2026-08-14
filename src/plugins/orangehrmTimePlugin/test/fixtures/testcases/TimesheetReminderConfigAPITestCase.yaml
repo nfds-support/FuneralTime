@@ -1,0 +1,118 @@
+GetOne:
+  'Get timesheet reminder config':
+    userId: 1
+    services:
+      time.timesheet_reminder_service: \OrangeHRM\Time\Service\TimesheetReminderService
+    attributes:
+      id: 0
+    body: [ ]
+    query: [ ]
+    hooks:
+      preAssertValidTestCase: [ '\OrangeHRM\Tests\Time\Api\TimesheetReminderConfigAPITest', 'attachDefaultRecipients' ]
+    data:
+      enabled: true
+      weekday: 5
+      sendTime: '16:00'
+      timezone: UTC
+      jobTitles:
+        - { id: 1, title: 'Software Architect' }
+        - { id: 2, title: 'Software Engineer' }
+      employees:
+        - { empNumber: 5, firstName: 'Sandeepa', middleName: 'RA', lastName: 'Ranathunga', employeeId: 'E005' }
+    meta: [ ]
+
+Update:
+  'Update timesheet reminder config':
+    userId: 1
+    services:
+      time.timesheet_reminder_service: \OrangeHRM\Time\Service\TimesheetReminderService
+    attributes:
+      id: 0
+    body:
+      enabled: true
+      weekday: 1
+      sendTime: '09:30'
+      timezone: 'America/New_York'
+      jobTitleIds: [ 1 ]
+      empNumbers: [ 1, 5 ]
+    query: [ ]
+    data:
+      enabled: true
+      weekday: 1
+      sendTime: '09:30'
+      timezone: 'America/New_York'
+      jobTitles:
+        - { id: 1, title: 'Software Architect' }
+      employees:
+        - { empNumber: 1, firstName: 'Kayla', middleName: 'T', lastName: 'Abbey', employeeId: 'E001' }
+        - { empNumber: 5, firstName: 'Sandeepa', middleName: 'RA', lastName: 'Ranathunga', employeeId: 'E005' }
+    meta: [ ]
+
+  'Update disabled with no recipients':
+    userId: 1
+    services:
+      time.timesheet_reminder_service: \OrangeHRM\Time\Service\TimesheetReminderService
+    attributes:
+      id: 0
+    body:
+      enabled: false
+      weekday: 5
+      sendTime: '16:00'
+      timezone: UTC
+      jobTitleIds: [ ]
+      empNumbers: [ ]
+    query: [ ]
+    data:
+      enabled: false
+      weekday: 5
+      sendTime: '16:00'
+      timezone: UTC
+      jobTitles: [ ]
+      employees: [ ]
+    meta: [ ]
+
+  'Reject enabled with no recipients':
+    userId: 1
+    services:
+      time.timesheet_reminder_service: \OrangeHRM\Time\Service\TimesheetReminderService
+    attributes:
+      id: 0
+    body:
+      enabled: true
+      weekday: 5
+      sendTime: '16:00'
+      timezone: UTC
+      jobTitleIds: [ ]
+      empNumbers: [ ]
+    query: [ ]
+    exception:
+      class: '\OrangeHRM\Core\Api\V2\Exception\BadRequestException'
+      message: 'Select at least one job title or employee when reminders are enabled.'
+
+  'Invalid weekday':
+    userId: 1
+    services:
+      time.timesheet_reminder_service: \OrangeHRM\Time\Service\TimesheetReminderService
+    attributes:
+      id: 0
+    body:
+      enabled: false
+      weekday: 7
+      sendTime: '16:00'
+      timezone: UTC
+    query: [ ]
+    invalidOnly: [ weekday ]
+
+  'Invalid send time':
+    userId: 1
+    services:
+      time.timesheet_reminder_service: \OrangeHRM\Time\Service\TimesheetReminderService
+    attributes:
+      id: 0
+    body:
+      enabled: false
+      weekday: 5
+      sendTime: '25:00'
+      timezone: UTC
+    query: [ ]
+    invalidOnly: [ sendTime ]
