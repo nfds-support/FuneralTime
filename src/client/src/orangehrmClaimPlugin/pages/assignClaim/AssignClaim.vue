@@ -181,7 +181,10 @@ export default {
   computed: {
     canEdit() {
       if (this.allowedActions) {
-        return this.allowedActions.includes('Submit');
+        return (
+          this.allowedActions.includes('Submit') ||
+          this.allowedActions.includes('Approve')
+        );
       }
       return false;
     },

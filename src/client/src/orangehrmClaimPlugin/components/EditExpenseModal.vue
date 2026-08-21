@@ -77,6 +77,9 @@
               :label="$t('general.note')"
               :rules="rules.note"
             />
+            <oxd-text tag="p" class="orangehrm-input-hint">
+              {{ $t('claim.expense_note_hint') }}
+            </oxd-text>
           </oxd-grid-item>
         </oxd-grid>
       </oxd-form-row>

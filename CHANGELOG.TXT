@@ -1,3 +1,8 @@
+New & Changed Features for OrangeHRM ver 5.9.12
+    New Features/Changes
+    -----------
+    - Claim - Approvers can adjust expense lines (category, amount, notes, add/delete) on submitted claims; submitters can break one receipt into multiple categorized lines with comments
+
 New & Changed Features for OrangeHRM ver 5.9.11
     New Features/Changes
     -----------
