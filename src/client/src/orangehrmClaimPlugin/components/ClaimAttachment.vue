@@ -32,6 +32,13 @@
         @click="onClickAdd"
       />
     </div>
+    <oxd-text
+      v-if="canEdit"
+      tag="p"
+      class="orangehrm-input-hint"
+    >
+      {{ $t('claim.attachment_claim_level_hint') }}
+    </oxd-text>
   </div>
   <table-header
     :total="total"

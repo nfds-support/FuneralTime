@@ -1,0 +1,10 @@
+langStrings:
+  -
+    value: 'Break a single receipt into multiple expense lines — one per category — and use the note to describe which items belong to that category.'
+    unitId: expense_breakdown_hint
+  -
+    value: 'Describe which receipt items this line covers (for example, office supplies vs miscellaneous from the same invoice).'
+    unitId: expense_note_hint
+  -
+    value: 'Attachments apply to the whole claim. Add one expense line per category and note how each line maps to the uploaded receipt.'
+    unitId: attachment_claim_level_hint

@@ -50,7 +50,6 @@ use OrangeHRM\Core\Traits\Service\DateTimeHelperTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\ClaimExpense;
 use OrangeHRM\Entity\ExpenseType;
-use OrangeHRM\Entity\WorkflowStateMachine;
 use OrangeHRM\ORM\Exception\TransactionException;
 
 class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
@@ -207,7 +206,7 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
             );
             $claimRequest = $this->getClaimRequestForUpdate($requestId);
 
-            $this->isActionAllowed(WorkflowStateMachine::CLAIM_ACTION_SUBMIT, $claimRequest);
+            $this->assertClaimExpensesMutable($claimRequest);
 
             $claimExpense->getDecorator()->setClaimRequestByRequestId($requestId);
             $expenseTypeId = $this->getRequestParams()->getInt(
@@ -333,7 +332,7 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
                 ->getInt(RequestParams::PARAM_TYPE_ATTRIBUTE, self::PARAMETER_REQUEST_ID);
             $claimRequest = $this->getClaimRequestForUpdate($requestId);
 
-            $this->isActionAllowed(WorkflowStateMachine::CLAIM_ACTION_SUBMIT, $claimRequest);
+            $this->assertClaimExpensesMutable($claimRequest);
 
             $ids = $this->getClaimService()->getClaimDao()->getExistingClaimExpenseIdsForRequestId(
                 $this->getRequestParams()->getArray(RequestParams::PARAM_TYPE_BODY, CommonParams::PARAMETER_IDS),
@@ -480,7 +479,7 @@ class ClaimExpenseAPI extends Endpoint implements CrudEndpoint
             ->getInt(RequestParams::PARAM_TYPE_ATTRIBUTE, self::PARAMETER_REQUEST_ID);
         $claimRequest = $this->getClaimRequest($requestId);
 
-        $this->isActionAllowed(WorkflowStateMachine::CLAIM_ACTION_SUBMIT, $claimRequest);
+        $this->assertClaimExpensesMutable($claimRequest);
 
         $claimExpenseId = $this->getRequestParams()
             ->getInt(RequestParams::PARAM_TYPE_ATTRIBUTE, CommonParams::PARAMETER_ID);

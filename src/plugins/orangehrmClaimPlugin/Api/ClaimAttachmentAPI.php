@@ -47,7 +47,6 @@ use OrangeHRM\Core\Traits\ORM\EntityManagerHelperTrait;
 use OrangeHRM\Core\Traits\Service\DateTimeHelperTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
 use OrangeHRM\Entity\ClaimAttachment;
-use OrangeHRM\Entity\WorkflowStateMachine;
 use OrangeHRM\ORM\Exception\TransactionException;
 
 class ClaimAttachmentAPI extends Endpoint implements CrudEndpoint
@@ -183,7 +182,7 @@ class ClaimAttachmentAPI extends Endpoint implements CrudEndpoint
             $claimRequest = $this->getClaimRequest($requestId);
             $claimAttachment->setRequestId($requestId);
 
-            $this->isActionAllowed(WorkflowStateMachine::CLAIM_ACTION_SUBMIT, $claimRequest);
+            $this->assertClaimExpensesMutable($claimRequest);
 
             $claimAttachment->getDecorator()->setUserByUserId(
                 $this->getAuthUser()->getUserId()
@@ -315,7 +314,7 @@ class ClaimAttachmentAPI extends Endpoint implements CrudEndpoint
         );
         $claimRequest = $this->getClaimRequest($requestId);
 
-        $this->isActionAllowed(WorkflowStateMachine::CLAIM_ACTION_SUBMIT, $claimRequest);
+        $this->assertClaimExpensesMutable($claimRequest);
 
         $ids = $this->getClaimService()->getClaimDao()->getExistingClaimAttachmentIdsForRequestId(
             $this->getRequestParams()->getArray(RequestParams::PARAM_TYPE_BODY, CommonParams::PARAMETER_IDS),
@@ -457,7 +456,7 @@ class ClaimAttachmentAPI extends Endpoint implements CrudEndpoint
             );
             $claimRequest = $this->getClaimRequest($requestId);
 
-            $this->isActionAllowed(WorkflowStateMachine::CLAIM_ACTION_SUBMIT, $claimRequest);
+            $this->assertClaimExpensesMutable($claimRequest);
 
             $claimAttachment = $this->getClaimService()
                 ->getClaimDao()
