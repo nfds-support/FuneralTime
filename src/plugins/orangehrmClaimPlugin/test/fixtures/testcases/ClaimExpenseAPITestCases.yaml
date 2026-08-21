@@ -3,6 +3,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -23,15 +24,18 @@ Create:
         name: transport
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: sample note
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Create - Claim Expense for own REJECTED request as Admin user':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -52,15 +56,18 @@ Create:
         name: transport
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: sample note
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Create - Claim Expense for ESS REJECTED request as Admin user':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -82,6 +89,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -102,15 +110,18 @@ Create:
         name: transport
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: sample note
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Create - Claim Expense for own REJECTED request as ESS user':
     userId: 2
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -131,15 +142,18 @@ Create:
         name: transport
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: sample note
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Create - Claim Expense with maximum amount':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -160,15 +174,18 @@ Create:
         name: transport
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 9999999999.99
       note: sample note
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Create - Claim Expense for own PAID request as ESS user':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -190,6 +207,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -208,6 +226,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -229,6 +248,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -250,6 +270,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -268,6 +289,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -287,9 +309,11 @@ Create:
         name: transport
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000
       note: null
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
     'Create - note with null':
@@ -325,6 +349,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -346,6 +371,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -367,6 +393,7 @@ Create:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -404,11 +431,13 @@ GetAll:
           "id": 1,
           "name": "transport",
           "isDeleted": false,
-          "status": true
+          "status": true,
+          "reportColumn": null
         },
-        "amount": 100,
+        "amount": 100.0,
         "note": "Travel expenses for business trip to New York",
-        "date": "2022-12-01"
+        "date": "2022-12-01",
+        "quantityKm": null
       },
       {
         "id": 2,
@@ -416,11 +445,13 @@ GetAll:
           "id": 2,
           "name": "medical",
           "isDeleted": false,
-          "status": true
+          "status": true,
+          "reportColumn": null
         },
-        "amount": 200,
+        "amount": 200.0,
         "note": "Marketing expenses for trade show",
-        "date": "2022-11-20"
+        "date": "2022-11-20",
+        "quantityKm": null
       }
     ]
     meta: { "total": 2, "totalAmount": 300 }
@@ -462,9 +493,11 @@ GetOne:
         name: transport
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 100.0
       note: Travel expenses for business trip to New York
       date: "2022-12-01"
+      quantityKm: null
     meta: [ ]
 
   'Get One - Claim Expense - with invalid id':
@@ -518,6 +551,7 @@ Update:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -539,15 +573,18 @@ Update:
         name: medical
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: sample note
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Update - Claim Expense with own REJECTED request as Admin user':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -569,15 +606,18 @@ Update:
         name: medical
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: sample note
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Update - Claim Expense with own SUBMITTED request as Admin user':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -599,15 +639,18 @@ Update:
         name: medical
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: sample note
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Update - Claim Expense - with invalid id':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -630,6 +673,7 @@ Update:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -649,6 +693,7 @@ Update:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -669,14 +714,17 @@ Update:
         name: medical
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: null
       date: "2023-02-20"
+      quantityKm: null
 
   'Update - Claim Expense - without date':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -696,6 +744,7 @@ Update:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -716,6 +765,7 @@ Update:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -738,6 +788,7 @@ Update:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -759,15 +810,18 @@ Update:
         name: medical
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: null
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Update - with null for note':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -789,15 +843,18 @@ Update:
         name: medical
         isDeleted: false
         status: true
+        reportColumn: null
       amount: 7000.0
       note: null
       date: "2023-02-20"
+      quantityKm: null
     meta: [ ]
 
   'Update - with 3 decimal points':
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
@@ -820,6 +877,7 @@ Update:
     userId: 1
     services:
       claim.claim_service: OrangeHRM\Claim\Service\ClaimService
+      claim.expense_claim_limit_service: OrangeHRM\Claim\Service\ExpenseClaimLimitService
       admin.user_service: \OrangeHRM\Admin\Service\UserService
       pim.employee_service: \OrangeHRM\Pim\Service\EmployeeService
       core.authorization.user_role_manager_helper: \OrangeHRM\Core\Authorization\Helper\UserRoleManagerHelper
