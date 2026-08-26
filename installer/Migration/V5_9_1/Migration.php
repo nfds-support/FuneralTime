@@ -81,10 +81,11 @@ class Migration extends AbstractMigration
             );
         }
 
+        // ohrm_timesheet.timesheet_id is BIGINT (V3_3_3 baseline); child FKs must match.
         if (!$this->getSchemaHelper()->tableExists(['ohrm_timesheet_day'])) {
             $this->getSchemaHelper()->createTable('ohrm_timesheet_day')
                 ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
-                ->addColumn('timesheet_id', Types::INTEGER, ['Notnull' => true])
+                ->addColumn('timesheet_id', Types::BIGINT, ['Length' => 20, 'Notnull' => true])
                 ->addColumn('date', Types::DATE_MUTABLE, ['Notnull' => true])
                 ->addColumn('on_call', Types::BOOLEAN, ['Notnull' => true, 'Default' => false])
                 ->setPrimaryKey(['id'])
@@ -105,7 +106,7 @@ class Migration extends AbstractMigration
         if (!$this->getSchemaHelper()->tableExists(['ohrm_timesheet_deduction'])) {
             $this->getSchemaHelper()->createTable('ohrm_timesheet_deduction')
                 ->addColumn('id', Types::INTEGER, ['Autoincrement' => true, 'Notnull' => true])
-                ->addColumn('timesheet_id', Types::INTEGER, ['Notnull' => true])
+                ->addColumn('timesheet_id', Types::BIGINT, ['Length' => 20, 'Notnull' => true])
                 ->addColumn('date', Types::DATE_MUTABLE, ['Notnull' => true])
                 ->addColumn('start_time', Types::TIME_MUTABLE, ['Notnull' => true])
                 ->addColumn('end_time', Types::TIME_MUTABLE, ['Notnull' => true])
