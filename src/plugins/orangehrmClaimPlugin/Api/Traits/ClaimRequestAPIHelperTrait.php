@@ -39,7 +39,37 @@ trait ClaimRequestAPIHelperTrait
      */
     public function isActionAllowed(int $action, ClaimRequest $claimRequest): bool
     {
-        $isActionAllowed = $this->getUserRoleManager()->isActionAllowed(
+        if (!$this->isClaimWorkflowActionAllowed($action, $claimRequest)) {
+            throw $this->getForbiddenException();
+        }
+        return true;
+    }
+
+    /**
+     * Expense and attachment mutations are allowed when the user can Submit
+     * (draft / rejected) or Approve (submitted claim under review).
+     *
+     * @param ClaimRequest $claimRequest
+     */
+    public function assertClaimExpensesMutable(ClaimRequest $claimRequest): void
+    {
+        if (
+            $this->isClaimWorkflowActionAllowed(WorkflowStateMachine::CLAIM_ACTION_SUBMIT, $claimRequest)
+            || $this->isClaimWorkflowActionAllowed(WorkflowStateMachine::CLAIM_ACTION_APPROVE, $claimRequest)
+        ) {
+            return;
+        }
+        throw $this->getForbiddenException();
+    }
+
+    /**
+     * @param int $action
+     * @param ClaimRequest $claimRequest
+     * @return bool
+     */
+    private function isClaimWorkflowActionAllowed(int $action, ClaimRequest $claimRequest): bool
+    {
+        return $this->getUserRoleManager()->isActionAllowed(
             WorkflowStateMachine::FLOW_CLAIM,
             $claimRequest->getStatus(),
             $action,
@@ -47,10 +77,6 @@ trait ClaimRequestAPIHelperTrait
             [],
             [Employee::class => $claimRequest->getEmployee()->getEmpNumber()]
         );
-        if (!$isActionAllowed) {
-            throw $this->getForbiddenException();
-        }
-        return true;
     }
 
     /**
