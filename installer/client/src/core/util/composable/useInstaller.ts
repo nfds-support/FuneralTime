@@ -78,6 +78,36 @@ export default function useInstaller(http: APIService) {
     }
   };
 
+  const runRestoreMigrations = async (
+    fromVersion: string,
+  ): Promise<void> => {
+    const doMigration = (version: string): Promise<AxiosResponse> => {
+      return http.request({
+        method: 'POST',
+        url: 'installer/api/installation/migration',
+        data: {
+          version,
+        },
+      });
+    };
+
+    const versionResponse = await getVersionList();
+    const versions = versionResponse.data;
+    if (!fromVersion) throw new Error('dump version not detected');
+    for (const nextVersion of versionGenerator(versions, fromVersion)) {
+      await doMigration(nextVersion);
+    }
+  };
+
+  const importSqlDump = (): Promise<AxiosResponse> => {
+    return http.request({
+      method: 'POST',
+      url: '/installer/api/sql-dump/import',
+      data: {},
+      timeout: 0,
+    });
+  };
+
   const createInstance = (): Promise<AxiosResponse> => {
     return http.request({
       method: 'POST',
@@ -102,6 +132,8 @@ export default function useInstaller(http: APIService) {
   return {
     runCleanup,
     runMigrations,
+    runRestoreMigrations,
+    importSqlDump,
     createInstance,
     createDatabase,
     createConfigFiles,

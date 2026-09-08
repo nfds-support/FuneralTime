@@ -17,7 +17,7 @@
 {% block body %}
   <noscript>
     <strong>
-      We're sorry but orangehrm doesn't work properly without JavaScript enabled. Please enable it to continue.
+      We're sorry but FuneralTime doesn't work properly without JavaScript enabled. Please enable it to continue.
     </strong>
   </noscript>
 
@@ -29,7 +29,7 @@
       ></trial-remaining-days>
     {% endif %}
     <oxd-layout
-        home-url="https://www.orangehrm.com/"
+        home-url="{{ baseUrl }}/dashboard/index"
         :sidepanel-menu-items="{{ sidePanelMenuItems | json_encode() }}"
         :topbar-menu-items="{{ topMenuItems | json_encode() }}"
         :user="{{ user | json_encode() }}"
@@ -42,6 +42,8 @@
         :breadcrumb="{{ breadcrumb | json_encode() }}"
         :date-format="{{ dateFormat | json_encode() }}"
         help-url="{{ helpUrl }}"
+        :ui-languages="{{ uiLanguages | default([]) | json_encode() }}"
+        current-ui-language="{{ currentUiLanguage | default('en_US') }}"
     >
       <{{ componentName }}
       {% for prop in componentProps %}
@@ -74,6 +76,7 @@
       window.appGlobal = {
         baseUrl: "{{ baseUrl }}",
         publicPath: "{{ publicPath }}",
+        locale: "{{ currentUiLanguage | default('en_US') }}",
       };
   </script>
   <script src="{{ publicPath }}/dist/js/chunk-vendors.js?v={{ assetsVersion }}"></script>

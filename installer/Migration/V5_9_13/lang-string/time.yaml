@@ -1,0 +1,31 @@
+langStrings:
+  -
+    unitId: ufcw_monthly_remittance
+    value: 'UFCW Monthly Remittance'
+  -
+    unitId: prepared_by
+    value: 'Prepared By'
+  -
+    unitId: update_initiation_balances
+    value: 'Update initiation balances'
+  -
+    unitId: generate_ufcw_remittance
+    value: 'Generate UFCW Remittance'
+  -
+    unitId: download_xlsx
+    value: 'Download XLSX'
+  -
+    unitId: email_ufcw_remittance
+    value: 'Email UFCW Remittance'
+  -
+    unitId: remittance_due
+    value: 'Remittance Due'
+  -
+    unitId: regular_union_dues
+    value: 'Regular Union Dues'
+  -
+    unitId: initiation_fees
+    value: 'Initiation Fees'
+  -
+    unitId: total_remittance
+    value: 'Total Remittance'

@@ -34,6 +34,12 @@ class SystemCheckController extends AbstractInstallerVueController
     {
         $component = new Component('system-check-screen');
         $component->addProp(new Prop('installer', Prop::TYPE_BOOLEAN, true));
+        $component->addProp(
+            new Prop('restore-mode', Prop::TYPE_BOOLEAN, StateContainer::getInstance()->isRestoreMode())
+        );
+        $component->addProp(
+            new Prop('skip-admin-seed', Prop::TYPE_BOOLEAN, StateContainer::getInstance()->shouldSkipAdminSeed())
+        );
         $this->setComponent($component);
         StateContainer::getInstance()->setCurrentScreen(self::SYSTEM_CHECK_SCREEN);
     }

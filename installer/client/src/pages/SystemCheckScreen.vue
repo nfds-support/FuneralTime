@@ -17,7 +17,7 @@
  */
  -->
 <template>
-  <oxd-form :loading="isLoading">
+  <oxd-form :loading="isLoading || preparing">
     <div class="orangehrm-installer-page">
       <oxd-text tag="h5" class="orangehrm-installer-page-title">
         System Check
@@ -27,6 +27,22 @@
         In order for your OrangeHRM installation to function properly, please
         ensure that all of the system check items listed below are green. If any
         are red, please take the necessary steps to fix them.
+      </oxd-text>
+      <br />
+      <oxd-text
+        v-if="restoreMode"
+        tag="p"
+        class="orangehrm-installer-page-content"
+      >
+        Next will create the database and import your SQL dump before continuing.
+      </oxd-text>
+      <oxd-text
+        v-if="errorMessage"
+        tag="p"
+        class="orangehrm-installer-page-content"
+        style="color: #c62828"
+      >
+        {{ errorMessage }}
       </oxd-text>
       <br />
       <flex-table
@@ -47,7 +63,7 @@
         <oxd-button
           class="orangehrm-left-space"
           display-type="secondary"
-          :disabled="isInterrupted"
+          :disabled="isInterrupted || preparing"
           label="Next"
           @click="goToScreen()"
         />
@@ -69,14 +85,24 @@ export default {
       type: Boolean,
       default: false,
     },
+    restoreMode: {
+      type: Boolean,
+      default: false,
+    },
+    skipAdminSeed: {
+      type: Boolean,
+      default: false,
+    },
   },
   setup(props) {
     const http = new APIService(
       window.appGlobal.baseUrl,
       `${props.installer ? 'installer' : 'upgrader'}/api/system-check`,
     );
+    const modeHttp = new APIService(window.appGlobal.baseUrl, '');
     return {
       http,
+      modeHttp,
     };
   },
   data() {
@@ -84,6 +110,8 @@ export default {
       items: [],
       isLoading: false,
       isInterrupted: true,
+      preparing: false,
+      errorMessage: '',
     };
   },
   beforeMount() {
@@ -106,16 +134,39 @@ export default {
     navigateUrl() {
       navigate(
         this.installer
-          ? '/installer/database-config'
+          ? this.restoreMode
+            ? '/installer/sql-dump-upload'
+            : '/installer/database-config'
           : '/upgrader/database-config',
       );
     },
-    goToScreen() {
-      navigate(
-        this.installer
-          ? '/installer/instance-creation'
-          : '/upgrader/current-version',
-      );
+    async goToScreen() {
+      if (!this.installer || !this.restoreMode) {
+        navigate(
+          this.installer
+            ? '/installer/instance-creation'
+            : '/upgrader/current-version',
+        );
+        return;
+      }
+      this.preparing = true;
+      this.errorMessage = '';
+      try {
+        const {data} = await this.modeHttp.request({
+          method: 'POST',
+          url: '/installer/api/sql-dump/import',
+          data: {},
+          timeout: 0,
+        });
+        const skip = data?.data?.skipAdminSeed === true;
+        navigate(skip ? '/installer/process' : '/installer/instance-creation');
+      } catch (error) {
+        this.errorMessage =
+          error?.response?.data?.error?.message ??
+          error?.message ??
+          'Failed to import SQL dump';
+        this.preparing = false;
+      }
     },
     reCheck() {
       this.fetchData();

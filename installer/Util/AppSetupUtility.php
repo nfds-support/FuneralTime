@@ -23,6 +23,7 @@ use DateTime;
 use Doctrine\DBAL\Types\Types;
 use Exception;
 use InvalidArgumentException;
+use RuntimeException;
 use OrangeHRM\Config\Config;
 use OrangeHRM\Core\Exception\KeyHandlerException;
 use OrangeHRM\Core\Utility\KeyHandler;
@@ -87,6 +88,9 @@ class AppSetupUtility
         '5.9.10' => \OrangeHRM\Installer\Migration\V5_9_10\Migration::class,
         '5.9.11' => \OrangeHRM\Installer\Migration\V5_9_11\Migration::class,
         '5.9.12' => \OrangeHRM\Installer\Migration\V5_9_12\Migration::class,
+        '5.9.13' => \OrangeHRM\Installer\Migration\V5_9_13\Migration::class,
+        '5.9.14' => \OrangeHRM\Installer\Migration\V5_9_14\Migration::class,
+        '5.9.15' => \OrangeHRM\Installer\Migration\V5_9_15\Migration::class,
     ];
 
     public const INSTALLATION_DB_TYPE_NEW = 'new';
@@ -621,5 +625,232 @@ class AppSetupUtility
     {
         $dbName = StateContainer::getInstance()->getDbInfo()[StateContainer::DB_NAME];
         Connection::getConnection()->createSchemaManager()->dropDatabase($dbName);
+    }
+
+    /**
+     * Quarantine directory for uploaded SQL dumps during install.
+     */
+    public static function getSqlDumpTempDir(): string
+    {
+        $dir = rtrim(sys_get_temp_dir(), DIRECTORY_SEPARATOR) . DIRECTORY_SEPARATOR . 'funeraltime-installer';
+        if (!is_dir($dir)) {
+            mkdir($dir, 0700, true);
+        }
+        return $dir;
+    }
+
+    /**
+     * Import a SQL dump into the database configured in StateContainer.
+     *
+     * @throws InvalidArgumentException
+     * @throws RuntimeException
+     */
+    public function importSqlDump(string $path): void
+    {
+        if (!is_readable($path) || !is_file($path)) {
+            throw new InvalidArgumentException('SQL dump file is not readable');
+        }
+        $extension = strtolower(pathinfo($path, PATHINFO_EXTENSION));
+        if ($extension !== 'sql') {
+            throw new InvalidArgumentException('Only .sql dump files are supported');
+        }
+
+        $preparedPath = $this->prepareSqlDumpForImport($path);
+        $dbInfo = StateContainer::getInstance()->getDbInfo();
+        $dbHost = $dbInfo[StateContainer::DB_HOST];
+        $dbPort = (string) $dbInfo[StateContainer::DB_PORT];
+        $dbName = $dbInfo[StateContainer::DB_NAME];
+        $dbUser = $dbInfo[StateContainer::DB_USER];
+        $dbPass = (string) ($dbInfo[StateContainer::DB_PASSWORD] ?? '');
+
+        try {
+            $this->runMysqlImport($preparedPath, $dbHost, $dbPort, $dbName, $dbUser, $dbPass);
+        } finally {
+            if ($preparedPath !== $path && is_file($preparedPath)) {
+                @unlink($preparedPath);
+            }
+        }
+
+        Connection::reset();
+        StateContainer::getInstance()->setSqlDumpImported(true);
+    }
+
+    /**
+     * Strip MariaDB sandbox magic comments that break older clients.
+     */
+    protected function prepareSqlDumpForImport(string $path): string
+    {
+        $handle = fopen($path, 'rb');
+        if ($handle === false) {
+            throw new RuntimeException('Unable to open SQL dump for reading');
+        }
+        $firstLine = fgets($handle);
+        $needsStrip = is_string($firstLine) && str_starts_with(ltrim($firstLine), '/*M!');
+        if (!$needsStrip) {
+            fclose($handle);
+            return $path;
+        }
+
+        $tempPath = tempnam(self::getSqlDumpTempDir(), 'sqlprep_');
+        if ($tempPath === false) {
+            fclose($handle);
+            throw new RuntimeException('Unable to create temporary SQL dump');
+        }
+        $out = fopen($tempPath, 'wb');
+        if ($out === false) {
+            fclose($handle);
+            throw new RuntimeException('Unable to write temporary SQL dump');
+        }
+        // skip first line already read; copy the rest
+        stream_copy_to_stream($handle, $out);
+        fclose($handle);
+        fclose($out);
+        return $tempPath;
+    }
+
+    /**
+     * @throws RuntimeException
+     */
+    protected function runMysqlImport(
+        string $path,
+        string $dbHost,
+        string $dbPort,
+        string $dbName,
+        string $dbUser,
+        string $dbPass
+    ): void {
+        $mysqlBin = $this->resolveMysqlClientBinary();
+        $cmd = [
+            $mysqlBin,
+            '-h', $dbHost,
+            '-P', $dbPort,
+            '-u', $dbUser,
+            $dbName,
+        ];
+        $descriptors = [
+            0 => ['file', $path, 'r'],
+            1 => ['pipe', 'w'],
+            2 => ['pipe', 'w'],
+        ];
+        $env = null;
+        if ($dbPass !== '') {
+            // Keep env values scalar — $_SERVER can contain arrays that break proc_open.
+            $env = [];
+            foreach (array_merge($_ENV, $_SERVER) as $key => $value) {
+                if (is_string($key) && (is_string($value) || is_numeric($value))) {
+                    $env[$key] = (string) $value;
+                }
+            }
+            $env['MYSQL_PWD'] = $dbPass;
+        }
+        $process = proc_open($cmd, $descriptors, $pipes, null, $env);
+        if (!is_resource($process)) {
+            throw new RuntimeException('Failed to start mysql client for SQL import');
+        }
+        $stdout = stream_get_contents($pipes[1]);
+        $stderr = stream_get_contents($pipes[2]);
+        fclose($pipes[1]);
+        fclose($pipes[2]);
+        $exitCode = proc_close($process);
+        if ($exitCode !== 0) {
+            Logger::getLogger()->error('SQL import failed: ' . $stderr . $stdout);
+            throw new RuntimeException(
+                'SQL import failed. Check installer.log for details.'
+                . (is_string($stderr) && $stderr !== '' ? ' ' . trim($stderr) : '')
+            );
+        }
+    }
+
+    protected function resolveMysqlClientBinary(): string
+    {
+        foreach (['mysql', 'mariadb'] as $bin) {
+            $which = stripos(PHP_OS_FAMILY, 'Windows') === 0
+                ? trim((string) shell_exec("where $bin 2>nul"))
+                : trim((string) shell_exec("command -v $bin 2>/dev/null"));
+            if ($which !== '') {
+                $lines = preg_split('/\r\n|\r|\n/', $which);
+                return $lines[0] ?? $bin;
+            }
+        }
+        throw new RuntimeException(
+            'mysql/mariadb client not found on PATH. Install the client or use CLI with a host that has it.'
+        );
+    }
+
+    /**
+     * True when dump already has organization info and at least one enabled admin user.
+     */
+    public function dumpHasUsableAdminAndOrg(): bool
+    {
+        $conn = Connection::getConnection();
+        $orgName = $conn->fetchOne('SELECT name FROM ohrm_organization_gen_info LIMIT 1');
+        if ($orgName === false || $orgName === null || trim((string) $orgName) === '') {
+            return false;
+        }
+        $adminCount = (int) $conn->fetchOne(
+            'SELECT COUNT(*) FROM ohrm_user u
+             INNER JOIN ohrm_user_role r ON r.id = u.user_role_id
+             WHERE r.name = ? AND u.status = 1',
+            ['Admin']
+        );
+        return $adminCount > 0;
+    }
+
+    /**
+     * After dump import: detect migration map key, store skip-admin flag.
+     *
+     * @return array{currentVersion: string, skipAdminSeed: bool, instanceVersion: string}
+     * @throws InvalidArgumentException
+     */
+    public function finalizeSqlDumpImport(): array
+    {
+        $instanceVersion = $this->getConfigHelper()->getConfigValue('instance.version');
+        if ($instanceVersion === null || $instanceVersion === '') {
+            throw new InvalidArgumentException(
+                'Imported dump has no instance.version; cannot determine upgrade path'
+            );
+        }
+        $mapKey = $this->getCurrentProductVersionFromDatabase();
+        if ($mapKey === null) {
+            throw new InvalidArgumentException(
+                "Imported dump version `$instanceVersion` is not supported by this FuneralTime installer"
+            );
+        }
+        $skipAdminSeed = $this->dumpHasUsableAdminAndOrg();
+        StateContainer::getInstance()->setCurrentVersion($mapKey);
+        StateContainer::getInstance()->setSkipAdminSeed($skipAdminSeed);
+        return [
+            'currentVersion' => $mapKey,
+            'skipAdminSeed' => $skipAdminSeed,
+            'instanceVersion' => (string) $instanceVersion,
+        ];
+    }
+
+    /**
+     * Create DB (if needed) and import the dump path from StateContainer.
+     *
+     * @return array{currentVersion: string, skipAdminSeed: bool, instanceVersion: string}
+     */
+    public function createDatabaseAndImportSqlDump(?string $path = null, bool $overwrite = false): array
+    {
+        $path = $path ?? StateContainer::getInstance()->getSqlDumpPath();
+        if ($path === null || $path === '') {
+            throw new InvalidArgumentException('No SQL dump path configured');
+        }
+
+        $dbName = StateContainer::getInstance()->getDbInfo()[StateContainer::DB_NAME];
+        if ($this->isDatabaseExist($dbName)) {
+            if (!$overwrite) {
+                throw new InvalidArgumentException("Cannot create database `$dbName`, already exist");
+            }
+            DatabaseServerConnection::getConnection()->createSchemaManager()->dropDatabase($dbName);
+        }
+        StateContainer::getInstance()->setDbType(self::INSTALLATION_DB_TYPE_NEW);
+        $this->createNewDatabase($dbName);
+        DatabaseServerConnection::reset();
+        Connection::reset();
+
+        $this->importSqlDump($path);
+        return $this->finalizeSqlDumpImport();
     }
 }

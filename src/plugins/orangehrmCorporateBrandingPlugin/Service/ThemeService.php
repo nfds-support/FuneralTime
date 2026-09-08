@@ -242,7 +242,7 @@ class ThemeService
         if ($this->getImageETag('client_banner') !== null) {
             return $request->getBaseUrl() . "/admin/theme/image/clientBanner?v=$assetsVersion";
         }
-        return $request->getBasePath() . "/images/orangehrm-logo.png?v=$assetsVersion";
+        return $request->getBasePath() . "/images/ohrm_branding.png?v=$assetsVersion";
     }
 
     /**

@@ -673,8 +673,8 @@ class EmailService
             return;
         }
 
-        $subject = $this->readFile($template->getSubject());
-        $body = $this->readFile($template->getBody());
+        $subject = $this->resolveTemplateSubject($template);
+        $body = $this->resolveTemplateBody($template);
         $templateHelper = new TemplateHelper();
 
         $processors = $email->getEmailProcessors();
@@ -713,6 +713,71 @@ class EmailService
                 }
             }
         }
+    }
+
+    /**
+     * Prefer DB override content when present; otherwise load the file path.
+     *
+     * @param EmailTemplate $template
+     * @return string
+     */
+    public function resolveTemplateSubject(EmailTemplate $template): string
+    {
+        $content = $template->getSubjectContent();
+        if ($content !== null && $content !== '') {
+            return $content;
+        }
+        $path = trim($template->getSubject());
+        if ($path === '') {
+            return '';
+        }
+        return $this->readFile($path);
+    }
+
+    /**
+     * Prefer DB override content when present; otherwise load the file path.
+     *
+     * @param EmailTemplate $template
+     * @return string
+     */
+    public function resolveTemplateBody(EmailTemplate $template): string
+    {
+        $content = $template->getBodyContent();
+        if ($content !== null && $content !== '') {
+            return $content;
+        }
+        $path = trim($template->getBody());
+        if ($path === '') {
+            return '';
+        }
+        return $this->readFile($path);
+    }
+
+    /**
+     * @param string $emailName
+     * @param string|null $recipientRole
+     * @param string|null $performerRole
+     * @return EmailTemplate|null
+     */
+    public function findTemplate(
+        string $emailName,
+        ?string $recipientRole = null,
+        ?string $performerRole = null
+    ): ?EmailTemplate {
+        return $this->getEmailTemplateBestMatch(
+            $emailName,
+            $recipientRole ?? '',
+            $performerRole ?? ''
+        );
+    }
+
+    /**
+     * @param string $path Relative path under plugins directory (e.g. from email template subject/body)
+     * @return string
+     */
+    public function readTemplateFile(string $path): string
+    {
+        return $this->readFile($path);
     }
 
     /**

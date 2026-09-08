@@ -20,6 +20,7 @@
 namespace OrangeHRM\Installer\Controller\Installer;
 
 use OrangeHRM\Core\Vue\Component;
+use OrangeHRM\Core\Vue\Prop;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Installer\Controller\AbstractInstallerVueController;
 use OrangeHRM\Installer\Util\StateContainer;
@@ -32,6 +33,19 @@ class InstallerController extends AbstractInstallerVueController
     public function preRender(Request $request): void
     {
         $component = new Component('install-process-screen');
+        $component->addProp(
+            new Prop('restore-mode', Prop::TYPE_BOOLEAN, StateContainer::getInstance()->isRestoreMode())
+        );
+        $component->addProp(
+            new Prop('skip-admin-seed', Prop::TYPE_BOOLEAN, StateContainer::getInstance()->shouldSkipAdminSeed())
+        );
+        $component->addProp(
+            new Prop(
+                'current-version',
+                Prop::TYPE_STRING,
+                StateContainer::getInstance()->getCurrentVersion()
+            )
+        );
         $this->setComponent($component);
         StateContainer::getInstance()->setCurrentScreen(self::INSTALLATION_SCREEN);
     }

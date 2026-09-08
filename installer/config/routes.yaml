@@ -58,6 +58,11 @@ installer_licence_acceptance:
   controller: OrangeHRM\Installer\Controller\Installer\LicenceAcceptanceController::handle
   methods: [ GET ]
 
+installer_sql_dump_upload:
+  path: /installer/sql-dump-upload
+  controller: OrangeHRM\Installer\Controller\Installer\SqlDumpUploadController::handle
+  methods: [ GET ]
+
 installer_process:
   path: /installer/process
   controller: OrangeHRM\Installer\Controller\Installer\InstallerController::handle
@@ -205,3 +210,18 @@ api_installer_clean_up_install:
   path: /installer/api/clean-up-install
   controller: OrangeHRM\Installer\Controller\Installer\Api\CleanUpInstallAPI::handle
   methods: [ POST ]
+
+installer_api_sql_dump_upload:
+  path: /installer/api/sql-dump/upload
+  controller: OrangeHRM\Installer\Controller\Installer\Api\SqlDumpUploadAPI::handle
+  methods: [ GET, POST ]
+
+installer_api_sql_dump_import:
+  path: /installer/api/sql-dump/import
+  controller: OrangeHRM\Installer\Controller\Installer\Api\SqlDumpImportAPI::handle
+  methods: [ POST ]
+
+installer_api_installation_mode:
+  path: /installer/api/installation-mode
+  controller: OrangeHRM\Installer\Controller\Installer\Api\InstallationModeAPI::handle
+  methods: [ GET, POST ]

@@ -4,6 +4,17 @@
       <slot :name="name" v-bind="slotData" />
     </template>
     <template #user-actions>
+      <li v-for="language in uiLanguages" :key="language.code">
+        <a
+          href="#"
+          role="menuitem"
+          class="oxd-userdropdown-link"
+          @click.prevent="onSelectLanguage(language.code)"
+        >
+          {{ languageLabel(language) }}
+          <span v-if="language.code === currentUiLanguage"> ✓</span>
+        </a>
+      </li>
       <li>
         <a
           href="#"
@@ -49,7 +60,9 @@
 import {provide, readonly, ref} from 'vue';
 import About from '@/core/pages/About.vue';
 import {OxdLayout} from '@ohrm/oxd';
+import {APIService} from '@/core/util/services/api.service';
 import {dateFormatKey} from '@/core/util/composable/useDateFormat';
+import {reloadPage} from '@/core/util/helper/navigation';
 
 export default {
   components: {
@@ -82,6 +95,14 @@ export default {
       type: String,
       default: null,
     },
+    uiLanguages: {
+      type: Array,
+      default: () => [],
+    },
+    currentUiLanguage: {
+      type: String,
+      default: 'en_US',
+    },
   },
   setup(props) {
     const showAboutModel = ref(false);
@@ -100,11 +121,38 @@ export default {
       if (props.helpUrl) window.open(props.helpUrl, '_blank');
     };
 
+    const languageLabel = (language) => {
+      if (language.code === 'fr_CA') {
+        return 'Français (Canada)';
+      }
+      if (language.code === 'en_US') {
+        return 'English (United States)';
+      }
+      return language.name || language.code;
+    };
+
+    const onSelectLanguage = async (code) => {
+      if (code === props.currentUiLanguage) {
+        return;
+      }
+      const http = new APIService(
+        window.appGlobal.baseUrl,
+        '/api/v2/core/ui-language',
+      );
+      await http.update(0, {language: code});
+      document.cookie = `ft_ui_language=${encodeURIComponent(
+        code,
+      )};path=/;max-age=31536000;SameSite=Lax`;
+      reloadPage();
+    };
+
     return {
       onClickSupport,
       showAboutModel,
       openAboutModel,
       closeAboutModel,
+      languageLabel,
+      onSelectLanguage,
     };
   },
 };

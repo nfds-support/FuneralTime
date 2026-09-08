@@ -33,9 +33,23 @@ class Migration extends AbstractMigration
         $this->addEmployeeFuelForBankedTimeFlag();
         $this->addEmployeeHourlyRate();
         $this->createFuelBankedTimeRequestTable();
-        $this->seedScreens();
+        // insertScreenPermissions creates ohrm_screen rows — do not also seedScreens()
+        // or ScreenDao::getScreen() throws NonUniqueResultException (HTTP 500).
+        $this->cleanupDuplicateScreens([
+            'viewMyFuelBankedTime',
+            'viewEmployeeFuelBankedTime',
+        ]);
         $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
-        $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+        if (
+            !$this->screenExistsByActionUrl('viewMyFuelBankedTime')
+            || !$this->screenExistsByActionUrl('viewEmployeeFuelBankedTime')
+        ) {
+            $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+        }
+        $this->cleanupDuplicateScreens([
+            'viewMyFuelBankedTime',
+            'viewEmployeeFuelBankedTime',
+        ]);
         $this->insertMenus();
 
         foreach (['time', 'pim', 'leave'] as $group) {
@@ -125,46 +139,54 @@ class Migration extends AbstractMigration
         );
     }
 
-    private function seedScreens(): void
+    private function cleanupDuplicateScreens(array $actionUrls): void
     {
-        $moduleId = $this->createQueryBuilder()
-            ->select('id')
-            ->from('ohrm_module')
-            ->where('name = :name')
-            ->setParameter('name', 'time')
-            ->executeQuery()
-            ->fetchOne();
-        if (!$moduleId) {
-            return;
-        }
-
-        $screens = [
-            ['My Fuel for Banked Time', 'viewMyFuelBankedTime'],
-            ['Employee Fuel for Banked Time', 'viewEmployeeFuelBankedTime'],
-        ];
-        foreach ($screens as [$name, $url]) {
-            $exists = $this->createQueryBuilder()
-                ->select('id')
-                ->from('ohrm_screen')
-                ->where('action_url = :url')
-                ->setParameter('url', $url)
+        foreach ($actionUrls as $actionUrl) {
+            $ids = $this->createQueryBuilder()
+                ->select('s.id')
+                ->from('ohrm_screen', 's')
+                ->where('s.action_url = :url')
+                ->setParameter('url', $actionUrl)
+                ->orderBy('s.id', 'ASC')
                 ->executeQuery()
-                ->fetchOne();
-            if ($exists) {
+                ->fetchFirstColumn();
+            if (count($ids) <= 1) {
                 continue;
             }
-            $this->createQueryBuilder()
-                ->insert('ohrm_screen')
-                ->values([
-                    'name' => ':name',
-                    'module_id' => ':moduleId',
-                    'action_url' => ':url',
-                ])
-                ->setParameter('name', $name)
-                ->setParameter('moduleId', $moduleId)
-                ->setParameter('url', $url)
-                ->executeQuery();
+            $keepId = (int) array_shift($ids);
+            foreach ($ids as $duplicateId) {
+                $duplicateId = (int) $duplicateId;
+                $this->createQueryBuilder()
+                    ->update('ohrm_menu_item')
+                    ->set('screen_id', ':keepId')
+                    ->where('screen_id = :duplicateId')
+                    ->setParameter('keepId', $keepId)
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+                $this->createQueryBuilder()
+                    ->delete('ohrm_user_role_screen')
+                    ->where('screen_id = :duplicateId')
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+                $this->createQueryBuilder()
+                    ->delete('ohrm_screen')
+                    ->where('id = :duplicateId')
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+            }
         }
+    }
+
+    private function screenExistsByActionUrl(string $actionUrl): bool
+    {
+        return (bool) $this->createQueryBuilder()
+            ->select('s.id')
+            ->from('ohrm_screen', 's')
+            ->where('s.action_url = :url')
+            ->setParameter('url', $actionUrl)
+            ->setMaxResults(1)
+            ->executeQuery()
+            ->fetchOne();
     }
 
     private function insertMenus(): void
@@ -203,6 +225,8 @@ class Migration extends AbstractMigration
                 ->from('ohrm_screen')
                 ->where('name = :name')
                 ->setParameter('name', $screenName)
+                ->orderBy('id', 'ASC')
+                ->setMaxResults(1)
                 ->executeQuery()
                 ->fetchOne();
 

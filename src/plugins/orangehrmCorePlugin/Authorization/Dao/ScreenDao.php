@@ -39,6 +39,10 @@ class ScreenDao extends BaseDao
             ->setParameter('moduleName', $module);
         $q->andWhere('s.actionUrl = :actionUrl')
             ->setParameter('actionUrl', $action);
+        // Prefer the oldest screen when duplicates exist (e.g. seedScreens +
+        // insertScreenPermissions both creating the same action_url).
+        $q->orderBy('s.id', 'ASC')
+            ->setMaxResults(1);
 
         return $q->getQuery()->getOneOrNullResult();
     }

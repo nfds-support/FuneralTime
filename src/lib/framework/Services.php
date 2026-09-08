@@ -360,6 +360,11 @@ final class Services
      */
     public const I18N_HELPER = 'i18n.i18n_helper';
 
+    /**
+     * @see \OrangeHRM\Core\Service\UiLanguageService
+     */
+    public const UI_LANGUAGE_SERVICE = 'core.ui_language_service';
+
     ///////////////////////////////////////////////////////////////
     /// Recruitment plugin services
     ///////////////////////////////////////////////////////////////

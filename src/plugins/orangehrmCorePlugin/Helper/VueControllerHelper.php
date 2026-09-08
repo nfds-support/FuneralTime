@@ -31,9 +31,12 @@ use OrangeHRM\Core\Traits\ModuleScreenHelperTrait;
 use OrangeHRM\Core\Traits\Service\MenuServiceTrait;
 use OrangeHRM\Core\Vue\Component;
 use OrangeHRM\CorporateBranding\Traits\ThemeServiceTrait;
+use OrangeHRM\Core\Service\UiLanguageService;
+use OrangeHRM\Core\Traits\ServiceContainerTrait;
 use OrangeHRM\Entity\MenuItem;
 use OrangeHRM\Entity\Module;
 use OrangeHRM\Framework\Http\Request;
+use OrangeHRM\Framework\Services;
 use OrangeHRM\I18N\Traits\Service\I18NHelperTrait;
 
 class VueControllerHelper
@@ -45,6 +48,7 @@ class VueControllerHelper
     use ThemeServiceTrait;
     use LocalizationServiceTrait;
     use AuthUserTrait;
+    use ServiceContainerTrait;
 
     public const COMPONENT_NAME = 'componentName';
     public const COMPONENT_PROPS = 'componentProps';
@@ -67,6 +71,8 @@ class VueControllerHelper
     public const THEME_VARIABLES = 'themeVariables';
     public const HELP_URL = 'helpUrl';
     public const IS_TRIAL_MODE = 'isTrialMode';
+    public const UI_LANGUAGES = 'uiLanguages';
+    public const CURRENT_UI_LANGUAGE = 'currentUiLanguage';
 
     /**
      * @var Request|null
@@ -128,6 +134,11 @@ class VueControllerHelper
      */
     public function getContextParams(): array
     {
+        $uiLanguageService = $this->getContainer()->get(Services::UI_LANGUAGE_SERVICE);
+        /** @var UiLanguageService $uiLanguageService */
+        $currentUiLanguage = $uiLanguageService->resolveCurrentLanguage($this->getRequest());
+        $this->getI18NHelper()->setTranslatorLanguage($currentUiLanguage);
+
         list($sidePanelMenuItems, $topMenuItems) = $this->getMenuItems();
         list($contextTitle, $contextIcon) = $this->getContextItems();
         list($clientLogoUrl, $clientBannerUrl, $themeVariables) = $this->getThemeData();
@@ -154,6 +165,8 @@ class VueControllerHelper
                 self::THEME_VARIABLES => $themeVariables,
                 self::HELP_URL => $this->getHelpUrl(),
                 self::IS_TRIAL_MODE => Config::PRODUCT_MODE === Config::MODE_TRIAL,
+                self::UI_LANGUAGES => $uiLanguageService->getSelectableLanguages(),
+                self::CURRENT_UI_LANGUAGE => $currentUiLanguage,
             ]
         );
 

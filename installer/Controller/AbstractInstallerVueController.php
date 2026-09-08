@@ -49,6 +49,7 @@ abstract class AbstractInstallerVueController extends AbstractInstallerControlle
     public const CONFIRMATION_SCREEN = "Confirmation";
     public const INSTALLATION_SCREEN = "Installation";
     public const INSTALLATION_COMPLETE_SCREEN = "Installation Complete";
+    public const SQL_DUMP_UPLOAD_SCREEN = "SQL Dump Upload";
 
     public const INSTALLER_SCREENS = [
         self::WELCOME_SCREEN,
@@ -58,6 +59,29 @@ abstract class AbstractInstallerVueController extends AbstractInstallerControlle
         self::INSTANCE_CREATION_SCREEN,
         self::ADMIN_USER_CREATION_SCREEN,
         self::CONFIRMATION_SCREEN,
+        self::INSTALLATION_SCREEN,
+        self::INSTALLATION_COMPLETE_SCREEN
+    ];
+
+    public const RESTORE_SCREENS = [
+        self::WELCOME_SCREEN,
+        self::LICENCE_ACCEPTANCE_SCREEN,
+        self::DATABASE_CONFIG_SCREEN,
+        self::SQL_DUMP_UPLOAD_SCREEN,
+        self::SYSTEM_CHECK_SCREEN,
+        self::INSTANCE_CREATION_SCREEN,
+        self::ADMIN_USER_CREATION_SCREEN,
+        self::CONFIRMATION_SCREEN,
+        self::INSTALLATION_SCREEN,
+        self::INSTALLATION_COMPLETE_SCREEN
+    ];
+
+    public const RESTORE_SCREENS_SKIP_ADMIN = [
+        self::WELCOME_SCREEN,
+        self::LICENCE_ACCEPTANCE_SCREEN,
+        self::DATABASE_CONFIG_SCREEN,
+        self::SQL_DUMP_UPLOAD_SCREEN,
+        self::SYSTEM_CHECK_SCREEN,
         self::INSTALLATION_SCREEN,
         self::INSTALLATION_COMPLETE_SCREEN
     ];
@@ -245,6 +269,11 @@ abstract class AbstractInstallerVueController extends AbstractInstallerControlle
             return [self::WELCOME_SCREEN];
         } elseif (StateContainer::getInstance()->isUpgrader()) {
             return self::UPGRADER_SCREENS;
+        } elseif (StateContainer::getInstance()->isRestoreMode()) {
+            if (StateContainer::getInstance()->shouldSkipAdminSeed()) {
+                return self::RESTORE_SCREENS_SKIP_ADMIN;
+            }
+            return self::RESTORE_SCREENS;
         } else {
             return self::INSTALLER_SCREENS;
         }
@@ -256,10 +285,7 @@ abstract class AbstractInstallerVueController extends AbstractInstallerControlle
     protected function getCurrentStep(): int
     {
         $currentScreen = StateContainer::getInstance()->getCurrentScreen();
-        $screens = self::INSTALLER_SCREENS;
-        if (StateContainer::getInstance()->isUpgrader()) {
-            $screens = self::UPGRADER_SCREENS;
-        }
+        $screens = $this->getSteps();
         return array_flip($screens)[$currentScreen] ?? 0;
     }
 }

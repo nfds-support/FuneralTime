@@ -83,13 +83,13 @@ class LoginController extends AbstractVueController implements PublicControllerI
             )
         );
         $component->addProp(
-            new Prop('login-logo-src', Prop::TYPE_STRING, $request->getBasePath() . '/images/ohrm_logo.png')
+            new Prop('login-logo-src', Prop::TYPE_STRING, $this->getThemeService()->getClientLogoURL($request))
         );
         $component->addProp(
             new Prop('login-banner-src', Prop::TYPE_STRING, $this->getThemeService()->getLoginBannerURL($request))
         );
         $component->addProp(
-            new Prop('show-social-media', Prop::TYPE_BOOLEAN, $this->getThemeService()->showSocialMediaImages())
+            new Prop('show-social-media', Prop::TYPE_BOOLEAN, false)
         );
         $component->addProp(new Prop('is-demo-mode', Prop::TYPE_BOOLEAN, Config::PRODUCT_MODE === Config::MODE_DEMO));
 

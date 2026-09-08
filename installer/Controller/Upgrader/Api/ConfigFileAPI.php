@@ -81,6 +81,9 @@ class ConfigFileAPI extends AbstractInstallerRestController
     protected function sendRegistrationData(): void
     {
         $initialData = StateContainer::getInstance()->getInitialRegistrationData();
+        if ($initialData === null) {
+            return;
+        }
         $initialRegistrationDataBody = $initialData[StateContainer::INITIAL_REGISTRATION_DATA_BODY];
         $published = $initialData[StateContainer::IS_INITIAL_REG_DATA_SENT];
         $installerStartedEventStored = $initialData[StateContainer::INSTALLER_STARTED_EVENT_STORED];

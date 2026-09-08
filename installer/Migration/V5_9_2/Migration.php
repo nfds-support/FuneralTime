@@ -36,10 +36,27 @@ class Migration extends AbstractMigration
         $this->createLeaveEntitlementTransactionTable();
         $this->seedEntitlementTypes();
         $this->seedBankedTimeLeaveType();
-        $this->seedPayrollMenuAndPermissions();
+        // insertScreenPermissions creates ohrm_screen rows — do not also seed
+        // screens manually or ScreenDao::getScreen() throws NonUniqueResultException.
+        $this->cleanupDuplicateScreens([
+            'viewPayrollFillSheetReport',
+            'viewLeaveEntitlementHistoryReport',
+            'viewMyLeaveEntitlementHistoryReport',
+        ]);
 
         $this->getDataGroupHelper()->insertApiPermissions(__DIR__ . '/permission/api.yaml');
-        $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+        if (
+            !$this->screenExistsByActionUrl('viewPayrollFillSheetReport')
+            || !$this->screenExistsByActionUrl('viewLeaveEntitlementHistoryReport')
+            || !$this->screenExistsByActionUrl('viewMyLeaveEntitlementHistoryReport')
+        ) {
+            $this->getDataGroupHelper()->insertScreenPermissions(__DIR__ . '/permission/screen.yaml');
+        }
+        $this->cleanupDuplicateScreens([
+            'viewPayrollFillSheetReport',
+            'viewLeaveEntitlementHistoryReport',
+            'viewMyLeaveEntitlementHistoryReport',
+        ]);
 
         $this->insertReportMenus();
 
@@ -244,95 +261,54 @@ class Migration extends AbstractMigration
         $this->getConfigHelper()->setConfigValue('leave.banked_time_type_id', (string) $id);
     }
 
-    private function seedPayrollMenuAndPermissions(): void
+    private function cleanupDuplicateScreens(array $actionUrls): void
     {
-        $moduleId = $this->createQueryBuilder()
-            ->select('m.id')
-            ->from('ohrm_module', 'm')
-            ->where('m.name = :name')
-            ->setParameter('name', 'time')
-            ->executeQuery()
-            ->fetchOne();
-
-        if (!$moduleId) {
-            return;
+        foreach ($actionUrls as $actionUrl) {
+            $ids = $this->createQueryBuilder()
+                ->select('s.id')
+                ->from('ohrm_screen', 's')
+                ->where('s.action_url = :url')
+                ->setParameter('url', $actionUrl)
+                ->orderBy('s.id', 'ASC')
+                ->executeQuery()
+                ->fetchFirstColumn();
+            if (count($ids) <= 1) {
+                continue;
+            }
+            $keepId = (int) array_shift($ids);
+            foreach ($ids as $duplicateId) {
+                $duplicateId = (int) $duplicateId;
+                $this->createQueryBuilder()
+                    ->update('ohrm_menu_item')
+                    ->set('screen_id', ':keepId')
+                    ->where('screen_id = :duplicateId')
+                    ->setParameter('keepId', $keepId)
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+                $this->createQueryBuilder()
+                    ->delete('ohrm_user_role_screen')
+                    ->where('screen_id = :duplicateId')
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+                $this->createQueryBuilder()
+                    ->delete('ohrm_screen')
+                    ->where('id = :duplicateId')
+                    ->setParameter('duplicateId', $duplicateId)
+                    ->executeQuery();
+            }
         }
+    }
 
-        $existing = $this->createQueryBuilder()
+    private function screenExistsByActionUrl(string $actionUrl): bool
+    {
+        return (bool) $this->createQueryBuilder()
             ->select('s.id')
             ->from('ohrm_screen', 's')
             ->where('s.action_url = :url')
-            ->setParameter('url', 'viewPayrollFillSheetReport')
+            ->setParameter('url', $actionUrl)
+            ->setMaxResults(1)
             ->executeQuery()
             ->fetchOne();
-
-        if (!$existing) {
-            $this->createQueryBuilder()
-                ->insert('ohrm_screen')
-                ->values([
-                    'name' => ':name',
-                    'module_id' => ':moduleId',
-                    'action_url' => ':url',
-                ])
-                ->setParameter('name', 'Payroll Fill Sheet Report')
-                ->setParameter('moduleId', $moduleId)
-                ->setParameter('url', 'viewPayrollFillSheetReport')
-                ->executeQuery();
-        }
-
-        $leaveModuleId = $this->createQueryBuilder()
-            ->select('m.id')
-            ->from('ohrm_module', 'm')
-            ->where('m.name = :name')
-            ->setParameter('name', 'leave')
-            ->executeQuery()
-            ->fetchOne();
-
-        if ($leaveModuleId) {
-            $existingLeave = $this->createQueryBuilder()
-                ->select('s.id')
-                ->from('ohrm_screen', 's')
-                ->where('s.action_url = :url')
-                ->setParameter('url', 'viewLeaveEntitlementHistoryReport')
-                ->executeQuery()
-                ->fetchOne();
-
-            if (!$existingLeave) {
-                $this->createQueryBuilder()
-                    ->insert('ohrm_screen')
-                    ->values([
-                        'name' => ':name',
-                        'module_id' => ':moduleId',
-                        'action_url' => ':url',
-                    ])
-                    ->setParameter('name', 'Leave Entitlement History Report')
-                    ->setParameter('moduleId', $leaveModuleId)
-                    ->setParameter('url', 'viewLeaveEntitlementHistoryReport')
-                    ->executeQuery();
-            }
-
-            $existingMyLeave = $this->createQueryBuilder()
-                ->select('s.id')
-                ->from('ohrm_screen', 's')
-                ->where('s.action_url = :url')
-                ->setParameter('url', 'viewMyLeaveEntitlementHistoryReport')
-                ->executeQuery()
-                ->fetchOne();
-
-            if (!$existingMyLeave) {
-                $this->createQueryBuilder()
-                    ->insert('ohrm_screen')
-                    ->values([
-                        'name' => ':name',
-                        'module_id' => ':moduleId',
-                        'action_url' => ':url',
-                    ])
-                    ->setParameter('name', 'My Leave Entitlement History Report')
-                    ->setParameter('moduleId', $leaveModuleId)
-                    ->setParameter('url', 'viewMyLeaveEntitlementHistoryReport')
-                    ->executeQuery();
-            }
-        }
     }
 
     private function insertReportMenus(): void

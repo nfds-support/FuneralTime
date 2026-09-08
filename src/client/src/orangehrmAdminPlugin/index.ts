@@ -48,6 +48,9 @@ import Nationality from './pages/nationality/Nationality.vue';
 import EditNationality from './pages/nationality/EditNationality.vue';
 import SaveNationality from './pages/nationality/SaveNationality.vue';
 import ViewEmailConfiguration from './pages/emailConfiguration/ViewEmailConfiguration.vue';
+import EmailTemplate from './pages/emailTemplate/EmailTemplate.vue';
+import SaveEmailTemplate from './pages/emailTemplate/SaveEmailTemplate.vue';
+import EditEmailTemplate from './pages/emailTemplate/EditEmailTemplate.vue';
 import LocationList from './pages/location/LocationList.vue';
 import SaveLocation from './pages/location/SaveLocation.vue';
 import EditLocation from './pages/location/EditLocation.vue';
@@ -111,6 +114,9 @@ export default {
   'location-save': SaveLocation,
   'location-edit': EditLocation,
   'email-configuration-view': ViewEmailConfiguration,
+  'email-template-list': EmailTemplate,
+  'email-template-save': SaveEmailTemplate,
+  'email-template-edit': EditEmailTemplate,
   'pay-grade-list': PayGrade,
   'pay-grade-add': AddPayGrade,
   'pay-grade-edit': EditPayGrade,

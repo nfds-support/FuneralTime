@@ -13,6 +13,14 @@ apiv2_core_about_organization:
     id: 0
     _api: OrangeHRM\Core\Api\Rest\AboutOrganizationAPI
 
+apiv2_core_ui_language:
+  path: /api/v2/core/ui-language
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    id: 0
+    _api: OrangeHRM\Core\Api\Rest\UiLanguageAPI
+
 push_events:
   path: /events/push
   controller: OrangeHRM\Core\Registration\Controller\PushEventController::handle

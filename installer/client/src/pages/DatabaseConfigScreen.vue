@@ -34,7 +34,7 @@
     <oxd-text tag="p" class="orangehrm-installer-page-content">
       Select Database to Use
     </oxd-text>
-    <oxd-form-row class="orangehrm-database-info-row">
+    <oxd-form-row v-if="!restoreMode" class="orangehrm-database-info-row">
       <oxd-radio-input
         v-model="database.dbType"
         value="new"
@@ -46,6 +46,14 @@
         option-label="Existing Empty Database"
       />
     </oxd-form-row>
+    <oxd-text
+      v-else
+      tag="p"
+      class="orangehrm-installer-page-content"
+    >
+      Restore mode always creates a <b>new</b> database and imports your SQL dump
+      into it.
+    </oxd-text>
     <br />
 
     <oxd-grid :cols="4" class="orangehrm-full-width-grid">
@@ -190,6 +198,12 @@ export default {
   directives: {
     tooltip: tooltipDirective,
   },
+  props: {
+    restoreMode: {
+      type: Boolean,
+      default: false,
+    },
+  },
   setup() {
     const http = new APIService(
       window.appGlobal.baseUrl,
@@ -244,7 +258,7 @@ export default {
     this.http.getAll().then((response) => {
       const {data} = response.data;
       this.database = {...data, dbPassword: null, ohrmDbPassword: null};
-      if (!this.database.dbType) {
+      if (!this.database.dbType || this.restoreMode) {
         this.database.dbType = 'new';
       }
       if (!this.database.dbPort) {
@@ -274,7 +288,11 @@ export default {
           }),
         })
         .then(() => {
-          navigate('/installer/system-check');
+          navigate(
+            this.restoreMode
+              ? '/installer/sql-dump-upload'
+              : '/installer/system-check',
+          );
         })
         .catch(({response}) => {
           const {error} = response.data;

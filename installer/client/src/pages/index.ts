@@ -28,6 +28,7 @@ import InstanceCreationScreen from '@/pages/InstanceCreationScreen.vue';
 import ConfirmationScreen from '@/pages/ConfirmationScreen.vue';
 import InstallerCompleteScreen from '@/pages/InstallerCompleteScreen.vue';
 import InstallScreen from '@/pages/InstallScreen.vue';
+import SqlDumpUploadScreen from '@/pages/SqlDumpUploadScreen.vue';
 
 export default {
   'welcome-screen': WelcomeScreen,
@@ -43,4 +44,5 @@ export default {
   'confirmation-screen': ConfirmationScreen,
   'installer-complete-screen': InstallerCompleteScreen,
   'install-process-screen': InstallScreen,
+  'sql-dump-upload-screen': SqlDumpUploadScreen,
 };

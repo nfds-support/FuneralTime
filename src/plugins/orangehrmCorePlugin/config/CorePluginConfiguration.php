@@ -88,6 +88,7 @@ class CorePluginConfiguration implements PluginConfigurationInterface, ConsoleCo
         $this->getContainer()->register(Services::MENU_SERVICE, MenuService::class);
         $this->getContainer()->register(Services::MODULE_SERVICE, ModuleService::class);
         $this->getContainer()->register(Services::REPORT_GENERATOR_SERVICE, ReportGeneratorService::class);
+        $this->getContainer()->register(Services::UI_LANGUAGE_SERVICE, \OrangeHRM\Core\Service\UiLanguageService::class);
 
         $this->registerCoreSubscribers();
     }

@@ -1,0 +1,15 @@
+apiv2_admin_email_templates:
+  description: 'API-v2 Admin - Email Templates'
+  api: OrangeHRM\Admin\Api\EmailTemplateAPI
+  module: admin
+  allowed: { read: true, create: true, update: true, delete: true }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+
+apiv2_admin_emails:
+  description: 'API-v2 Admin - Email Types'
+  api: OrangeHRM\Admin\Api\EmailAPI
+  module: admin
+  allowed: { read: true, create: false, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false } }

@@ -23,6 +23,7 @@ import Layout from '@ohrm/components/layout/Layout.vue';
 import DateInput from '@ohrm/components/inputs/DateInput.vue';
 import TimeInput from '@ohrm/components/inputs/TimeInput.vue';
 import RichTextInput from '@ohrm/components/inputs/RichTextInput.vue';
+import TinyMceInput from '@ohrm/components/inputs/TinyMceInput.vue';
 import RichTextDisplay from '@ohrm/components/inputs/RichTextDisplay.vue';
 
 import {
@@ -65,6 +66,7 @@ export default {
     app.component('DateInput', DateInput);
     app.component('TimeInput', TimeInput);
     app.component('RichTextInput', RichTextInput);
+    app.component('TinyMceInput', TinyMceInput);
     app.component('RichTextDisplay', RichTextDisplay);
   },
 };

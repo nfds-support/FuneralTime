@@ -2370,6 +2370,19 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@tinymce/tinymce-vue@npm:^6":
+  version: 6.3.0
+  resolution: "@tinymce/tinymce-vue@npm:6.3.0"
+  peerDependencies:
+    tinymce: ^8.0.0 || ^7.0.0 || ^6.0.0 || ^5.5.1
+    vue: ^3.0.0
+  peerDependenciesMeta:
+    tinymce:
+      optional: true
+  checksum: 10/91fd49cb840dc8c58f9fa76a0adea493b9b2b6e1261593298b4d17a31fedd8b45c780a9f78e937f0425caaa68caf3afa1468734a6eaa26acfa32073ad88109e3
+  languageName: node
+  linkType: hard
+
 "@tootallnate/once@npm:1":
   version: 1.1.2
   resolution: "@tootallnate/once@npm:1.1.2"
@@ -9565,6 +9578,7 @@ __metadata:
   resolution: "orangehrm@workspace:."
   dependencies:
     "@ohrm/oxd": "npm:2.0.3"
+    "@tinymce/tinymce-vue": "npm:^6"
     "@types/hammerjs": "npm:^2.0.45"
     "@types/jest": "npm:^27.5.2"
     "@typescript-eslint/eslint-plugin": "npm:^5.62.0"
@@ -9594,6 +9608,7 @@ __metadata:
     quill: "npm:^2.0.2"
     sass: "npm:^1.70.0"
     sass-loader: "npm:^12.6.0"
+    tinymce: "npm:^7"
     ts-jest: "npm:^27.1.5"
     typescript: "npm:~4.5.5"
     vue: "npm:^3.4.18"
@@ -11850,6 +11865,13 @@ __metadata:
   version: 1.1.0
   resolution: "thunky@npm:1.1.0"
   checksum: 10/825e3bd07ab3c9fd6f753c457a60957c628cacba5dd0656fd93b037c445e2828b43cf0805a9f2b16b0c5f5a10fd561206271acddb568df4f867f0aea0eb2772f
+  languageName: node
+  linkType: hard
+
+"tinymce@npm:^7":
+  version: 7.9.3
+  resolution: "tinymce@npm:7.9.3"
+  checksum: 10/a0db3c631cbefd50d49254f0252cf928bfdda2a34f9646fb331d0910ad30cc09f32f812fdad9334026a76b3f2db7b027b537bf6a627cae9c3e1bd4a919cb6c6b
   languageName: node
   linkType: hard
 

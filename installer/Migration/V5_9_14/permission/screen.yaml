@@ -1,0 +1,11 @@
+'Email Templates':
+  module: admin
+  url: viewEmailTemplates
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
+
+'Add/Edit Email Template':
+  module: admin
+  url: saveEmailTemplate
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: true, delete: false } }

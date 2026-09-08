@@ -1,0 +1,10 @@
+langStrings:
+  -
+    unitId: language
+    value: 'Language'
+  -
+    unitId: english_united_states
+    value: 'English (United States)'
+  -
+    unitId: french_canada
+    value: 'French (Canada)'

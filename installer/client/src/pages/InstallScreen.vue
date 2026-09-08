@@ -90,13 +90,28 @@ export default {
     'oxd-progress': OxdProgressbar,
     'installer-tasks': InstallerTasks,
   },
-  setup() {
+  props: {
+    restoreMode: {
+      type: Boolean,
+      default: false,
+    },
+    skipAdminSeed: {
+      type: Boolean,
+      default: false,
+    },
+    currentVersion: {
+      type: String,
+      default: null,
+    },
+  },
+  setup(props) {
     const errorText = ref(null);
     const {progress, start, stop, end} = useProgress();
 
     const {
       runCleanup,
       runMigrations,
+      runRestoreMigrations,
       createInstance,
       createDatabase,
       createConfigFiles,
@@ -104,26 +119,64 @@ export default {
       preMigrationCheck,
     } = useInstaller(new APIService(window.appGlobal.baseUrl, ''));
 
-    const tasks = ref([
-      {name: 'Database creation', state: 0, task: createDatabase},
-      {
-        name: 'Checking database permissions',
-        state: 0,
-        task: preMigrationCheck,
-      },
-      {name: 'Applying database changes', state: 0, task: runMigrations},
-      {
-        name: 'Instance and Admin user creation',
-        state: 0,
-        task: createInstance,
-      },
-      {
-        name: 'Create OrangeHRM database user',
-        state: 0,
-        task: createDatabaseUser,
-      },
-      {name: 'Creating configuration files', state: 0, task: createConfigFiles},
-    ]);
+    const buildTasks = () => {
+      if (props.restoreMode) {
+        const tasks = [
+          {
+            name: 'Checking database permissions',
+            state: 0,
+            task: preMigrationCheck,
+          },
+          {
+            name: 'Applying database changes',
+            state: 0,
+            task: () => runRestoreMigrations(props.currentVersion),
+          },
+        ];
+        if (!props.skipAdminSeed) {
+          tasks.push({
+            name: 'Instance and Admin user creation',
+            state: 0,
+            task: createInstance,
+          });
+        }
+        tasks.push(
+          {
+            name: 'Create OrangeHRM database user',
+            state: 0,
+            task: createDatabaseUser,
+          },
+          {
+            name: 'Creating configuration files',
+            state: 0,
+            task: createConfigFiles,
+          },
+        );
+        return tasks;
+      }
+      return [
+        {name: 'Database creation', state: 0, task: createDatabase},
+        {
+          name: 'Checking database permissions',
+          state: 0,
+          task: preMigrationCheck,
+        },
+        {name: 'Applying database changes', state: 0, task: runMigrations},
+        {
+          name: 'Instance and Admin user creation',
+          state: 0,
+          task: createInstance,
+        },
+        {
+          name: 'Create OrangeHRM database user',
+          state: 0,
+          task: createDatabaseUser,
+        },
+        {name: 'Creating configuration files', state: 0, task: createConfigFiles},
+      ];
+    };
+
+    const tasks = ref(buildTasks());
 
     const onClickNext = () => {
       navigate('/installer/complete');
@@ -131,7 +184,11 @@ export default {
 
     const onClickCleanup = () => {
       runCleanup().then(() => {
-        navigate('/installer/confirmation');
+        navigate(
+          props.restoreMode && props.skipAdminSeed
+            ? '/installer/system-check'
+            : '/installer/confirmation',
+        );
       });
     };
 

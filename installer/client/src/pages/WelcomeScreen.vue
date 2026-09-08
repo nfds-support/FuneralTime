@@ -56,6 +56,19 @@
       </oxd-text>
     </oxd-form-row>
 
+    <oxd-form-row class="orangehrm-installer-page-row">
+      <oxd-radio-input
+        v-model="selected"
+        value="restore"
+        option-label="Restore from SQL Dump"
+      />
+      <oxd-text tag="p" class="orangehrm-installer-page-content --label">
+        Choose this option to create a new database from an existing OrangeHRM
+        <b>.sql</b> dump and upgrade it to FuneralTime
+        <b>version {{ productversion }}</b>
+      </oxd-text>
+    </oxd-form-row>
+
     <oxd-text tag="p" class="orangehrm-installer-page-content">
       Click <b>Next</b> to continue
     </oxd-text>
@@ -75,6 +88,7 @@
 import {navigate} from '@/core/util/helper/navigation.ts';
 import DatabaseConfigDialog from '@/components/DatabaseConfigDialog.vue';
 import {OxdRadioInput} from '@ohrm/oxd';
+import {APIService} from '@/core/util/services/api.service';
 export default {
   name: 'WelcomeScreen',
   components: {
@@ -91,11 +105,24 @@ export default {
     return {
       selected: 'install',
       showModal: false,
+      http: new APIService(window.appGlobal.baseUrl, ''),
     };
   },
   methods: {
-    toggleModal() {
+    async setInstallationMode(mode) {
+      await this.http.request({
+        method: 'POST',
+        url: '/installer/api/installation-mode',
+        data: {mode},
+      });
+    },
+    async toggleModal() {
       if (this.selected === 'install') {
+        await this.setInstallationMode('fresh');
+        return navigate('/installer/licence-acceptance');
+      }
+      if (this.selected === 'restore') {
+        await this.setInstallationMode('restore');
         return navigate('/installer/licence-acceptance');
       }
       this.showModal = !this.showModal;

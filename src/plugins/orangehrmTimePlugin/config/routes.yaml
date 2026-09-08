@@ -401,12 +401,14 @@ apiv2_time_fuel_banked_time_request_action:
     id: '\d+'
 
 apiv2_time_fuel_banked_time_eligibility:
-  path: /api/v2/time/fuel-banked-time/eligibility
+  path: /api/v2/time/fuel-banked-time/eligibility/{id}
   controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
   methods: [ GET ]
   defaults:
     id: 0
     _api: OrangeHRM\Time\Api\FuelBankedTimeEligibilityAPI
+  requirements:
+    id: '\d+'
 
 time_my_fuel_banked_time:
   path: /time/viewMyFuelBankedTime

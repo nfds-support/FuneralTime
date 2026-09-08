@@ -65,6 +65,14 @@ class StateContainer
 
     public const MIGRATION_COMPLETED = 'migrationCompleted';
 
+    public const INSTALLATION_MODE = 'installationMode';
+    public const INSTALLATION_MODE_FRESH = 'fresh';
+    public const INSTALLATION_MODE_RESTORE = 'restore';
+    public const SQL_DUMP_PATH = 'sqlDumpPath';
+    public const SQL_DUMP_ORIGINAL_NAME = 'sqlDumpOriginalName';
+    public const SKIP_ADMIN_SEED = 'skipAdminSeed';
+    public const SQL_DUMP_IMPORTED = 'sqlDumpImported';
+
     /**
      * @var null|self
      */
@@ -432,11 +440,78 @@ class StateContainer
         $this->getSession()->remove(self::MIGRATION_COMPLETED);
     }
 
+    public function setInstallationMode(string $mode): void
+    {
+        $this->getSession()->set(self::INSTALLATION_MODE, $mode);
+    }
+
+    public function getInstallationMode(): string
+    {
+        return $this->getSession()->get(self::INSTALLATION_MODE, self::INSTALLATION_MODE_FRESH);
+    }
+
+    public function isRestoreMode(): bool
+    {
+        return $this->getInstallationMode() === self::INSTALLATION_MODE_RESTORE;
+    }
+
+    public function setSqlDumpPath(string $path, ?string $originalName = null): void
+    {
+        $this->getSession()->set(self::SQL_DUMP_PATH, $path);
+        if ($originalName !== null) {
+            $this->getSession()->set(self::SQL_DUMP_ORIGINAL_NAME, $originalName);
+        }
+    }
+
+    public function getSqlDumpPath(): ?string
+    {
+        return $this->getSession()->get(self::SQL_DUMP_PATH);
+    }
+
+    public function getSqlDumpOriginalName(): ?string
+    {
+        return $this->getSession()->get(self::SQL_DUMP_ORIGINAL_NAME);
+    }
+
+    public function clearSqlDumpPath(): void
+    {
+        $path = $this->getSqlDumpPath();
+        if (is_string($path) && is_file($path)) {
+            @unlink($path);
+        }
+        $this->getSession()->remove(self::SQL_DUMP_PATH);
+        $this->getSession()->remove(self::SQL_DUMP_ORIGINAL_NAME);
+        $this->getSession()->remove(self::SQL_DUMP_IMPORTED);
+    }
+
+    public function setSkipAdminSeed(bool $skip): void
+    {
+        $this->getSession()->set(self::SKIP_ADMIN_SEED, $skip);
+    }
+
+    public function shouldSkipAdminSeed(): bool
+    {
+        return (bool) $this->getSession()->get(self::SKIP_ADMIN_SEED, false);
+    }
+
+    public function setSqlDumpImported(bool $imported): void
+    {
+        $this->getSession()->set(self::SQL_DUMP_IMPORTED, $imported);
+    }
+
+    public function isSqlDumpImported(): bool
+    {
+        return (bool) $this->getSession()->get(self::SQL_DUMP_IMPORTED, false);
+    }
+
     public function clean(): void
     {
         $currentScreen = $this->getCurrentScreen();
         $isUpgrader = $this->isUpgrader();
+        $installationMode = $this->getInstallationMode();
+        $this->clearSqlDumpPath();
         $this->getSession()->invalidate();
         $this->setCurrentScreen($currentScreen, $isUpgrader);
+        $this->setInstallationMode($installationMode);
     }
 }

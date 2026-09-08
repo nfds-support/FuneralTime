@@ -235,16 +235,28 @@ class TimesheetReminderService
             'timesheetPath' => self::MY_TIMESHEET_PATH,
         ];
 
-        $subject = $this->getTemplateHelper()->renderTemplate(
-            $this->readTemplate('timesheetReminderSubject.txt.twig'),
-            $replacements
-        );
-        $body = $this->getTemplateHelper()->renderTemplate(
-            $this->readTemplate('timesheetReminderBody.html.twig'),
-            $replacements
-        );
-
         $emailService = $this->getEmailService();
+        $template = $emailService->findTemplate('time.timesheet_reminder', 'ess');
+        if ($template !== null) {
+            $subject = $this->getTemplateHelper()->renderTemplate(
+                $emailService->resolveTemplateSubject($template),
+                $replacements
+            );
+            $body = $this->getTemplateHelper()->renderTemplate(
+                $emailService->resolveTemplateBody($template),
+                $replacements
+            );
+        } else {
+            $subject = $this->getTemplateHelper()->renderTemplate(
+                $this->readTemplate('timesheetReminderSubject.txt.twig'),
+                $replacements
+            );
+            $body = $this->getTemplateHelper()->renderTemplate(
+                $this->readTemplate('timesheetReminderBody.html.twig'),
+                $replacements
+            );
+        }
+
         $emailService->setMessageTo([$email]);
         $emailService->setMessageSubject(trim($subject));
         $emailService->setMessageBody($body);

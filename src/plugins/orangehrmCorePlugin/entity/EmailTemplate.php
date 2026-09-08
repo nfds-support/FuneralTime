@@ -80,6 +80,24 @@ class EmailTemplate
     private string $body;
 
     /**
+     * Editable subject override. When set, takes precedence over the file path in `subject`.
+     *
+     * @var string|null
+     *
+     * @ORM\Column(name="subject_content", type="text", nullable=true)
+     */
+    private ?string $subjectContent = null;
+
+    /**
+     * Editable body override. When set, takes precedence over the file path in `body`.
+     *
+     * @var string|null
+     *
+     * @ORM\Column(name="body_content", type="text", nullable=true)
+     */
+    private ?string $bodyContent = null;
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -189,5 +207,37 @@ class EmailTemplate
     public function setBody(string $body): void
     {
         $this->body = $body;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSubjectContent(): ?string
+    {
+        return $this->subjectContent;
+    }
+
+    /**
+     * @param string|null $subjectContent
+     */
+    public function setSubjectContent(?string $subjectContent): void
+    {
+        $this->subjectContent = $subjectContent;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getBodyContent(): ?string
+    {
+        return $this->bodyContent;
+    }
+
+    /**
+     * @param string|null $bodyContent
+     */
+    public function setBodyContent(?string $bodyContent): void
+    {
+        $this->bodyContent = $bodyContent;
     }
 }

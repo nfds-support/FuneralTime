@@ -48,7 +48,9 @@ class I18NMessagesController extends AbstractFileController implements PublicCon
     {
         $locale = $request->query->get('locale');
         if (!$request->query->has('locale')) {
-            $locale = $this->getConfigService()->getAdminLocalizationDefaultLanguage();
+            /** @var \OrangeHRM\Core\Service\UiLanguageService $uiLanguageService */
+            $uiLanguageService = $this->getContainer()->get(\OrangeHRM\Framework\Services::UI_LANGUAGE_SERVICE);
+            $locale = $uiLanguageService->resolveCurrentLanguage($request);
         }
 
         $response = $this->getResponse();

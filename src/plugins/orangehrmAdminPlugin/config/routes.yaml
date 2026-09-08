@@ -556,6 +556,45 @@ view_email_configuration:
   controller: OrangeHRM\Admin\Controller\ViewEmailConfigurationController::handle
   methods: [ GET ]
 
+apiv2_admin_emails:
+  path: /api/v2/admin/emails
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET ]
+  defaults:
+    _api: OrangeHRM\Admin\Api\EmailAPI
+
+apiv2_admin_email_templates:
+  path: /api/v2/admin/email-templates
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST, DELETE ]
+  defaults:
+    _api: OrangeHRM\Admin\Api\EmailTemplateAPI
+
+apiv2_admin_email_template:
+  path: /api/v2/admin/email-templates/{id}
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, PUT ]
+  defaults:
+    _api: OrangeHRM\Admin\Api\EmailTemplateAPI
+    _key: id
+  requirements:
+    id: '\d+'
+
+view_email_templates:
+  path: /admin/viewEmailTemplates
+  controller: OrangeHRM\Admin\Controller\EmailTemplateController::handle
+  methods: [ GET ]
+
+save_email_template:
+  path: /admin/saveEmailTemplate
+  controller: OrangeHRM\Admin\Controller\SaveEmailTemplateController::handle
+  methods: [ GET ]
+
+edit_email_template:
+  path: /admin/saveEmailTemplate/{id}
+  controller: OrangeHRM\Admin\Controller\SaveEmailTemplateController::handle
+  methods: [ GET ]
+
 view_pay_grades:
   path: /admin/viewPayGrades
   controller: OrangeHRM\Admin\Controller\PayGradeController::handle

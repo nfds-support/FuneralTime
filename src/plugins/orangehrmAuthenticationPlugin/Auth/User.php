@@ -38,6 +38,8 @@ class User
     public const USER_EMPLOYEE_NUMBER = 'user.user_employee_number';
     public const USER_LAST_MODIFIED = 'user.last_modified';
     public const OPENID_PROVIDER_ID = 'openid.provider_id';
+    public const USER_UI_LANGUAGE = 'user.ui_language';
+    public const UI_LANGUAGE_COOKIE = 'ft_ui_language';
 
     public const FLASH_LOGIN_ERROR = 'flash.login_error';
     public const FLASH_PASSWORD_ENFORCE_ERROR = 'flash.password_enforce_error';

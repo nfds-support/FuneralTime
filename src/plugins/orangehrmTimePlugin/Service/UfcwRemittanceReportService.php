@@ -21,10 +21,13 @@ namespace OrangeHRM\Time\Service;
 
 use DateTime;
 use OrangeHRM\Core\Service\EmailService;
+use OrangeHRM\Core\Service\UiLanguageService;
 use OrangeHRM\Core\Traits\ORM\EntityManagerHelperTrait;
+use OrangeHRM\Core\Traits\ServiceContainerTrait;
 use OrangeHRM\Entity\Employee;
 use OrangeHRM\Entity\PayrollPeriod;
 use OrangeHRM\Entity\UfcwInitiationFee;
+use OrangeHRM\Framework\Services;
 use OrangeHRM\Time\Dao\UfcwRemittanceDao;
 use OrangeHRM\Time\Dto\UfcwRemittanceEmployeeRow;
 use OrangeHRM\Time\Dto\UfcwRemittanceSettings;
@@ -37,6 +40,79 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 class UfcwRemittanceReportService
 {
     use EntityManagerHelperTrait;
+    use ServiceContainerTrait;
+
+    private const FRENCH_LABELS = [
+        'UFCW MONTHLY DUES & MEMBERSHIP REPORT' => 'RAPPORT MENSUEL DES COTISATIONS ET MEMBRES UFCW',
+        'Employer' => 'Employeur',
+        'Work Location' => 'Lieu de travail',
+        'Work Location Code' => 'Code du lieu de travail',
+        'Report Month / Year' => 'Mois / année du rapport',
+        'Union Contact(s)' => 'Contact(s) syndical(aux)',
+        'Prepared By' => 'Préparé par',
+        'Date Prepared' => 'Date de préparation',
+        'Payroll Periods Included' => 'Périodes de paie incluses',
+        'Report Status' => 'État du rapport',
+        'Reporting Rules' => 'Règles de déclaration',
+        'Remittance deadline' => 'Date limite de remise',
+        'Totals: see Remittance Summary sheet' => 'Totaux : voir la feuille Résumé de la remise',
+        'Do not subtract overpayments from the current remittance' =>
+            'Ne pas soustraire les trop-perçus de la remise actuelle',
+        'Yellow cells require completion or confirmation before the report is sent. Amounts in the Total Deducted column calculate automatically.' =>
+            'Les cellules jaunes doivent être remplies ou confirmées avant l\'envoi. Les montants de la colonne Total déduit se calculent automatiquement.',
+        'S.I.N.' => 'NAS',
+        'Employee #' => 'N° d\'employé',
+        'Full Name' => 'Nom complet',
+        'Full Address' => 'Adresse complète',
+        'City' => 'Ville',
+        'Prov.' => 'Prov.',
+        'Postal Code' => 'Code postal',
+        'Telephone' => 'Téléphone',
+        'Employee Email' => 'Courriel de l\'employé',
+        'Date of Hire' => 'Date d\'embauche',
+        'Rate of Pay' => 'Taux de rémunération',
+        'Classification' => 'Classification',
+        'FT/PT Designation' => 'Désignation TP/TPT',
+        'Payroll Period(s)' => 'Période(s) de paie',
+        'Week Ending Date(s)' => 'Date(s) de fin de semaine',
+        'Union Dues Deducted' => 'Cotisations syndicales déduites',
+        'Initiation Fees Deducted' => 'Frais d\'initiation déduits',
+        'Total Deducted' => 'Total déduit',
+        'Reason No Deduction / Notes' => 'Raison aucune déduction / Notes',
+        'Monthly Totals' => 'Totaux mensuels',
+        'Verify totals against Remittance Summary' => 'Vérifier les totaux avec le résumé de la remise',
+        'UFCW LOCAL 175 – MONTHLY REMITTANCE SUMMARY' => 'UFCW LOCAL 175 – RÉSUMÉ MENSUEL DE LA REMISE',
+        'Report Month' => 'Mois du rapport',
+        'Remittance Due' => 'Remise due',
+        'Remittance Totals' => 'Totaux de la remise',
+        'Regular Union Dues' => 'Cotisations syndicales régulières',
+        'Initiation Fees' => 'Frais d\'initiation',
+        'Total Remittance' => 'Remise totale',
+        'Initiation Fee Rules' => 'Règles des frais d\'initiation',
+        'Employee type' => 'Type d\'employé',
+        'Total initiation fee' => 'Frais d\'initiation totaux',
+        'Maximum weekly deduction' => 'Déduction hebdomadaire maximale',
+        'Full-time' => 'Temps plein',
+        'Part-time' => 'Temps partiel',
+        'Submission Instructions' => 'Instructions de soumission',
+        'Deadline: 15th of the following month' => 'Date limite : le 15 du mois suivant',
+    ];
+
+    private function label(string $english): string
+    {
+        /** @var UiLanguageService $uiLanguageService */
+        $uiLanguageService = $this->getContainer()->get(Services::UI_LANGUAGE_SERVICE);
+        if (!$uiLanguageService->isFrench()) {
+            return $english;
+        }
+        if (str_starts_with($english, 'Email report to ')) {
+            return str_replace('Email report to ', 'Envoyer le rapport à ', $english);
+        }
+        if (str_starts_with($english, 'Report email: ')) {
+            return str_replace('Report email: ', 'Courriel du rapport : ', $english);
+        }
+        return self::FRENCH_LABELS[$english] ?? $english;
+    }
 
     public const DESIGNATION_FULL_TIME = 'Full-time';
     public const DESIGNATION_PART_TIME = 'Part-time';
@@ -224,28 +300,53 @@ class UfcwRemittanceReportService
         }
         $recipients = array_values(array_unique($recipients));
 
+        $replacements = [
+            'employerName' => $settings->getEmployerName(),
+            'reportMonthLabel' => $report['reportMonthLabel'],
+            'unionDues' => number_format($report['totals']['unionDues'], 2),
+            'initiationFees' => number_format($report['totals']['initiationFees'], 2),
+            'remittance' => number_format($report['totals']['remittance'], 2),
+            'remittanceDueDate' => $report['remittanceDueDate'],
+            'chequePayableTo' => $settings->getChequePayableTo(),
+            'chequeAttention' => $settings->getChequeAttention(),
+        ];
+
         $emailService = $this->getEmailService();
+        $template = $emailService->findTemplate('time.ufcw_remittance', 'subscriber');
+        $templateHelper = new \OrangeHRM\Core\Mail\TemplateHelper();
+        if ($template !== null) {
+            $subject = $templateHelper->renderTemplate(
+                $emailService->resolveTemplateSubject($template),
+                $replacements
+            );
+            $body = $templateHelper->renderTemplate(
+                $emailService->resolveTemplateBody($template),
+                $replacements
+            );
+        } else {
+            $subject = sprintf(
+                'UFCW Monthly Remittance – %s – %s',
+                $settings->getEmployerName(),
+                $report['reportMonthLabel']
+            );
+            $body = '<p>Please find attached the UFCW monthly dues &amp; membership remittance report for '
+                . htmlspecialchars($report['reportMonthLabel'], ENT_QUOTES)
+                . '.</p>'
+                . '<p>Regular union dues: $' . number_format($report['totals']['unionDues'], 2)
+                . '<br/>Initiation fees: $' . number_format($report['totals']['initiationFees'], 2)
+                . '<br/>Total remittance: $' . number_format($report['totals']['remittance'], 2)
+                . '<br/>Remittance due: ' . htmlspecialchars($report['remittanceDueDate'], ENT_QUOTES)
+                . '</p>'
+                . '<p>Cheque payable to: ' . htmlspecialchars($settings->getChequePayableTo(), ENT_QUOTES)
+                . '<br/>Attention: ' . htmlspecialchars($settings->getChequeAttention(), ENT_QUOTES)
+                . '</p>'
+                . '<p>A hard copy of the detailed dues report should accompany the cheque. '
+                . 'Do not offset prior overpayments.</p>';
+        }
+
         $emailService->setMessageTo($recipients);
-        $emailService->setMessageSubject(sprintf(
-            'UFCW Monthly Remittance – %s – %s',
-            $settings->getEmployerName(),
-            $report['reportMonthLabel']
-        ));
-        $emailService->setMessageBody(
-            '<p>Please find attached the UFCW monthly dues &amp; membership remittance report for '
-            . htmlspecialchars($report['reportMonthLabel'], ENT_QUOTES)
-            . '.</p>'
-            . '<p>Regular union dues: $' . number_format($report['totals']['unionDues'], 2)
-            . '<br/>Initiation fees: $' . number_format($report['totals']['initiationFees'], 2)
-            . '<br/>Total remittance: $' . number_format($report['totals']['remittance'], 2)
-            . '<br/>Remittance due: ' . htmlspecialchars($report['remittanceDueDate'], ENT_QUOTES)
-            . '</p>'
-            . '<p>Cheque payable to: ' . htmlspecialchars($settings->getChequePayableTo(), ENT_QUOTES)
-            . '<br/>Attention: ' . htmlspecialchars($settings->getChequeAttention(), ENT_QUOTES)
-            . '</p>'
-            . '<p>A hard copy of the detailed dues report should accompany the cheque. '
-            . 'Do not offset prior overpayments.</p>'
-        );
+        $emailService->setMessageSubject(trim($subject));
+        $emailService->setMessageBody($body);
         $emailService->clearAttachments();
         $emailService->addAttachment(
             $xlsx,
@@ -571,38 +672,38 @@ class UfcwRemittanceReportService
         $headerFill = 'D9E1F2';
 
         $sheet->mergeCells('A1:S1');
-        $sheet->setCellValue('A1', 'UFCW MONTHLY DUES & MEMBERSHIP REPORT');
+        $sheet->setCellValue('A1', $this->label('UFCW MONTHLY DUES & MEMBERSHIP REPORT'));
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
 
-        $sheet->setCellValue('A3', 'Employer');
+        $sheet->setCellValue('A3', $this->label('Employer'));
         $sheet->mergeCells('C3:J3');
         $sheet->setCellValue('C3', $settings->getEmployerName());
-        $sheet->setCellValue('A4', 'Work Location');
+        $sheet->setCellValue('A4', $this->label('Work Location'));
         $sheet->mergeCells('C4:J4');
         $sheet->setCellValue('C4', $settings->getWorkLocation());
-        $sheet->setCellValue('A5', 'Work Location Code');
+        $sheet->setCellValue('A5', $this->label('Work Location Code'));
         $sheet->setCellValue('C5', $settings->getWorkLocationCode());
-        $sheet->setCellValue('E5', 'Report Month / Year');
+        $sheet->setCellValue('E5', $this->label('Report Month / Year'));
         $sheet->setCellValue('G5', DateTime::createFromFormat('Y-m-d', $report['reportMonth']));
         $sheet->getStyle('G5')->getNumberFormat()->setFormatCode('MMMM YYYY');
         $sheet->mergeCells('G5:J5');
 
-        $sheet->setCellValue('A6', 'Union Contact(s)');
+        $sheet->setCellValue('A6', $this->label('Union Contact(s)'));
         $sheet->mergeCells('C6:J6');
         $sheet->setCellValue('C6', $settings->getUnionContacts());
-        $sheet->setCellValue('A7', 'Prepared By');
+        $sheet->setCellValue('A7', $this->label('Prepared By'));
         $sheet->setCellValue('C7', $report['preparedBy']);
         $sheet->getStyle('C7')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($yellow);
-        $sheet->setCellValue('E7', 'Date Prepared');
+        $sheet->setCellValue('E7', $this->label('Date Prepared'));
         $sheet->setCellValue('G7', $report['datePrepared']);
         $sheet->mergeCells('G7:J7');
-        $sheet->setCellValue('A8', 'Payroll Periods Included');
+        $sheet->setCellValue('A8', $this->label('Payroll Periods Included'));
         $sheet->setCellValue('C8', $report['payrollPeriods']);
-        $sheet->setCellValue('E8', 'Report Status');
+        $sheet->setCellValue('E8', $this->label('Report Status'));
         $sheet->setCellValue('G8', $report['status']);
         $sheet->mergeCells('G8:J8');
 
-        $sheet->setCellValue('P3', 'Reporting Rules');
+        $sheet->setCellValue('P3', $this->label('Reporting Rules'));
         $sheet->getStyle('P3')->getFont()->setBold(true);
         $sheet->setCellValue(
             'P4',
@@ -612,16 +713,21 @@ class UfcwRemittanceReportService
                 number_format($settings->getDuesWeeklyFlatFee(), 2)
             )
         );
-        $sheet->setCellValue('P5', 'Remittance deadline');
+        $sheet->setCellValue('P5', $this->label('Remittance deadline'));
         $sheet->setCellValue('R5', $report['remittanceDueDate']);
-        $sheet->setCellValue('P6', 'Totals: see Remittance Summary sheet');
-        $sheet->setCellValue('P7', 'Do not subtract overpayments from the current remittance');
-        $sheet->setCellValue('P8', 'Email report to ' . $settings->getRemittanceEmail() . ' and attach hard copy with cheque');
+        $sheet->setCellValue('P6', $this->label('Totals: see Remittance Summary sheet'));
+        $sheet->setCellValue('P7', $this->label('Do not subtract overpayments from the current remittance'));
+        $sheet->setCellValue(
+            'P8',
+            $this->label('Email report to ') . $settings->getRemittanceEmail() . ' and attach hard copy with cheque'
+        );
 
         $sheet->mergeCells('A10:S10');
         $sheet->setCellValue(
             'A10',
-            'Yellow cells require completion or confirmation before the report is sent. Amounts in the Total Deducted column calculate automatically.'
+            $this->label(
+                'Yellow cells require completion or confirmation before the report is sent. Amounts in the Total Deducted column calculate automatically.'
+            )
         );
         $sheet->getStyle('A10')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($yellow);
 
@@ -646,8 +752,8 @@ class UfcwRemittanceReportService
             'R' => 'Total Deducted',
             'S' => 'Reason No Deduction / Notes',
         ];
-        foreach ($headers as $col => $label) {
-            $sheet->setCellValue($col . '11', $label);
+        foreach ($headers as $col => $headerLabel) {
+            $sheet->setCellValue($col . '11', $this->label($headerLabel));
         }
         $sheet->getStyle('A11:S11')->getFont()->setBold(true);
         $sheet->getStyle('A11:S11')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setRGB($headerFill);
@@ -711,7 +817,7 @@ class UfcwRemittanceReportService
 
         $totalsRow = $rowIndex;
         $lastEmployeeRow = max($startRow, $totalsRow - 1);
-        $sheet->setCellValue('O' . $totalsRow, 'Monthly Totals');
+        $sheet->setCellValue('O' . $totalsRow, $this->label('Monthly Totals'));
         $sheet->getStyle('O' . $totalsRow)->getFont()->setBold(true);
         if (count($rows) > 0) {
             $sheet->setCellValue('P' . $totalsRow, sprintf('=SUM(P%d:P%d)', $startRow, $lastEmployeeRow));
@@ -724,7 +830,7 @@ class UfcwRemittanceReportService
         }
         $sheet->getStyle('P' . $totalsRow . ':R' . $totalsRow)
             ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD_SIMPLE);
-        $sheet->setCellValue('S' . $totalsRow, 'Verify totals against Remittance Summary');
+        $sheet->setCellValue('S' . $totalsRow, $this->label('Verify totals against Remittance Summary'));
 
         foreach (range('A', 'S') as $col) {
             $sheet->getColumnDimension($col)->setAutoSize(true);
@@ -739,55 +845,55 @@ class UfcwRemittanceReportService
     private function buildSummarySheet($sheet, array $report, UfcwRemittanceSettings $settings): void
     {
         $sheet->mergeCells('A1:H1');
-        $sheet->setCellValue('A1', 'UFCW LOCAL 175 – MONTHLY REMITTANCE SUMMARY');
+        $sheet->setCellValue('A1', $this->label('UFCW LOCAL 175 – MONTHLY REMITTANCE SUMMARY'));
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
 
-        $sheet->setCellValue('A3', 'Employer');
+        $sheet->setCellValue('A3', $this->label('Employer'));
         $sheet->setCellValue('C3', $settings->getEmployerName());
-        $sheet->setCellValue('E3', 'Work Location Code');
+        $sheet->setCellValue('E3', $this->label('Work Location Code'));
         $sheet->setCellValue('G3', $settings->getWorkLocationCode());
-        $sheet->setCellValue('A4', 'Work Location');
+        $sheet->setCellValue('A4', $this->label('Work Location'));
         $sheet->setCellValue('C4', $settings->getWorkLocation());
-        $sheet->setCellValue('E4', 'Report Month');
+        $sheet->setCellValue('E4', $this->label('Report Month'));
         $sheet->setCellValue('G4', DateTime::createFromFormat('Y-m-d', $report['reportMonth']));
         $sheet->getStyle('G4')->getNumberFormat()->setFormatCode('MMMM YYYY');
-        $sheet->setCellValue('A5', 'Union Contact(s)');
+        $sheet->setCellValue('A5', $this->label('Union Contact(s)'));
         $sheet->setCellValue('C5', $settings->getUnionContacts());
-        $sheet->setCellValue('E5', 'Remittance Due');
+        $sheet->setCellValue('E5', $this->label('Remittance Due'));
         $sheet->setCellValue('G5', $report['remittanceDueDate']);
-        $sheet->setCellValue('A6', 'Prepared By');
+        $sheet->setCellValue('A6', $this->label('Prepared By'));
         $sheet->setCellValue('C6', $report['preparedBy']);
-        $sheet->setCellValue('E6', 'Date Prepared');
+        $sheet->setCellValue('E6', $this->label('Date Prepared'));
         $sheet->setCellValue('G6', $report['datePrepared']);
 
-        $sheet->setCellValue('A8', 'Remittance Totals');
+        $sheet->setCellValue('A8', $this->label('Remittance Totals'));
         $sheet->getStyle('A8')->getFont()->setBold(true);
-        $sheet->setCellValue('A10', 'Regular Union Dues');
+        $sheet->setCellValue('A10', $this->label('Regular Union Dues'));
         $sheet->setCellValue('B10', $report['totals']['unionDues']);
-        $sheet->setCellValue('A11', 'Initiation Fees');
+        $sheet->setCellValue('A11', $this->label('Initiation Fees'));
         $sheet->setCellValue('B11', $report['totals']['initiationFees']);
-        $sheet->setCellValue('A12', 'Total Remittance');
+        $sheet->setCellValue('A12', $this->label('Total Remittance'));
         $sheet->setCellValue('B12', $report['totals']['remittance']);
         $sheet->getStyle('B10:B12')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD_SIMPLE);
         $sheet->getStyle('A12:B12')->getFont()->setBold(true);
 
-        $sheet->setCellValue('A14', 'Initiation Fee Rules');
+        $sheet->setCellValue('A14', $this->label('Initiation Fee Rules'));
         $sheet->getStyle('A14')->getFont()->setBold(true);
-        $sheet->setCellValue('A15', 'Employee type');
-        $sheet->setCellValue('B15', 'Total initiation fee');
-        $sheet->setCellValue('C15', 'Maximum weekly deduction');
-        $sheet->setCellValue('A16', 'Full-time');
+        $sheet->setCellValue('A15', $this->label('Employee type'));
+        $sheet->setCellValue('B15', $this->label('Total initiation fee'));
+        $sheet->setCellValue('C15', $this->label('Maximum weekly deduction'));
+        $sheet->setCellValue('A16', $this->label('Full-time'));
         $sheet->setCellValue('B16', $settings->getInitiationFeeFullTime());
         $sheet->setCellValue('C16', $settings->getInitiationWeeklyMaxFullTime());
-        $sheet->setCellValue('A17', 'Part-time');
+        $sheet->setCellValue('A17', $this->label('Part-time'));
         $sheet->setCellValue('B17', $settings->getInitiationFeePartTime());
         $sheet->setCellValue('C17', $settings->getInitiationWeeklyMaxPartTime());
         $sheet->getStyle('B16:C17')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD_SIMPLE);
 
-        $sheet->setCellValue('A19', 'Submission Instructions');
+        $sheet->setCellValue('A19', $this->label('Submission Instructions'));
         $sheet->getStyle('A19')->getFont()->setBold(true);
-        $sheet->setCellValue('A20', 'Deadline: 15th of the following month');
-        $sheet->setCellValue('A21', 'Report email: ' . $settings->getRemittanceEmail());
+        $sheet->setCellValue('A20', $this->label('Deadline: 15th of the following month'));
+        $sheet->setCellValue('A21', $this->label('Report email: ') . $settings->getRemittanceEmail());
         $sheet->setCellValue('A22', 'Cheque payable to: ' . $settings->getChequePayableTo());
         $sheet->setCellValue('A23', 'Attention: ' . $settings->getChequeAttention());
         $sheet->setCellValue('A24', 'Attach a hard copy of the detailed dues report to the cheque');

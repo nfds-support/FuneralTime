@@ -48,7 +48,8 @@ const baseUrl = window.appGlobal.baseUrl;
 
 const {i18n, init} = createI18n({
   baseUrl: baseUrl,
-  resourceUrl: '/core/i18n/messages',
+  // @ts-expect-error: appGlobal is not in window object by default
+  resourceUrl: `/core/i18n/messages?locale=${encodeURIComponent(window.appGlobal.locale || 'en_US')}`,
 });
 
 app.use(acl);

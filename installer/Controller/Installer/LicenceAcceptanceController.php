@@ -33,6 +33,6 @@ class LicenceAcceptanceController extends AbstractInstallerVueController
     {
         $component = new Component('licence-acceptance-screen');
         $this->setComponent($component);
-        StateContainer::getInstance()->setCurrentScreen(self::LICENCE_ACCEPTANCE_SCREEN);
+        StateContainer::getInstance()->setCurrentScreen(self::LICENCE_ACCEPTANCE_SCREEN, false);
     }
 }

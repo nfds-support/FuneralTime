@@ -1,0 +1,9 @@
+apiv2_core_ui_language:
+  description: 'API-v2 Core - UI Language Preference'
+  api: OrangeHRM\Core\Api\Rest\UiLanguageAPI
+  module: core
+  allowed: { read: true, create: false, update: true, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: true, delete: false } }
+    - { role: ESS, permission: { read: true, create: false, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: true, delete: false } }

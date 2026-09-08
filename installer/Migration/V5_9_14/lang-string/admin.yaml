@@ -1,0 +1,46 @@
+langStrings:
+  -
+    unitId: email_templates
+    value: 'Email Templates'
+  -
+    unitId: add_email_template
+    value: 'Add Email Template'
+  -
+    unitId: edit_email_template
+    value: 'Edit Email Template'
+  -
+    unitId: email_type
+    value: 'Email Type'
+  -
+    unitId: new_email_type
+    value: 'Or new email type'
+  -
+    unitId: new_email_type_hint
+    value: 'e.g. time.custom_notice'
+  -
+    unitId: locale
+    value: 'Locale'
+  -
+    unitId: recipient_role
+    value: 'Recipient Role'
+  -
+    unitId: performer_role
+    value: 'Performer Role'
+  -
+    unitId: customized
+    value: 'Customized'
+  -
+    unitId: email_subject
+    value: 'Subject'
+  -
+    unitId: email_body
+    value: 'Body (HTML)'
+  -
+    unitId: email_template_twig_hint
+    value: 'Use Twig placeholders such as {{ employeeName }} or {{ reportMonthLabel }}. Leave HTML tags intact for formatting.'
+  -
+    unitId: reset_to_default
+    value: 'Reset to Default'
+  -
+    unitId: email_type_required
+    value: 'Select an existing email type or enter a new one'

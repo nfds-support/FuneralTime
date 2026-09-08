@@ -20,6 +20,7 @@
 namespace OrangeHRM\Installer\Controller\Installer;
 
 use OrangeHRM\Core\Vue\Component;
+use OrangeHRM\Core\Vue\Prop;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\Installer\Controller\AbstractInstallerVueController;
 use OrangeHRM\Installer\Util\StateContainer;
@@ -32,6 +33,9 @@ class DatabaseConfigController extends AbstractInstallerVueController
     public function preRender(Request $request): void
     {
         $component = new Component('database-config-screen');
+        $component->addProp(
+            new Prop('restore-mode', Prop::TYPE_BOOLEAN, StateContainer::getInstance()->isRestoreMode())
+        );
         $this->setComponent($component);
         StateContainer::getInstance()->setCurrentScreen(self::DATABASE_CONFIG_SCREEN);
     }
