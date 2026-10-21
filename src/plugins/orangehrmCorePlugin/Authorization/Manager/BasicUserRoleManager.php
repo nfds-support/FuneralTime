@@ -563,6 +563,12 @@ class BasicUserRoleManager extends AbstractUserRoleManager
     {
         $roles = [$user->getUserRole()];
 
+        // Read-only accounts must never inherit ESS or dynamic (Supervisor,
+        // ProjectAdmin, ...) roles — those would grant write permissions.
+        if ($user->getUserRole()->getName() === 'ReadOnly') {
+            return $roles;
+        }
+
         // Check for supervisor:
         $empNumber = $user->getEmpNumber();
         if (!empty($empNumber)) {
