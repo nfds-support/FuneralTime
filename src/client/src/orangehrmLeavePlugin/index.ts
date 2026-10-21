@@ -36,6 +36,7 @@ import LeaveEntitlementReport from './pages/reports/LeaveEntitlementReport.vue';
 import MyLeaveEntitlementReport from './pages/reports/MyLeaveEntitlementReport.vue';
 import LeaveEntitlementHistoryReport from './pages/reports/LeaveEntitlementHistoryReport.vue';
 import MyLeaveEntitlementHistoryReport from './pages/reports/MyLeaveEntitlementHistoryReport.vue';
+import BankedTimePayout from './pages/bankedTimePayout/BankedTimePayout.vue';
 
 export default {
   'leave-period': LeavePeriod,
@@ -59,4 +60,5 @@ export default {
   'my-leave-entitlement-report': MyLeaveEntitlementReport,
   'leave-entitlement-history-report': LeaveEntitlementHistoryReport,
   'my-leave-entitlement-history-report': MyLeaveEntitlementHistoryReport,
+  'banked-time-payout': BankedTimePayout,
 };

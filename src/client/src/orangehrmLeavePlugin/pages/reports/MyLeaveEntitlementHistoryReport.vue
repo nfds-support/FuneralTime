@@ -129,6 +129,36 @@ export default {
       '/api/v2/leave/entitlement-transactions',
     );
 
+    // Banked Time is tracked in hours for employees (self scope here).
+    const bankedTimeLeaveTypeId = ref(null);
+    const hoursPerDay = ref(8);
+    const eligibilityHttp = new APIService(
+      window.appGlobal.baseUrl,
+      '/api/v2/time/fuel-banked-time/eligibility',
+    );
+    eligibilityHttp
+      .get(0)
+      .then(({data}) => {
+        bankedTimeLeaveTypeId.value = data.data?.bankedTimeLeaveTypeId ?? null;
+        hoursPerDay.value = Number(data.data?.hoursPerDay || 8);
+        onSearch();
+      })
+      .catch(() => {
+        bankedTimeLeaveTypeId.value = null;
+      });
+
+    const formatValue = (row, value) => {
+      if (
+        bankedTimeLeaveTypeId.value !== null &&
+        row.leaveType?.id === bankedTimeLeaveTypeId.value &&
+        value !== null &&
+        value !== undefined
+      ) {
+        return `${(Number(value) * hoursPerDay.value).toFixed(2)} hrs`;
+      }
+      return value;
+    };
+
     const buildParams = () => {
       const params = {limit: 100};
       if (filters.value.leaveType?.id) {
@@ -153,6 +183,8 @@ export default {
         .then(({data}) => {
           items.value = (data.data || []).map((row) => ({
             ...row,
+            days: formatValue(row, row.days),
+            balanceAfter: formatValue(row, row.balanceAfter),
             leaveType: row.leaveType?.name,
           }));
         })

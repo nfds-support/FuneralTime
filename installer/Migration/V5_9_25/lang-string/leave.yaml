@@ -1,0 +1,41 @@
+langStrings:
+  -
+    unitId: banked_time_payout
+    value: 'Banked Time Payout'
+    note: 'Manager-only screen to pay out banked hours'
+  -
+    unitId: banked_hours_available
+    value: 'Banked Hours Available'
+    note: ''
+  -
+    unitId: hours_to_pay_out
+    value: 'Hours to Pay Out'
+    note: ''
+  -
+    unitId: pay_out_banked_time
+    value: 'Pay Out Banked Time'
+    note: ''
+  -
+    unitId: banked_time_payout_hint
+    value: 'Payout deducts hours from the employee''s banked time balance. No money amounts are calculated.'
+    note: ''
+  -
+    unitId: banked_time_payout_success
+    value: 'Banked time payout recorded'
+    note: ''
+  -
+    unitId: recent_banked_time_payouts
+    value: 'Recent Banked Time Payouts'
+    note: ''
+  -
+    unitId: hours_deducted
+    value: 'Hours Deducted'
+    note: ''
+  -
+    unitId: balance_after_hours
+    value: 'Balance After (Hours)'
+    note: ''
+  -
+    unitId: paid_out_by
+    value: 'Paid Out By'
+    note: ''

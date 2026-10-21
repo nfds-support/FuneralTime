@@ -228,6 +228,13 @@ apiv2_leave_entitlement_transactions:
   defaults:
     _api: OrangeHRM\Leave\Api\LeaveEntitlementTransactionAPI
 
+apiv2_leave_banked_time_payouts:
+  path: /api/v2/leave/banked-time-payouts
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET, POST ]
+  defaults:
+    _api: OrangeHRM\Leave\Api\BankedTimePayoutAPI
+
 ##########################
 #        Screens
 ##########################
@@ -340,4 +347,9 @@ leave_view_leave_entitlement_history_report:
 leave_view_my_leave_entitlement_history_report:
   path: /leave/viewMyLeaveEntitlementHistoryReport
   controller: OrangeHRM\Leave\Controller\MyLeaveEntitlementHistoryReportController::handle
+  methods: [ GET ]
+
+leave_view_banked_time_payout:
+  path: /leave/viewBankedTimePayout
+  controller: OrangeHRM\Leave\Controller\BankedTimePayoutController::handle
   methods: [ GET ]

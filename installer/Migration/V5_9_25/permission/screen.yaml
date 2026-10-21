@@ -1,0 +1,6 @@
+'Banked Time Payout':
+  module: leave
+  url: viewBankedTimePayout
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: true, update: false, delete: false } }

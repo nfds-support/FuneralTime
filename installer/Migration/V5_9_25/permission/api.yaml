@@ -1,0 +1,8 @@
+apiv2_leave_banked_time_payouts:
+  description: 'API-v2 Leave - Banked Time Payouts (manager only)'
+  api: OrangeHRM\Leave\Api\BankedTimePayoutAPI
+  module: leave
+  allowed: { read: true, create: true, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: true, update: false, delete: false } }
