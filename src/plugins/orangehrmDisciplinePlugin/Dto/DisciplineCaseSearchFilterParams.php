@@ -37,6 +37,7 @@ class DisciplineCaseSearchFilterParams extends FilterParams
     private ?string $status = null;
     /** @var int[]|null */
     private ?array $empNumbers = null;
+    private bool $visibleToEmployeeOnly = false;
 
     public function __construct()
     {
@@ -88,5 +89,15 @@ class DisciplineCaseSearchFilterParams extends FilterParams
     public function setEmpNumbers(?array $empNumbers): void
     {
         $this->empNumbers = $empNumbers;
+    }
+
+    public function isVisibleToEmployeeOnly(): bool
+    {
+        return $this->visibleToEmployeeOnly;
+    }
+
+    public function setVisibleToEmployeeOnly(bool $visibleToEmployeeOnly): void
+    {
+        $this->visibleToEmployeeOnly = $visibleToEmployeeOnly;
     }
 }

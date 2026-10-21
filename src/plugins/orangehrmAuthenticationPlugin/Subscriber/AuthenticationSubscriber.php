@@ -142,6 +142,23 @@ class AuthenticationSubscriber extends AbstractEventSubscriber
     {
         $exception = $event->getThrowable();
         if ($exception instanceof SessionExpiredException) {
+            $request = $event->getRequest();
+            $accept = (string) $request->headers->get('Accept', '');
+            $fetchDest = (string) $request->headers->get('Sec-Fetch-Dest', '');
+            $isDocumentNavigation = $fetchDest === 'document' || str_starts_with(strtolower($accept), 'text/html');
+            // XHR downloads must not follow a login redirect, or the HTML page is saved as the file.
+            if (!$isDocumentNavigation) {
+                $response = new Response();
+                $response->setStatusCode(Response::HTTP_UNAUTHORIZED);
+                $response->headers->set('Content-Type', 'application/json');
+                $response->setContent(
+                    '{"error":{"status":401,"message":"Session expired"}}'
+                );
+                $event->setResponse($response);
+                $event->stopPropagation();
+                return;
+            }
+
             /** @var UrlGenerator $urlGenerator */
             $urlGenerator = $this->getContainer()->get(Services::URL_GENERATOR);
 

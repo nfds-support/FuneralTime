@@ -237,7 +237,7 @@ Update:
         id: USD
         name: United States Dollar
       remarks: Salary expenses for temporary employee
-      status: "PAID"
+      status: "SUBMITTED"
 
   "Admin SUBMIT ESS REJECTED claim request":
     userId: 1

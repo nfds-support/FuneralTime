@@ -36,6 +36,7 @@ use OrangeHRM\Core\Api\V2\Validator\Rules;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
 use OrangeHRM\Core\Traits\HtmlSanitizerTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
+use OrangeHRM\Discipline\Api\Model\DisciplineCaseEmployeeModel;
 use OrangeHRM\Discipline\Api\Model\DisciplineCaseModel;
 use OrangeHRM\Discipline\Dto\DisciplineCaseSearchFilterParams;
 use OrangeHRM\Discipline\Traits\Service\DisciplineServiceTrait;
@@ -61,6 +62,7 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_STATUS = 'status';
     public const PARAMETER_SEVERITY = 'severity';
     public const PARAMETER_ACTION_TAKEN = 'actionTaken';
+    public const PARAMETER_VISIBLE_TO_EMPLOYEE = 'visibleToEmployee';
 
     /**
      * @inheritDoc
@@ -82,26 +84,34 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
             self::PARAMETER_EMP_NUMBER
         );
 
+        $canManage = $this->canManageDisciplineCases();
         $accessible = $this->getUserRoleManager()->getAccessibleEntityIds(\OrangeHRM\Entity\Employee::class);
         if (!is_null($empNumber)) {
-            if (!in_array($empNumber, $accessible, true)
+            if (!$canManage
+                && $empNumber !== $this->getAuthUser()->getEmpNumber()) {
+                throw $this->getForbiddenException();
+            }
+            if ($canManage
+                && !in_array($empNumber, $accessible, true)
                 && $empNumber !== $this->getAuthUser()->getEmpNumber()) {
                 throw $this->getForbiddenException();
             }
             $filterParams->setEmpNumber($empNumber);
-        } else {
-            // ESS self-only when no broader employee access
-            if (empty($accessible)) {
-                $filterParams->setEmpNumber($this->getAuthUser()->getEmpNumber());
-            } else {
-                $filterParams->setEmpNumbers($accessible);
+            if (!$canManage) {
+                $filterParams->setVisibleToEmployeeOnly(true);
             }
+        } elseif ($canManage && !empty($accessible)) {
+            $filterParams->setEmpNumbers($accessible);
+        } else {
+            // Employee self-view: only shared cases about themselves
+            $filterParams->setEmpNumber($this->getAuthUser()->getEmpNumber());
+            $filterParams->setVisibleToEmployeeOnly(true);
         }
 
         $cases = $this->getDisciplineService()->getDisciplineDao()->getDisciplineCaseList($filterParams);
         $count = $this->getDisciplineService()->getDisciplineDao()->getDisciplineCaseCount($filterParams);
         return new EndpointCollectionResult(
-            DisciplineCaseModel::class,
+            $canManage ? DisciplineCaseModel::class : DisciplineCaseEmployeeModel::class,
             $cases,
             new ParameterBag([CommonParams::PARAMETER_TOTAL => $count])
         );
@@ -167,7 +177,10 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
         $case = $this->getDisciplineService()->getDisciplineDao()->getDisciplineCaseById($id);
         $this->throwRecordNotFoundExceptionIfNotExist($case, DisciplineCase::class);
         $this->assertCaseAccessible($case);
-        return new EndpointResourceResult(DisciplineCaseModel::class, $case);
+        $model = $this->canManageDisciplineCases()
+            ? DisciplineCaseModel::class
+            : DisciplineCaseEmployeeModel::class;
+        return new EndpointResourceResult($model, $case);
     }
 
     /**
@@ -286,6 +299,9 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
             $this->getValidationDecorator()->notRequiredParamRule(
                 new ParamRule(self::PARAMETER_ACTION_TAKEN, new Rule(Rules::STRING_TYPE))
             ),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(self::PARAMETER_VISIBLE_TO_EMPLOYEE, new Rule(Rules::BOOL_TYPE))
+            ),
         ];
 
         if ($requireEmpNumber) {
@@ -351,17 +367,43 @@ class DisciplineCaseAPI extends Endpoint implements CrudEndpoint
             $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_SEVERITY)
         );
         $case->setActionTaken($this->getSanitizedRichTextOrNull(self::PARAMETER_ACTION_TAKEN));
+        if ($this->canManageDisciplineCases()) {
+            $visible = $this->getRequestParams()->getBooleanOrNull(
+                RequestParams::PARAM_TYPE_BODY,
+                self::PARAMETER_VISIBLE_TO_EMPLOYEE
+            );
+            if (!is_null($visible)) {
+                $case->setVisibleToEmployee($visible);
+            } elseif ($isCreate) {
+                $case->setVisibleToEmployee(false);
+            }
+        }
     }
 
     private function assertCaseAccessible(DisciplineCase $case, bool $forUpdate = false): void
     {
         $empNumber = $case->getEmployee()->getEmpNumber();
         $self = $empNumber === $this->getAuthUser()->getEmpNumber();
-        if ($self && !$forUpdate) {
+        if ($this->canManageDisciplineCases()) {
+            if ($self) {
+                return;
+            }
+            if (!$this->getUserRoleManagerHelper()->isEmployeeAccessible($empNumber)) {
+                throw $this->getForbiddenException();
+            }
             return;
         }
-        if (!$this->getUserRoleManagerHelper()->isEmployeeAccessible($empNumber)) {
+
+        // Affected employee: read-only, and only when managers shared the case
+        if ($forUpdate || !$self || !$case->isVisibleToEmployee()) {
             throw $this->getForbiddenException();
         }
+    }
+
+    private function canManageDisciplineCases(): bool
+    {
+        return $this->getUserRoleManager()
+            ->getDataGroupPermissions('apiv2_discipline_cases')
+            ->canUpdate();
     }
 }

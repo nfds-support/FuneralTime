@@ -119,7 +119,10 @@ class RequestParams
     public function getIntOrNull(string $type, string $key, ?int $default = null): ?int
     {
         $param = $this->$type->get($key, $default);
-        return $this->isEmptyString($param) ? null : $param;
+        if ($this->isEmptyString($param) || $param === null) {
+            return null;
+        }
+        return (int) $param;
     }
 
     /**

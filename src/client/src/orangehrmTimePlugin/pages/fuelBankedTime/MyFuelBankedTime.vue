@@ -144,7 +144,7 @@ export default {
   name: 'MyFuelBankedTime',
   setup() {
     const {$t} = usei18n();
-    const {toastSuccess, toastError} = useToast();
+    const {saveSuccess, unexpectedError} = useToast();
     const isLoading = ref(false);
     const eligibility = reactive({
       enabled: false,
@@ -231,17 +231,13 @@ export default {
         });
         form.amount = '';
         form.comment = '';
-        toastSuccess({
-          title: $t('general.success'),
-          message: $t('general.successfully_saved'),
-        });
+        await saveSuccess();
         await loadEligibility();
         await execQuery();
       } catch (error) {
-        const message =
-          error?.response?.data?.error?.message ||
-          $t('general.unexpected_error');
-        toastError({title: $t('general.error'), message});
+        await unexpectedError(
+          error?.response?.data?.error?.message || null,
+        );
       } finally {
         isLoading.value = false;
       }

@@ -1,0 +1,9 @@
+langStrings:
+  -
+    unitId: visible_to_employee
+    value: 'Visible to employee'
+    note: ''
+  -
+    unitId: visible_to_employee_hint
+    value: 'When enabled, the affected employee can view a limited version of this case (subject, status, details, and actions). Manager notes stay private.'
+    note: ''

@@ -33,4 +33,14 @@ class LoginLogDao extends BaseDao
         $this->persist($loginLog);
         return $loginLog;
     }
+
+    public function countByUserId(int $userId): int
+    {
+        return (int) $this->createQueryBuilder(LoginLog::class, 'loginLog')
+            ->select('COUNT(loginLog.id)')
+            ->andWhere('loginLog.userId = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getSingleScalarResult();
+    }
 }

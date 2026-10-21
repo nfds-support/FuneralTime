@@ -34,6 +34,8 @@ class LoginService
      */
     private ?LoginLogDao $loginLogDao = null;
 
+    private ?WelcomeEmailService $welcomeEmailService = null;
+
     /**
      * @return LoginLogDao|null
      */
@@ -45,6 +47,16 @@ class LoginService
         return $this->loginLogDao;
     }
 
+    public function getWelcomeEmailService(): WelcomeEmailService
+    {
+        return $this->welcomeEmailService ??= new WelcomeEmailService();
+    }
+
+    public function setWelcomeEmailService(WelcomeEmailService $welcomeEmailService): void
+    {
+        $this->welcomeEmailService = $welcomeEmailService;
+    }
+
     /**
      * @param UserCredential $credentials
      * @return LoginLog
@@ -54,12 +66,7 @@ class LoginService
         $user = $this->getUserService()
             ->geUserDao()
             ->getUserByUserName($credentials->getUsername());
-        $loginLog = new LoginLog();
-        $loginLog->setUserId($user->getId());
-        $loginLog->setUserName($user->getUserName());
-        $loginLog->setUserRoleName($user->getUserRole()->getName());
-        $loginLog->setUserRolePredefined($user->getUserRole()->isPredefined());
-        return $this->getLoginLogDao()->saveLoginLog($loginLog);
+        return $this->recordLogin($user);
     }
 
     /**
@@ -68,6 +75,16 @@ class LoginService
      */
     public function addOIDCLogin(User $user): LoginLog
     {
+        return $this->recordLogin($user);
+    }
+
+    private function recordLogin(User $user): LoginLog
+    {
+        $isFirstLogin = $this->getLoginLogDao()->countByUserId($user->getId()) === 0;
+        if ($isFirstLogin) {
+            $this->getWelcomeEmailService()->sendIfEligible($user);
+        }
+
         $loginLog = new LoginLog();
         $loginLog->setUserId($user->getId());
         $loginLog->setUserName($user->getUserName());

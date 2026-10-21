@@ -104,13 +104,29 @@ function createI18n(options: LanguageOptions) {
             const language: {[key: string]: string} = {};
             for (const key in data) {
               // https://formatjs.io/docs/intl-messageformat#intlmessageformat-constructor
-              language[key] = data[key].target || data[key].source;
-              langStrings[key] = new IntlMessageFormat(
-                data[key].target || data[key].source,
-                undefined,
-                undefined,
-                {ignoreTag: true}, // no html/xml markup parsing
-              );
+              const message = data[key].target || data[key].source;
+              language[key] = message;
+              try {
+                langStrings[key] = new IntlMessageFormat(
+                  message,
+                  undefined,
+                  undefined,
+                  {ignoreTag: true}, // no html/xml markup parsing
+                );
+              } catch (error) {
+                // Bad ICU (e.g. French apostrophes / stray braces) must not
+                // break the whole UI — treat the whole string as a literal.
+                // eslint-disable-next-line no-console
+                console.error(`i18n parse failed for ${key}:`, error);
+                const literal =
+                  "'" + String(message).replace(/'/g, "''") + "'";
+                langStrings[key] = new IntlMessageFormat(
+                  literal,
+                  undefined,
+                  undefined,
+                  {ignoreTag: true},
+                );
+              }
             }
             StoreService.mergeConfig({
               language,

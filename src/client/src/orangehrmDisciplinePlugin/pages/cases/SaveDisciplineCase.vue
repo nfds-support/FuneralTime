@@ -119,6 +119,16 @@
                 :label="$t('discipline.action_taken')"
               />
             </oxd-grid-item>
+            <oxd-grid-item v-if="!myCase">
+              <oxd-input-field
+                v-model="caseData.visibleToEmployee"
+                type="switch"
+                :label="$t('discipline.visible_to_employee')"
+              />
+              <oxd-text tag="p" class="orangehrm-input-hint">
+                {{ $t('discipline.visible_to_employee_hint') }}
+              </oxd-text>
+            </oxd-grid-item>
           </oxd-grid>
         </oxd-form-row>
         <oxd-divider />
@@ -156,6 +166,7 @@ const defaultCase = {
   managerNotes: '',
   actionPlan: '',
   actionTaken: '',
+  visibleToEmployee: false,
 };
 
 export default {
@@ -262,6 +273,7 @@ export default {
           this.caseData.managerNotes = data.managerNotes;
           this.caseData.actionPlan = data.actionPlan;
           this.caseData.actionTaken = data.actionTaken;
+          this.caseData.visibleToEmployee = !!data.visibleToEmployee;
         })
         .finally(() => {
           this.isLoading = false;
@@ -300,6 +312,9 @@ export default {
         managerNotes: this.caseData.managerNotes || null,
         actionPlan: this.caseData.actionPlan || null,
         actionTaken: this.caseData.actionTaken || null,
+        visibleToEmployee: this.myCase
+          ? undefined
+          : !!this.caseData.visibleToEmployee,
       };
       const request = this.isEdit
         ? this.http.update(this.caseId, payload)

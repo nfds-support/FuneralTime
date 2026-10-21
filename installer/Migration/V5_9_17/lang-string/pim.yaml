@@ -1,0 +1,13 @@
+langStrings:
+  -
+    value: 'Common-Law'
+    unitId: common_law
+  -
+    value: 'Divorced'
+    unitId: divorced
+  -
+    value: 'Separated'
+    unitId: separated
+  -
+    value: 'Widow'
+    unitId: widow

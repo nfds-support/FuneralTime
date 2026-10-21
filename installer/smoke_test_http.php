@@ -178,7 +178,7 @@ $dups = (int) $pdo->query(
 $version = (string) $pdo->query("SELECT value FROM hs_hr_config WHERE name='instance.version'")->fetchColumn();
 $templates = (int) $pdo->query('SELECT COUNT(*) FROM ohrm_email_template')->fetchColumn();
 check('duplicate screens', $dups === 0, (string) $dups);
-$expectedVersion = '5.9.15';
+$expectedVersion = '5.9.18';
 $okVersion = version_compare($version, '5.9.14', '>=');
 check('instance.version', $okVersion, "$version (product $expectedVersion)");
 check('email templates', $templates >= 15, (string) $templates);

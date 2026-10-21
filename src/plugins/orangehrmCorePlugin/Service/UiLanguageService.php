@@ -21,9 +21,11 @@ namespace OrangeHRM\Core\Service;
 
 use OrangeHRM\Admin\Dto\I18NLanguageSearchFilterParams;
 use OrangeHRM\Admin\Traits\Service\LocalizationServiceTrait;
+use OrangeHRM\Admin\Traits\Service\UserServiceTrait;
 use OrangeHRM\Authentication\Auth\User as AuthUser;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
 use OrangeHRM\Core\Traits\Service\ConfigServiceTrait;
+use OrangeHRM\Entity\User;
 use OrangeHRM\Framework\Http\Request;
 use OrangeHRM\I18N\Traits\Service\I18NHelperTrait;
 
@@ -33,6 +35,7 @@ class UiLanguageService
     use ConfigServiceTrait;
     use LocalizationServiceTrait;
     use I18NHelperTrait;
+    use UserServiceTrait;
 
     public const ALLOWED_CODES = ['en_US', 'fr_CA'];
 
@@ -87,16 +90,23 @@ class UiLanguageService
             }
         }
 
+        $userLang = $this->getPersistedUserLanguage();
+        if ($userLang !== null) {
+            $this->getAuthUser()->setAttribute(AuthUser::USER_UI_LANGUAGE, $userLang);
+            return $userLang;
+        }
+
         $default = $this->getConfigService()->getAdminLocalizationDefaultLanguage();
         return $this->isAllowed($default) ? $default : 'en_US';
     }
 
-    public function setCurrentLanguage(string $langCode, ?Request $request = null): string
+    public function setCurrentLanguage(string $langCode): string
     {
         if (!$this->isAllowed($langCode)) {
             $langCode = 'en_US';
         }
         $this->getAuthUser()->setAttribute(AuthUser::USER_UI_LANGUAGE, $langCode);
+        $this->persistUserLanguage($langCode);
         $this->getI18NHelper()->setTranslatorLanguage($langCode);
         return $langCode;
     }
@@ -110,5 +120,39 @@ class UiLanguageService
     {
         $langCode ??= $this->resolveCurrentLanguage();
         return str_starts_with($langCode, 'fr');
+    }
+
+    private function getPersistedUserLanguage(): ?string
+    {
+        $userId = $this->getAuthUser()->getUserId();
+        if ($userId === null) {
+            return null;
+        }
+        $user = $this->getUserService()->getSystemUser($userId);
+        if (!$user instanceof User) {
+            return null;
+        }
+        $langCode = $user->getUiLanguage();
+        if (!is_string($langCode) || !$this->isAllowed($langCode)) {
+            return null;
+        }
+        return $langCode;
+    }
+
+    private function persistUserLanguage(string $langCode): void
+    {
+        $userId = $this->getAuthUser()->getUserId();
+        if ($userId === null) {
+            return;
+        }
+        $user = $this->getUserService()->getSystemUser($userId);
+        if (!$user instanceof User) {
+            return;
+        }
+        if ($user->getUiLanguage() === $langCode) {
+            return;
+        }
+        $user->setUiLanguage($langCode);
+        $this->getUserService()->saveSystemUser($user);
     }
 }

@@ -41,7 +41,16 @@ use OrangeHRM\Entity\Membership;
 class MembershipAPI extends Endpoint implements CrudEndpoint
 {
     public const PARAMETER_NAME = 'name';
+    public const PARAMETER_DUES_MODE = 'duesMode';
+    public const PARAMETER_DUES_HOURLY_MULTIPLIER = 'duesHourlyMultiplier';
+    public const PARAMETER_DUES_WEEKLY_FLAT_FEE = 'duesWeeklyFlatFee';
+    public const PARAMETER_INITIATION_FEE_FULL_TIME = 'initiationFeeFullTime';
+    public const PARAMETER_INITIATION_FEE_PART_TIME = 'initiationFeePartTime';
+    public const PARAMETER_INITIATION_WEEKLY_MAX_FULL_TIME = 'initiationWeeklyMaxFullTime';
+    public const PARAMETER_INITIATION_WEEKLY_MAX_PART_TIME = 'initiationWeeklyMaxPartTime';
+
     public const PARAM_RULE_NAME_MAX_LENGTH = 100;
+
     /**
      * @var null|MembershipService
      */
@@ -173,8 +182,9 @@ class MembershipAPI extends Endpoint implements CrudEndpoint
      *     @OA\RequestBody(
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="name", type="string", maxLength=OrangeHRM\Admin\Api\MembershipAPI::PARAM_RULE_NAME_MAX_LENGTH),
-     *             required={"name"}
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="duesMode", type="string"),
+     *             required={"name", "duesMode"}
      *         )
      *     ),
      *     @OA\Response(response="200",
@@ -206,7 +216,60 @@ class MembershipAPI extends Endpoint implements CrudEndpoint
     public function saveMembership(Membership $membership): Membership
     {
         $name = $this->getRequestParams()->getString(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_NAME);
+        $duesMode = $this->getRequestParams()->getString(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_DUES_MODE,
+            Membership::DUES_MODE_FLAT
+        );
         $membership->setName($name);
+        $membership->setDuesMode($duesMode);
+
+        if ($duesMode === Membership::DUES_MODE_RATE_WEEKLY) {
+            $membership->setDuesHourlyMultiplier(
+                $this->getRequestParams()->getFloatOrNull(
+                    RequestParams::PARAM_TYPE_BODY,
+                    self::PARAMETER_DUES_HOURLY_MULTIPLIER
+                )
+            );
+            $membership->setDuesWeeklyFlatFee(
+                $this->getRequestParams()->getFloatOrNull(
+                    RequestParams::PARAM_TYPE_BODY,
+                    self::PARAMETER_DUES_WEEKLY_FLAT_FEE
+                )
+            );
+            $membership->setInitiationFeeFullTime(
+                $this->getRequestParams()->getFloatOrNull(
+                    RequestParams::PARAM_TYPE_BODY,
+                    self::PARAMETER_INITIATION_FEE_FULL_TIME
+                )
+            );
+            $membership->setInitiationFeePartTime(
+                $this->getRequestParams()->getFloatOrNull(
+                    RequestParams::PARAM_TYPE_BODY,
+                    self::PARAMETER_INITIATION_FEE_PART_TIME
+                )
+            );
+            $membership->setInitiationWeeklyMaxFullTime(
+                $this->getRequestParams()->getFloatOrNull(
+                    RequestParams::PARAM_TYPE_BODY,
+                    self::PARAMETER_INITIATION_WEEKLY_MAX_FULL_TIME
+                )
+            );
+            $membership->setInitiationWeeklyMaxPartTime(
+                $this->getRequestParams()->getFloatOrNull(
+                    RequestParams::PARAM_TYPE_BODY,
+                    self::PARAMETER_INITIATION_WEEKLY_MAX_PART_TIME
+                )
+            );
+        } else {
+            $membership->setDuesHourlyMultiplier(null);
+            $membership->setDuesWeeklyFlatFee(null);
+            $membership->setInitiationFeeFullTime(null);
+            $membership->setInitiationFeePartTime(null);
+            $membership->setInitiationWeeklyMaxFullTime(null);
+            $membership->setInitiationWeeklyMaxPartTime(null);
+        }
+
         return $this->getMembershipService()->saveMembership($membership);
     }
 
@@ -216,7 +279,8 @@ class MembershipAPI extends Endpoint implements CrudEndpoint
     public function getValidationRuleForCreate(): ParamRuleCollection
     {
         return new ParamRuleCollection(
-            $this->getNameRule()
+            $this->getNameRule(),
+            ...$this->getDuesParamRules()
         );
     }
 
@@ -233,8 +297,9 @@ class MembershipAPI extends Endpoint implements CrudEndpoint
      *     @OA\RequestBody(
      *         @OA\JsonContent(
      *             type="object",
-     *             @OA\Property(property="name", type="string", maxLength=OrangeHRM\Admin\Api\MembershipAPI::PARAM_RULE_NAME_MAX_LENGTH),
-     *             required={"name"}
+     *             @OA\Property(property="name", type="string"),
+     *             @OA\Property(property="duesMode", type="string"),
+     *             required={"name", "duesMode"}
      *         )
      *     ),
      *     @OA\Response(response="200",
@@ -274,7 +339,8 @@ class MembershipAPI extends Endpoint implements CrudEndpoint
                 CommonParams::PARAMETER_ID,
                 new Rule(Rules::POSITIVE)
             ),
-            $this->getNameRule($uniqueOption)
+            $this->getNameRule($uniqueOption),
+            ...$this->getDuesParamRules()
         );
     }
 
@@ -292,6 +358,51 @@ class MembershipAPI extends Endpoint implements CrudEndpoint
                 new Rule(Rules::ENTITY_UNIQUE_PROPERTY, [Membership::class, 'name', $uniqueOption])
             )
         );
+    }
+
+    /**
+     * @return ParamRule[]
+     */
+    private function getDuesParamRules(): array
+    {
+        $duesMode = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_DUES_MODE
+        );
+        $isRateWeekly = $duesMode === Membership::DUES_MODE_RATE_WEEKLY;
+
+        $rules = [
+            $this->getValidationDecorator()->requiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_DUES_MODE,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::IN, [[Membership::DUES_MODE_FLAT, Membership::DUES_MODE_RATE_WEEKLY]])
+                )
+            ),
+        ];
+
+        $formulaParams = [
+            self::PARAMETER_DUES_HOURLY_MULTIPLIER,
+            self::PARAMETER_DUES_WEEKLY_FLAT_FEE,
+            self::PARAMETER_INITIATION_FEE_FULL_TIME,
+            self::PARAMETER_INITIATION_FEE_PART_TIME,
+            self::PARAMETER_INITIATION_WEEKLY_MAX_FULL_TIME,
+            self::PARAMETER_INITIATION_WEEKLY_MAX_PART_TIME,
+        ];
+        foreach ($formulaParams as $param) {
+            $paramRule = new ParamRule(
+                $param,
+                new Rule(Rules::NUMBER),
+                new Rule(Rules::ZERO_OR_POSITIVE)
+            );
+            if ($isRateWeekly) {
+                $rules[] = $this->getValidationDecorator()->requiredParamRule($paramRule);
+            } else {
+                $rules[] = $this->getValidationDecorator()->notRequiredParamRule($paramRule);
+            }
+        }
+
+        return $rules;
     }
 
     /**

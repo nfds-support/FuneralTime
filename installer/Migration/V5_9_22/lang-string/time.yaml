@@ -1,0 +1,25 @@
+langStrings:
+  -
+    unitId: period_title
+    value: 'Period Title'
+    note: ''
+  -
+    unitId: add_payroll_period
+    value: 'Add Payroll Period'
+    note: ''
+  -
+    unitId: edit_payroll_period
+    value: 'Edit Payroll Period'
+    note: ''
+  -
+    unitId: payroll_period_fiscal_hint
+    value: 'Add pay periods ahead of time (typically two weeks each). Fiscal year runs October 1 to September 30. Titles look like P1, P20.'
+    note: ''
+  -
+    unitId: payroll_period_manage_hint
+    value: 'Select a saved period to generate the report. Manage periods under'
+    note: ''
+  -
+    unitId: period_title_number_required
+    value: 'Title must include a number (e.g. P20)'
+    note: ''

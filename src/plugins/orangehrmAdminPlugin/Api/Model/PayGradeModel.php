@@ -37,7 +37,9 @@ use OrangeHRM\Entity\PayGradeCurrency;
  *         type="array",
  *         @OA\Items(
  *             @OA\Property(property="id", type="string"),
- *             @OA\Property(property="name", type="string")
+ *             @OA\Property(property="name", type="string"),
+ *             @OA\Property(property="minSalary", type="number"),
+ *             @OA\Property(property="maxSalary", type="number")
  *         )
 *     )
  * )
@@ -67,6 +69,8 @@ class PayGradeModel implements Normalizable
                     $currency['name'] = $currencyType->getName();
                     $currency['id'] = $currencyType->getId();
                 }
+                $currency['minSalary'] = $payGradeCurrency->getMinSalary();
+                $currency['maxSalary'] = $payGradeCurrency->getMaxSalary();
                 $currencies[] = $currency;
             }
         }

@@ -78,7 +78,6 @@
           :items="items?.data"
           :clickable="false"
           :loading="isLoading"
-          :cell-renderer="cellRenderer"
           row-decorator="oxd-table-decorator-card"
         />
       </div>
@@ -108,7 +107,7 @@ export default {
   },
   setup() {
     const {$t} = usei18n();
-    const {toastSuccess, toastError} = useToast();
+    const {updateSuccess, unexpectedError} = useToast();
     const filters = ref({
       employee: null,
       status: {id: 'PENDING', label: 'PENDING'},
@@ -135,18 +134,12 @@ export default {
           url: `/api/v2/time/fuel-banked-time/requests/${item.id}/action`,
           data: {action},
         });
-        toastSuccess({
-          title: $t('general.success'),
-          message: $t('general.successfully_updated'),
-        });
+        await updateSuccess();
         await execQuery();
       } catch (error) {
-        toastError({
-          title: $t('general.error'),
-          message:
-            error?.response?.data?.error?.message ||
-            $t('general.unexpected_error'),
-        });
+        await unexpectedError(
+          error?.response?.data?.error?.message || null,
+        );
       }
     };
 
@@ -195,44 +188,42 @@ export default {
       {name: 'status', title: $t('general.status'), style: {flex: 1}},
       {
         name: 'actions',
-        slot: 'action',
+        slot: 'footer',
         title: $t('general.actions'),
         style: {flex: 1},
         cellType: 'oxd-table-cell-actions',
-        cellConfig: {},
+        cellRenderer: (...[, , , row]) => {
+          const cellConfig = {};
+          if (row.canAction) {
+            cellConfig.approve = {
+              onClick: (item) => performAction(item, 'APPROVE'),
+              component: 'oxd-button',
+              props: {
+                label: $t('general.approve'),
+                displayType: 'label-success',
+                size: 'medium',
+              },
+            };
+            cellConfig.reject = {
+              onClick: (item) => performAction(item, 'REJECT'),
+              component: 'oxd-button',
+              props: {
+                label: $t('general.reject'),
+                displayType: 'label-danger',
+                size: 'medium',
+              },
+            };
+          }
+          return {
+            props: {
+              header: {
+                cellConfig,
+              },
+            },
+          };
+        },
       },
     ]);
-
-    const cellRenderer = (...[, , , row]) => {
-      const cellConfig = {};
-      if (row.canAction) {
-        cellConfig.approve = {
-          onClick: (item) => performAction(item, 'APPROVE'),
-          component: 'oxd-button',
-          props: {
-            label: $t('general.approve'),
-            displayType: 'success',
-            size: 'medium',
-          },
-        };
-        cellConfig.reject = {
-          onClick: (item) => performAction(item, 'REJECT'),
-          component: 'oxd-button',
-          props: {
-            label: $t('general.reject'),
-            displayType: 'danger',
-            size: 'medium',
-          },
-        };
-      }
-      return {
-        props: {
-          header: {
-            cellConfig,
-          },
-        },
-      };
-    };
 
     const onSearch = () => execQuery();
     const onReset = () => {
@@ -255,7 +246,6 @@ export default {
       isLoading,
       onSearch,
       onReset,
-      cellRenderer,
     };
   },
 };

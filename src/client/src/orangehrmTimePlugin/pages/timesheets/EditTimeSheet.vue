@@ -26,6 +26,7 @@
       :loading="isLoading"
       :timesheet-id="timesheetId"
       :columns="timesheetColumns"
+      :subtotal="timesheetSubtotal"
       :on-call-enabled="onCallEnabled"
       @submit-valid="onSave"
     >
@@ -125,8 +126,8 @@ export default {
       state.defaultProjectId = null;
       state.defaultActivityId = null;
       originalRecords = [];
-      fetchTimesheetEntries(props.timesheetId, !props.myTimesheet).then(
-        (response) => {
+      fetchTimesheetEntries(props.timesheetId, !props.myTimesheet)
+        .then((response) => {
           const {data, meta, timesheet, allowedActions} = response;
           state.timesheet = timesheet;
           state.employee = meta.employee;
@@ -141,6 +142,7 @@ export default {
             ...day,
             onCall: !!day.onCall,
             breakDuration: day.breakDuration || '00:00',
+            removalHours: day.removalHours || '00:00',
           }));
           originalRecords = JSON.parse(JSON.stringify(data || []));
           if (data.length > 0) {
@@ -152,19 +154,26 @@ export default {
               ) || data[0];
             state.timesheetRecords = [preferred];
           } else {
-            state.timesheetRecords.push({
-              project: meta.defaultProjectId
-                ? {id: meta.defaultProjectId, name: 'General Time'}
-                : null,
-              activity: meta.defaultActivityId
-                ? {id: meta.defaultActivityId, name: 'Regular Hours'}
-                : null,
-              dates: {},
-            });
+            state.timesheetRecords = [
+              {
+                project: meta.defaultProjectId
+                  ? {id: meta.defaultProjectId, name: 'General Time'}
+                  : null,
+                activity: meta.defaultActivityId
+                  ? {id: meta.defaultActivityId, name: 'Regular Hours'}
+                  : null,
+                dates: {},
+              },
+            ];
           }
+        })
+        .catch(() => {
+          state.timesheetRecords = [];
+          state.timesheetDays = [];
+        })
+        .finally(() => {
           state.isLoading = false;
-        },
-      );
+        });
     };
 
     const onClickReset = () => loadTimesheet();
@@ -250,6 +259,7 @@ export default {
                 date: day.date,
                 onCall: !!day.onCall,
                 breakDuration: day.breakDuration || '00:00',
+                removalHours: day.removalHours || '00:00',
               })),
             },
           }),

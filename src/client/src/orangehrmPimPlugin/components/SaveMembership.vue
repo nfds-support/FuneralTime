@@ -46,10 +46,18 @@
           </oxd-grid-item>
           <oxd-grid-item>
             <oxd-input-field
+              v-if="!isRateWeeklyMembership"
               v-model="membership.subscriptionFee"
               :label="$t('pim.subscription_amount')"
               :rules="rules.subscriptionFee"
             />
+            <oxd-text
+              v-else
+              tag="p"
+              class="orangehrm-input-hint"
+            >
+              {{ $t('pim.membership_rate_weekly_hint') }}
+            </oxd-text>
           </oxd-grid-item>
           <oxd-grid-item>
             <oxd-input-field
@@ -164,12 +172,20 @@ export default {
     };
   },
 
+  computed: {
+    isRateWeeklyMembership() {
+      return this.membership.membership?.duesMode === 'rate_weekly';
+    },
+  },
+
   methods: {
     onSave() {
       this.isLoading = true;
       this.http
         .create({
-          subscriptionFee: this.membership.subscriptionFee,
+          subscriptionFee: this.isRateWeeklyMembership
+            ? ''
+            : this.membership.subscriptionFee,
           subscriptionCommenceDate: this.membership.subscriptionCommenceDate,
           subscriptionRenewalDate: this.membership.subscriptionRenewalDate,
           membershipId: this.membership.membership.id,

@@ -21,6 +21,7 @@ namespace OrangeHRM\Authentication\Service;
 
 use DateTimeInterface;
 use OrangeHRM\Admin\Traits\Service\UserServiceTrait;
+use OrangeHRM\Authentication\Auth\User as AuthUser;
 use OrangeHRM\Authentication\Dto\UserCredential;
 use OrangeHRM\Authentication\Exception\AuthenticationException;
 use OrangeHRM\Core\Traits\Auth\AuthUserTrait;
@@ -82,5 +83,9 @@ class AuthenticationService
         $this->getAuthUser()->setUserLastModified(
             $lastModified instanceof DateTimeInterface ? $lastModified->format(DateTimeInterface::ATOM) : null
         );
+        $uiLanguage = $user->getUiLanguage();
+        if (is_string($uiLanguage) && $uiLanguage !== '') {
+            $this->getAuthUser()->setAttribute(AuthUser::USER_UI_LANGUAGE, $uiLanguage);
+        }
     }
 }

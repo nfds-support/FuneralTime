@@ -101,6 +101,13 @@ class User
     private ?int $createdBy = null;
 
     /**
+     * @var string|null
+     *
+     * @ORM\Column(name="ui_language", type="string", length=20, nullable=true)
+     */
+    private ?string $uiLanguage = null;
+
+    /**
      * @var Employee|null
      * @ORM\ManyToOne(targetEntity="OrangeHRM\Entity\Employee", inversedBy="users")
      * @ORM\JoinColumn(name="emp_number", referencedColumnName="emp_number")
@@ -271,6 +278,22 @@ class User
     public function setCreatedBy(?int $createdBy): void
     {
         $this->createdBy = $createdBy;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getUiLanguage(): ?string
+    {
+        return $this->uiLanguage;
+    }
+
+    /**
+     * @param string|null $uiLanguage
+     */
+    public function setUiLanguage(?string $uiLanguage): void
+    {
+        $this->uiLanguage = $uiLanguage;
     }
 
     /**

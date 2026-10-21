@@ -3,7 +3,7 @@
   url: viewDisciplineModule
   permissions:
     - { role: Admin, permission: { read: true } }
-    - { role: Supervisor, permission: { read: true } }
+    - { role: Supervisor, permission: { read: false, create: false, update: false, delete: false } }
     - { role: ESS, permission: { read: true, create: false, update: false, delete: false } }
 
 'Discipline Cases':
@@ -11,7 +11,7 @@
   url: viewDisciplineCases
   permissions:
     - { role: Admin, permission: { read: true, create: true, update: true, delete: true } }
-    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: false, create: false, update: false, delete: false } }
     - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
 
 'Save Discipline Case':
@@ -19,7 +19,7 @@
   url: saveDisciplineCase
   permissions:
     - { role: Admin, permission: { read: true, create: true, update: true, delete: false } }
-    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: false, create: false, update: false, delete: false } }
     - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
 
 'Edit Discipline Case':
@@ -27,19 +27,19 @@
   url: editDisciplineCase/{id}
   permissions:
     - { role: Admin, permission: { read: true, create: true, update: true, delete: false } }
-    - { role: Supervisor, permission: { read: true, create: true, update: true, delete: false } }
+    - { role: Supervisor, permission: { read: false, create: false, update: false, delete: false } }
     - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }
 
 'My Discipline Cases':
   module: discipline
   url: viewMyDisciplineCases
   permissions:
-    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
-    - { role: ESS, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false } }
+    - { role: ESS, permission: { read: true, create: false, update: false, delete: false } }
 
 'Save My Discipline Case':
   module: discipline
   url: saveMyDisciplineCase
   permissions:
-    - { role: Admin, permission: { read: true, create: true, update: false, delete: false } }
-    - { role: ESS, permission: { read: true, create: true, update: false, delete: false } }
+    - { role: Admin, permission: { read: false, create: false, update: false, delete: false } }
+    - { role: ESS, permission: { read: false, create: false, update: false, delete: false } }

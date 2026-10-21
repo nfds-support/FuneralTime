@@ -22,6 +22,7 @@ namespace OrangeHRM\Leave\Service;
 use DateTime;
 use OrangeHRM\Core\Traits\Service\DateTimeHelperTrait;
 use OrangeHRM\Core\Traits\UserRoleManagerTrait;
+use OrangeHRM\Core\Traits\ORM\EntityManagerHelperTrait;
 use OrangeHRM\Entity\LeaveEntitlement;
 use OrangeHRM\Entity\LeaveEntitlementTransaction;
 use OrangeHRM\Leave\Dao\LeaveEntitlementTransactionDao;
@@ -37,6 +38,7 @@ class LeaveEntitlementTransactionService
     use UserRoleManagerTrait;
     use LeaveEntitlementServiceTrait;
     use LeavePeriodServiceTrait;
+    use EntityManagerHelperTrait;
 
     /**
      * @var LeaveEntitlementTransactionDao|null
@@ -132,7 +134,7 @@ class LeaveEntitlementTransactionService
         ?DateTime $fromDate = null,
         ?DateTime $toDate = null
     ): LeaveEntitlementTransaction {
-        $this->getLeaveEntitlementTransactionDao()->beginTransaction();
+        $this->beginTransaction();
         try {
             $leavePeriod = $this->getLeavePeriodService()->getCurrentLeavePeriod();
             if ($fromDate === null && $leavePeriod !== null) {
@@ -198,10 +200,10 @@ class LeaveEntitlementTransactionService
                 $target->getId(),
                 $note
             );
-            $this->getLeaveEntitlementTransactionDao()->commitTransaction();
+            $this->commitTransaction();
             return $txn;
         } catch (Exception $e) {
-            $this->getLeaveEntitlementTransactionDao()->rollBackTransaction();
+            $this->rollBackTransaction();
             throw new TransactionException($e);
         }
     }

@@ -70,14 +70,31 @@ import {navigate} from '@ohrm/core/util/helper/navigation';
 import {APIService} from '@ohrm/core/util/services/api.service';
 
 const currencyNormalizer = (data) => {
-  return data.map((item) => {
-    const currencies = item.currencies.map((element) => {
-      return element.name;
+  const formatAmount = (value) => {
+    if (value === null || value === undefined || value === '') {
+      return '';
+    }
+    return Number(value).toLocaleString('en-US', {
+      maximumFractionDigits: 2,
+      minimumFractionDigits: 2,
     });
+  };
+
+  return data.map((item) => {
+    const currencies = item.currencies.map((element) => element.name);
+    const minSalaries = item.currencies
+      .map((element) => formatAmount(element.minSalary))
+      .filter(Boolean);
+    const maxSalaries = item.currencies
+      .map((element) => formatAmount(element.maxSalary))
+      .filter(Boolean);
+
     return {
       id: item.id,
       name: item.name,
-      currency: currencies.join(','),
+      currency: currencies.join(', '),
+      minSalary: minSalaries.join(', '),
+      maxSalary: maxSalaries.join(', '),
     };
   });
 };
@@ -124,12 +141,22 @@ export default {
           name: 'name',
           slot: 'title',
           title: this.$t('general.name'),
-          style: {'flex-basis': '40%'},
+          style: {'flex-basis': '25%'},
         },
         {
           name: 'currency',
           title: this.$t('general.currency'),
-          style: {'flex-basis': '40%'},
+          style: {'flex-basis': '20%'},
+        },
+        {
+          name: 'minSalary',
+          title: this.$t('admin.minimum_salary'),
+          style: {'flex-basis': '15%'},
+        },
+        {
+          name: 'maxSalary',
+          title: this.$t('admin.maximum_salary'),
+          style: {'flex-basis': '15%'},
         },
         {
           name: 'actions',

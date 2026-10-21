@@ -1,0 +1,5 @@
+langStrings:
+  -
+    unitId: membership_rate_weekly_hint
+    value: 'Weekly dues = (hourly rate × multiplier) + flat fee per week with hours; initiation is deducted over the first pays per membership settings.'
+    note: ''

@@ -31,11 +31,13 @@ use OrangeHRM\Entity\TimesheetItem;
 use OrangeHRM\Pim\Dto\EmployeeSearchFilterParams;
 use OrangeHRM\Pim\Traits\Service\EmployeeServiceTrait;
 use OrangeHRM\Time\Dto\PayrollFillSheetRow;
+use OrangeHRM\Time\Traits\Service\BankedTimeServiceTrait;
 
 class PayrollFillSheetService
 {
     use EntityManagerHelperTrait;
     use EmployeeServiceTrait;
+    use BankedTimeServiceTrait;
 
     public const DEFAULT_HOURS_PER_DAY = 8.0;
     public const DEFAULT_OT_THRESHOLD = 44.0;
@@ -71,6 +73,10 @@ class PayrollFillSheetService
 
             $payW1 = $this->applyPayRules($employee, $workedW1, $vacationW1);
             $payW2 = $this->applyPayRules($employee, $workedW2, $vacationW2);
+            // Banked columns = Banked Time leave used that week (not hours earned above contract).
+            // Excess salaried hours are credited to leave entitlements on timesheet approve.
+            $bankedW1 = $this->getBankedLeaveHours($employee->getEmpNumber(), $week1Start, $week1End, $hoursPerDay);
+            $bankedW2 = $this->getBankedLeaveHours($employee->getEmpNumber(), $week2Start, $week2End, $hoursPerDay);
 
             $row = new PayrollFillSheetRow();
             $row->setEmpNumber($employee->getEmpNumber());
@@ -87,8 +93,8 @@ class PayrollFillSheetService
             $row->setSickHours(round($sickHours, 2));
             $row->setVacationW1(round($vacationW1, 2));
             $row->setVacationW2(round($vacationW2, 2));
-            $row->setBankedW1($payW1['banked']);
-            $row->setBankedW2($payW2['banked']);
+            $row->setBankedW1(round($bankedW1, 2));
+            $row->setBankedW2(round($bankedW2, 2));
             $rows[] = $row;
         }
 
@@ -232,10 +238,49 @@ class PayrollFillSheetService
     }
 
     /**
+     * Hours of Banked Time leave taken/approved in the period (usage only).
+     *
+     * @param int $empNumber
+     * @param DateTime $from
+     * @param DateTime $to
+     * @param float $hoursPerDay
+     * @return float
+     */
+    private function getBankedLeaveHours(int $empNumber, DateTime $from, DateTime $to, float $hoursPerDay): float
+    {
+        $leaveTypeId = $this->getBankedTimeService()->getBankedTimeLeaveTypeId();
+        if ($leaveTypeId === null) {
+            return 0.0;
+        }
+
+        $q = $this->createQueryBuilder(Leave::class, 'l');
+        $q->andWhere('l.employee = :empNumber')
+            ->andWhere('l.leaveType = :leaveTypeId')
+            ->andWhere($q->expr()->in('l.status', ':statuses'))
+            ->andWhere($q->expr()->between('l.date', ':from', ':to'))
+            ->setParameter('empNumber', $empNumber)
+            ->setParameter('leaveTypeId', $leaveTypeId)
+            ->setParameter('statuses', [
+                Leave::LEAVE_STATUS_LEAVE_TAKEN,
+                Leave::LEAVE_STATUS_LEAVE_APPROVED,
+            ])
+            ->setParameter('from', $from)
+            ->setParameter('to', $to);
+
+        /** @var Leave[] $leaves */
+        $leaves = $q->getQuery()->execute();
+        $hours = 0.0;
+        foreach ($leaves as $leave) {
+            $hours += ((float) $leave->getLengthDays()) * $hoursPerDay;
+        }
+        return $hours;
+    }
+
+    /**
      * @param Employee $employee
      * @param float $workedHours
      * @param float $vacationHours
-     * @return array{regular: float, ot: float, banked: float}
+     * @return array{regular: float, ot: float}
      */
     private function applyPayRules(Employee $employee, float $workedHours, float $vacationHours): array
     {
@@ -258,7 +303,6 @@ class PayrollFillSheetService
             return [
                 'regular' => round($regular, 2),
                 'ot' => 0.0,
-                'banked' => round(max(0.0, $workedHours - $contracted), 2),
             ];
         }
 
@@ -267,7 +311,6 @@ class PayrollFillSheetService
             return [
                 'regular' => round($workedHours, 2),
                 'ot' => 0.0,
-                'banked' => 0.0,
             ];
         }
 
@@ -276,7 +319,6 @@ class PayrollFillSheetService
         return [
             'regular' => round(min($workedHours, $otThreshold), 2),
             'ot' => round(max(0.0, $workedHours - $otThreshold), 2),
-            'banked' => 0.0,
         ];
     }
 }

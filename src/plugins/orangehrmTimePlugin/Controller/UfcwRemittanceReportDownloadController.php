@@ -36,10 +36,6 @@ class UfcwRemittanceReportDownloadController extends AbstractFileController
     public function handle(Request $request): Response
     {
         $monthParam = (string) $request->query->get('month', '');
-        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $monthParam)) {
-            return $this->handleBadRequest();
-        }
-
         $preparedBy = $request->query->get('preparedBy');
         $preparedBy = is_string($preparedBy) ? $preparedBy : null;
 
@@ -56,16 +52,13 @@ class UfcwRemittanceReportDownloadController extends AbstractFileController
             }
         }
 
-        // Also accept JSON body (axios POST)
-        $content = $request->getContent();
-        if ($content !== '' && $content !== false) {
-            $body = json_decode($content, true);
+        // Axios posts the month and edited rows as JSON, not query parameters.
+        $rawBody = $request->getContent();
+        if ($rawBody !== '' && $rawBody !== false) {
+            $body = json_decode($rawBody, true);
             if (is_array($body)) {
-                if (isset($body['month']) && is_string($body['month'])) {
-                    $monthParam = $body['month'];
-                    if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $monthParam)) {
-                        return $this->handleBadRequest();
-                    }
+                if (isset($body['month']) && (is_string($body['month']) || is_numeric($body['month']))) {
+                    $monthParam = (string) $body['month'];
                 }
                 if (isset($body['preparedBy']) && is_string($body['preparedBy'])) {
                     $preparedBy = $body['preparedBy'];
@@ -78,6 +71,10 @@ class UfcwRemittanceReportDownloadController extends AbstractFileController
                     }
                 }
             }
+        }
+
+        if (!preg_match('/^\d{4}-(0[1-9]|1[0-2])$/', $monthParam)) {
+            return $this->handleBadRequest();
         }
 
         $reportMonth = DateTime::createFromFormat('Y-m-d', $monthParam . '-01');

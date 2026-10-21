@@ -283,9 +283,15 @@ export default {
             preparedBy: filters.value.preparedBy,
             employees: payloadEmployees(),
           },
-          {responseType: 'blob'},
+          {responseType: 'blob', maxRedirects: 0},
         );
-        const blob = new Blob([response.data], {
+        const payload = response.data;
+        const header = await payload.slice(0, 2).text();
+        const contentType = String(response.headers?.['content-type'] || '');
+        if (header !== 'PK' || contentType.includes('text/html')) {
+          throw new Error('invalid workbook');
+        }
+        const blob = new Blob([payload], {
           type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         });
         const url = window.URL.createObjectURL(blob);

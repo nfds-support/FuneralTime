@@ -42,6 +42,10 @@ class Employee
 
     public const MARITAL_STATUS_SINGLE = 'Single';
     public const MARITAL_STATUS_MARRIED = 'Married';
+    public const MARITAL_STATUS_COMMON_LAW = 'Common-Law';
+    public const MARITAL_STATUS_DIVORCED = 'Divorced';
+    public const MARITAL_STATUS_SEPARATED = 'Separated';
+    public const MARITAL_STATUS_WIDOW = 'Widow';
     public const MARITAL_STATUS_OTHER = 'Other';
 
     public const STATE_ACTIVE = 'ACTIVE';

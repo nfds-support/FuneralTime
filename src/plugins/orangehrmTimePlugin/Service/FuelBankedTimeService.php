@@ -170,12 +170,20 @@ class FuelBankedTimeService
             throw new Exception('Insufficient banked time balance');
         }
 
+        $note = sprintf('Fuel for banked time request #%d', $request->getId());
+        $comment = $request->getComment();
+        if (is_string($comment) && $comment !== '') {
+            $note = sprintf('%s: %s', $note, $comment);
+            if (strlen($note) > 255) {
+                $note = substr($note, 0, 252) . '...';
+            }
+        }
         $this->getLeaveEntitlementTransactionService()->createAdjustment(
             $empNumber,
             $leaveTypeId,
             LeaveEntitlementTransaction::TYPE_DEDUCTION,
             $days,
-            sprintf('Fuel for banked time request #%d', $request->getId())
+            $note
         );
 
         $request->setStatus(FuelBankedTimeRequest::STATUS_APPROVED);

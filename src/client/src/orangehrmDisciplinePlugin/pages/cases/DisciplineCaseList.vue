@@ -68,6 +68,7 @@ import useSort from '@ohrm/core/util/composable/useSort';
 import {APIService} from '@/core/util/services/api.service';
 import usePaginate from '@ohrm/core/util/composable/usePaginate';
 import useEmployeeNameTranslate from '@/core/util/composable/useEmployeeNameTranslate';
+import usei18n from '@/core/util/composable/usei18n';
 import DeleteConfirmationDialog from '@ohrm/components/dialogs/DeleteConfirmationDialog';
 
 const defaultFilters = {
@@ -85,6 +86,7 @@ export default {
   },
   setup() {
     const {$tEmpName} = useEmployeeNameTranslate();
+    const {$t} = usei18n();
     const filters = ref({...defaultFilters});
     const {sortDefinition, sortField, sortOrder, onSort} = useSort({
       sortDefinition: defaultSortOrder,
@@ -106,6 +108,9 @@ export default {
           severity: item.severity,
           incidentDate: item.incidentDate,
           employee: $tEmpName(item.employee),
+          visibleToEmployee: item.visibleToEmployee
+            ? $t('general.yes')
+            : $t('general.no'),
         };
       });
     };
@@ -181,6 +186,11 @@ export default {
           title: this.$t('discipline.incident_date'),
           sortField: 'disciplineCase.incidentDate',
           style: {flex: 1},
+        },
+        {
+          name: 'visibleToEmployee',
+          title: this.$t('discipline.visible_to_employee'),
+          style: {flex: 0.8},
         },
         {
           name: 'actions',

@@ -41,6 +41,7 @@ export interface TimesheetDayMeta {
   date: string;
   onCall: boolean;
   breakDuration?: string;
+  removalHours?: string;
   isHoliday?: boolean;
   holidayName?: string | null;
 }

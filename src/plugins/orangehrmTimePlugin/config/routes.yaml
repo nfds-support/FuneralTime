@@ -304,6 +304,11 @@ time_payroll_fill_sheet_report:
   controller: OrangeHRM\Time\Controller\PayrollFillSheetReportController::handle
   methods: [ GET ]
 
+time_payroll_periods:
+  path: /time/viewPayrollPeriods
+  controller: OrangeHRM\Time\Controller\PayrollPeriodsController::handle
+  methods: [ GET ]
+
 apiv2_time_timesheet_days:
   path: /api/v2/time/timesheets/{timesheetId}/days
   controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle

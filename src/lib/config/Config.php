@@ -52,12 +52,12 @@ class Config
     public const MODE_TRIAL = 'trial';
 
     public const PRODUCT_NAME = 'FuneralTime';
-    public const PRODUCT_VERSION = '5.9.15';
+    public const PRODUCT_VERSION = '5.9.24';
     public const ORANGEHRM_API_VERSION = '2.8.0';
     public const PRODUCT_MODE = self::MODE_DEV;
     public const REGISTRATION_URL = 'https://ospenguin.orangehrm.com';
 
-    public const DEFAULT_MAX_SESSION_IDLE_TIME = 1800;
+    public const DEFAULT_MAX_SESSION_IDLE_TIME = 54000; // 15 hours
 
     /**
      * @var array

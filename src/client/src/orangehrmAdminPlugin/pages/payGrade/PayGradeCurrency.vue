@@ -103,7 +103,7 @@ export default {
   },
   props: {
     payGradeId: {
-      type: String,
+      type: Number,
       required: true,
     },
   },

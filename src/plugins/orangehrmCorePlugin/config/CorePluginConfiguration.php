@@ -136,12 +136,15 @@ class CorePluginConfiguration implements PluginConfigurationInterface, ConsoleCo
         }
         $isSecure = $request->isSecure();
         $path = $request->getBasePath();
+        $sessionIdleTime = Config::get(Config::MAX_SESSION_IDLE_TIME);
         $options = [
             'name' => $isSecure ? 'orangehrm' : '_orangehrm',
             'cookie_secure' => $isSecure,
             'cookie_httponly' => true,
             'cookie_path' => $path == '' ? '/' : $path,
             'cookie_samesite' => 'Lax',
+            'cookie_lifetime' => $sessionIdleTime,
+            'gc_maxlifetime' => $sessionIdleTime,
         ];
         return new NativeSessionStorage(
             $options,

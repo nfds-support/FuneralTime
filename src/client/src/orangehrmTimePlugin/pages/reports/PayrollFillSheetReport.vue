@@ -35,52 +35,17 @@
             </oxd-grid-item>
           </oxd-grid>
         </oxd-form-row>
-        <oxd-divider />
         <oxd-form-row>
           <oxd-text tag="p" class="orangehrm-form-hint">
-            {{ $t('time.payroll_periods') }}
+            {{ $t('time.payroll_period_manage_hint') }}
+            <a href="#" @click.prevent="goToManagePeriods">
+              {{ $t('time.payroll_periods') }}
+            </a>
           </oxd-text>
-        </oxd-form-row>
-        <oxd-form-row>
-          <oxd-grid :cols="4" class="orangehrm-full-width-grid">
-            <oxd-grid-item>
-              <oxd-input-field
-                v-model="newPeriod.periodNumber"
-                :label="$t('time.period_number')"
-              />
-            </oxd-grid-item>
-            <oxd-grid-item>
-              <oxd-input-field
-                v-model="newPeriod.startDate"
-                :label="$t('general.from')"
-                placeholder="YYYY-MM-DD"
-              />
-            </oxd-grid-item>
-            <oxd-grid-item>
-              <oxd-input-field
-                v-model="newPeriod.endDate"
-                :label="$t('general.to')"
-                placeholder="YYYY-MM-DD"
-              />
-            </oxd-grid-item>
-            <oxd-grid-item>
-              <oxd-input-field
-                v-model="newPeriod.label"
-                :label="$t('general.name')"
-              />
-            </oxd-grid-item>
-          </oxd-grid>
         </oxd-form-row>
         <oxd-divider />
         <oxd-form-actions>
           <required-text />
-          <oxd-button
-            type="button"
-            display-type="ghost"
-            :label="$t('general.save')"
-            :disabled="!canSavePeriod"
-            @click="onSavePeriod"
-          />
           <oxd-button
             type="submit"
             display-type="secondary"
@@ -112,9 +77,10 @@
 </template>
 
 <script>
-import {computed, onBeforeMount, ref} from 'vue';
+import {onBeforeMount, ref} from 'vue';
 import {required} from '@/core/util/validation/rules';
 import {APIService} from '@/core/util/services/api.service';
+import {navigate} from '@ohrm/core/util/helper/navigation';
 import usei18n from '@/core/util/composable/usei18n';
 
 export default {
@@ -124,12 +90,6 @@ export default {
     const rows = ref([]);
     const periodOptions = ref([]);
     const filters = ref({period: null});
-    const newPeriod = ref({
-      periodNumber: '',
-      startDate: '',
-      endDate: '',
-      label: '',
-    });
     const rules = {period: [required]};
 
     const headers = [
@@ -163,7 +123,10 @@ export default {
       return periodsHttp.getAll({limit: 0}).then(({data}) => {
         periodOptions.value = (data.data || []).map((p) => ({
           id: p.id,
-          label: p.label || `P${p.periodNumber}: ${p.startDate} – ${p.endDate}`,
+          label:
+            p.title ||
+            p.label ||
+            `P${p.periodNumber}: ${p.startDate} – ${p.endDate}`,
         }));
       });
     };
@@ -171,38 +134,6 @@ export default {
     onBeforeMount(() => {
       loadPeriods();
     });
-
-    const canSavePeriod = computed(() => {
-      return (
-        !!newPeriod.value.periodNumber &&
-        !!newPeriod.value.startDate &&
-        !!newPeriod.value.endDate
-      );
-    });
-
-    const onSavePeriod = () => {
-      if (!canSavePeriod.value) return;
-      isLoading.value = true;
-      periodsHttp
-        .create({
-          periodNumber: Number(newPeriod.value.periodNumber),
-          startDate: newPeriod.value.startDate,
-          endDate: newPeriod.value.endDate,
-          label: newPeriod.value.label || null,
-        })
-        .then(() => {
-          newPeriod.value = {
-            periodNumber: '',
-            startDate: '',
-            endDate: '',
-            label: '',
-          };
-          return loadPeriods();
-        })
-        .finally(() => {
-          isLoading.value = false;
-        });
-    };
 
     const onGenerate = () => {
       if (!filters.value.period?.id) return;
@@ -239,13 +170,19 @@ export default {
       rows.value.forEach((row) => {
         lines.push(cols.map((c) => JSON.stringify(row[c] ?? '')).join(','));
       });
-      const blob = new Blob([lines.join('\n')], {type: 'text/csv;charset=utf-8;'});
+      const blob = new Blob([lines.join('\n')], {
+        type: 'text/csv;charset=utf-8;',
+      });
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
       link.download = 'payroll-fill-sheet.csv';
       link.click();
       URL.revokeObjectURL(url);
+    };
+
+    const goToManagePeriods = () => {
+      navigate('/time/viewPayrollPeriods');
     };
 
     return {
@@ -255,11 +192,9 @@ export default {
       filters,
       rules,
       periodOptions,
-      newPeriod,
-      canSavePeriod,
-      onSavePeriod,
       onGenerate,
       exportCsv,
+      goToManagePeriods,
     };
   },
 };

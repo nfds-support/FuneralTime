@@ -31,7 +31,8 @@ use OrangeHRM\Entity\PayrollPeriod;
  *     @OA\Property(property="periodNumber", type="integer"),
  *     @OA\Property(property="startDate", type="string", format="date"),
  *     @OA\Property(property="endDate", type="string", format="date"),
- *     @OA\Property(property="label", type="string", nullable=true)
+ *     @OA\Property(property="label", type="string", nullable=true),
+ *     @OA\Property(property="title", type="string", nullable=true)
  * )
  */
 class PayrollPeriodModel implements Normalizable
@@ -48,6 +49,7 @@ class PayrollPeriodModel implements Normalizable
                 ['getDecorator', 'getStartDate'],
                 ['getDecorator', 'getEndDate'],
                 'label',
+                'label',
             ]
         );
         $this->setAttributeNames(
@@ -57,6 +59,7 @@ class PayrollPeriodModel implements Normalizable
                 'startDate',
                 'endDate',
                 'label',
+                'title',
             ]
         );
     }

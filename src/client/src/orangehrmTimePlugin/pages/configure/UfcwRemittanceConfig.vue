@@ -47,6 +47,9 @@
               <oxd-text tag="p" class="orangehrm-input-hint">
                 {{ $t('time.help_dues_formula') }}
               </oxd-text>
+              <oxd-text tag="p" class="orangehrm-input-hint">
+                {{ $t('time.dues_fallback_hint') }}
+              </oxd-text>
             </oxd-grid-item>
           </oxd-grid>
         </oxd-form-row>

@@ -28,7 +28,14 @@ use OrangeHRM\Entity\Membership;
  *     schema="Admin-MembershipModel",
  *     type="object",
  *     @OA\Property(property="id", type="integer"),
- *     @OA\Property(property="name", type="string")
+ *     @OA\Property(property="name", type="string"),
+ *     @OA\Property(property="duesMode", type="string"),
+ *     @OA\Property(property="duesHourlyMultiplier", type="number", nullable=true),
+ *     @OA\Property(property="duesWeeklyFlatFee", type="number", nullable=true),
+ *     @OA\Property(property="initiationFeeFullTime", type="number", nullable=true),
+ *     @OA\Property(property="initiationFeePartTime", type="number", nullable=true),
+ *     @OA\Property(property="initiationWeeklyMaxFullTime", type="number", nullable=true),
+ *     @OA\Property(property="initiationWeeklyMaxPartTime", type="number", nullable=true)
  * )
  */
 class MembershipModel implements Normalizable
@@ -42,6 +49,13 @@ class MembershipModel implements Normalizable
             [
                 'id',
                 'name',
+                'duesMode',
+                'duesHourlyMultiplier',
+                'duesWeeklyFlatFee',
+                'initiationFeeFullTime',
+                'initiationFeePartTime',
+                'initiationWeeklyMaxFullTime',
+                'initiationWeeklyMaxPartTime',
             ]
         );
     }

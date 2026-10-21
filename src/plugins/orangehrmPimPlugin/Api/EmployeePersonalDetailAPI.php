@@ -208,8 +208,12 @@ class EmployeePersonalDetailAPI extends Endpoint implements ResourceEndpoint
         $employee->setBirthday(
             $this->getRequestParams()->getDateTimeOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_BIRTHDAY)
         );
+        $nationalityId = $this->getRequestParams()->getIntOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_NATIONALITY_ID
+        );
         $employee->getDecorator()->setNationality(
-            $this->getRequestParams()->getIntOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_NATIONALITY_ID)
+            $nationalityId === null ? null : (int) $nationalityId
         );
 
         $showDeprecatedFields = $this->getConfigService()->showPimDeprecatedFields();

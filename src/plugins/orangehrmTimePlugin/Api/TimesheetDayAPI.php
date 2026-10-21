@@ -60,6 +60,7 @@ class TimesheetDayAPI extends Endpoint implements CrudEndpoint
             $dayMetaByDate[$day->getDate()->format('Y-m-d')] = [
                 'onCall' => $day->isOnCall(),
                 'breakDuration' => $this->formatSecondsAsDuration($day->getBreakDuration()),
+                'removalHours' => $this->formatSecondsAsDuration($day->getRemovalHours()),
             ];
         }
 
@@ -71,6 +72,7 @@ class TimesheetDayAPI extends Endpoint implements CrudEndpoint
                 'date' => $ymd,
                 'onCall' => $dayMetaByDate[$ymd]['onCall'] ?? false,
                 'breakDuration' => $dayMetaByDate[$ymd]['breakDuration'] ?? '00:00',
+                'removalHours' => $dayMetaByDate[$ymd]['removalHours'] ?? '00:00',
                 'isHoliday' => $this->getHolidayService()->isHoliday($date)
                     || $this->getHolidayService()->isHalfDayHoliday($date),
                 'holidayName' => $holiday?->getName(),
@@ -124,12 +126,16 @@ class TimesheetDayAPI extends Endpoint implements CrudEndpoint
             if (array_key_exists('breakDuration', $dayPayload)) {
                 $timesheetDay->setBreakDuration($this->parseDurationToSeconds((string) $dayPayload['breakDuration']));
             }
+            if (array_key_exists('removalHours', $dayPayload)) {
+                $timesheetDay->setRemovalHours($this->parseDurationToSeconds((string) $dayPayload['removalHours']));
+            }
             $this->getTimesheetService()->getTimesheetDao()->saveTimesheetDay($timesheetDay);
             $holiday = $this->getHolidayService()->getHolidayDao()->getHolidayByDate($date);
             $saved[] = [
                 'date' => $date->format('Y-m-d'),
                 'onCall' => $timesheetDay->isOnCall(),
                 'breakDuration' => $this->formatSecondsAsDuration($timesheetDay->getBreakDuration()),
+                'removalHours' => $this->formatSecondsAsDuration($timesheetDay->getRemovalHours()),
                 'isHoliday' => $this->getHolidayService()->isHoliday($date)
                     || $this->getHolidayService()->isHalfDayHoliday($date),
                 'holidayName' => $holiday?->getName(),

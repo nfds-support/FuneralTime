@@ -84,6 +84,10 @@ class DisciplineDao extends BaseDao
             $q->andWhere('disciplineCase.status = :status')
                 ->setParameter('status', $filterParams->getStatus());
         }
+        if ($filterParams->isVisibleToEmployeeOnly()) {
+            $q->andWhere('disciplineCase.visibleToEmployee = :visibleToEmployee')
+                ->setParameter('visibleToEmployee', true);
+        }
 
         $this->setSortingAndPaginationParams($q, $filterParams);
         return $this->getPaginator($q);

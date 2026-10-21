@@ -11,11 +11,15 @@ GetOne:
       currencies: [
         {
           id: AUD,
-          name: Australian Dollar
+          name: Australian Dollar,
+          minSalary: 2000,
+          maxSalary: 5000
         },
         {
           id: USD,
-          name: United States Dollar
+          name: United States Dollar,
+          minSalary: 5000,
+          maxSalary: 10000
         }
       ]
     }
@@ -72,11 +76,15 @@ GetAll:
         currencies: [
           {
             id: AUD,
-            name: Australian Dollar
+            name: Australian Dollar,
+            minSalary: 2000,
+            maxSalary: 5000
           },
           {
             id: USD,
-            name: United States Dollar
+            name: United States Dollar,
+            minSalary: 5000,
+            maxSalary: 10000
           }
         ]
       },
@@ -86,7 +94,9 @@ GetAll:
         currencies: [
           {
             id: AUD,
-            name: Australian Dollar
+            name: Australian Dollar,
+            minSalary: 3000,
+            maxSalary: 5000
           }
         ]
       },
@@ -118,7 +128,9 @@ GetAll:
         currencies: [
           {
             id: AUD,
-            name: Australian Dollar
+            name: Australian Dollar,
+            minSalary: 3000,
+            maxSalary: 5000
           }
         ]
       },
@@ -128,11 +140,15 @@ GetAll:
         currencies: [
           {
             id: AUD,
-            name: Australian Dollar
+            name: Australian Dollar,
+            minSalary: 2000,
+            maxSalary: 5000
           },
           {
             id: USD,
-            name: United States Dollar
+            name: United States Dollar,
+            minSalary: 5000,
+            maxSalary: 10000
           }
         ]
       }
@@ -214,11 +230,15 @@ Update:
       currencies: [
         {
           id: AUD,
-          name: Australian Dollar
+          name: Australian Dollar,
+          minSalary: 2000,
+          maxSalary: 5000
         },
         {
           id: USD,
-          name: United States Dollar
+          name: United States Dollar,
+          minSalary: 5000,
+          maxSalary: 10000
         }
       ]
     }

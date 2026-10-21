@@ -215,8 +215,6 @@ class Migration extends AbstractMigration
 
         if (!$homeExists && $moduleId) {
             $adminRoleId = $this->getDataGroupHelper()->getUserRoleIdByName('Admin');
-            $essRoleId = $this->getDataGroupHelper()->getUserRoleIdByName('ESS');
-            $supervisorRoleId = $this->getDataGroupHelper()->getUserRoleIdByName('Supervisor');
 
             $this->getConnection()->createQueryBuilder()
                 ->insert('ohrm_module_default_page')
@@ -231,38 +229,6 @@ class Migration extends AbstractMigration
                 ->setParameter('action', 'discipline/viewDisciplineCases')
                 ->setParameter('priority', 20)
                 ->executeQuery();
-
-            if ($supervisorRoleId) {
-                $this->getConnection()->createQueryBuilder()
-                    ->insert('ohrm_module_default_page')
-                    ->values([
-                        'module_id' => ':module_id',
-                        'user_role_id' => ':user_role_id',
-                        'action' => ':action',
-                        'priority' => ':priority',
-                    ])
-                    ->setParameter('module_id', $moduleId)
-                    ->setParameter('user_role_id', $supervisorRoleId)
-                    ->setParameter('action', 'discipline/viewDisciplineCases')
-                    ->setParameter('priority', 10)
-                    ->executeQuery();
-            }
-
-            if ($essRoleId) {
-                $this->getConnection()->createQueryBuilder()
-                    ->insert('ohrm_module_default_page')
-                    ->values([
-                        'module_id' => ':module_id',
-                        'user_role_id' => ':user_role_id',
-                        'action' => ':action',
-                        'priority' => ':priority',
-                    ])
-                    ->setParameter('module_id', $moduleId)
-                    ->setParameter('user_role_id', $essRoleId)
-                    ->setParameter('action', 'discipline/viewMyDisciplineCases')
-                    ->setParameter('priority', 20)
-                    ->executeQuery();
-            }
         }
     }
 

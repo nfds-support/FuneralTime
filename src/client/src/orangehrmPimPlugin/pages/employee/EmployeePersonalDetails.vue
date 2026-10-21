@@ -76,7 +76,6 @@
                 v-model="employee.drivingLicenseNo"
                 :label="$t('pim.driver_license_number')"
                 :rules="rules.drivingLicenseNo"
-                :disabled="!$can.update(`personal_sensitive_information`)"
               />
             </oxd-grid-item>
             <oxd-grid-item>
@@ -115,8 +114,7 @@
                 v-model="employee.nationality"
                 type="select"
                 :label="$t('general.nationality')"
-                :clear="false"
-                :options="nationalities"
+                :options="nationalityOptions"
               />
             </oxd-grid-item>
             <oxd-grid-item>
@@ -124,7 +122,6 @@
                 v-model="employee.maritalStatus"
                 type="select"
                 :label="$t('pim.marital_status')"
-                :clear="false"
                 :options="maritalStatuses"
               />
             </oxd-grid-item>
@@ -212,13 +209,20 @@ const employeeModel = {
   drivingLicenseExpiredDate: '',
   ssnNumber: '',
   sinNumber: '',
-  nationality: [],
-  maritalStatus: [],
+  nationality: null,
+  maritalStatus: null,
   birthday: '',
   gender: '',
   nickname: '',
   smoker: '',
   militaryService: '',
+};
+
+const optionId = (value) => {
+  if (Array.isArray(value)) {
+    return value[0]?.id ?? null;
+  }
+  return value?.id ?? null;
 };
 
 export default {
@@ -267,6 +271,7 @@ export default {
     return {
       isLoading: false,
       employee: {...employeeModel},
+      nationalityOptions: [...this.nationalities],
       rules: {
         firstName: [required, shouldNotExceedCharLength(30)],
         middleName: [shouldNotExceedCharLength(30)],
@@ -284,6 +289,10 @@ export default {
       maritalStatuses: [
         {id: 'Single', label: this.$t('pim.single')},
         {id: 'Married', label: this.$t('pim.married')},
+        {id: 'Common-Law', label: this.$t('pim.common_law')},
+        {id: 'Divorced', label: this.$t('pim.divorced')},
+        {id: 'Separated', label: this.$t('pim.separated')},
+        {id: 'Widow', label: this.$t('pim.widow')},
         {id: 'Other', label: this.$t('pim.other')},
       ],
     };
@@ -291,8 +300,28 @@ export default {
 
   beforeMount() {
     this.isLoading = true;
-    this.http
-      .getAll()
+    const nationalitiesReady =
+      this.nationalityOptions.length > 0
+        ? Promise.resolve()
+        : this.http
+            .request({
+              method: 'GET',
+              url: '/api/v2/admin/nationalities',
+              params: {limit: 0},
+            })
+            .then((response) => {
+              const {data} = response.data;
+              this.nationalityOptions = (data || []).map((item) => ({
+                id: item.id,
+                label: item.name,
+              }));
+            })
+            .catch(() => {
+              this.nationalityOptions = [];
+            });
+
+    nationalitiesReady
+      .then(() => this.http.getAll())
       .then((response) => {
         this.updateModel(response);
         return this.http.request({
@@ -338,9 +367,9 @@ export default {
             drivingLicenseNo: this.employee.drivingLicenseNo,
             drivingLicenseExpiredDate: this.employee.drivingLicenseExpiredDate,
             gender: this.employee.gender,
-            maritalStatus: this.employee.maritalStatus?.id,
+            maritalStatus: optionId(this.employee.maritalStatus) ?? '',
             birthday: this.employee.birthday,
-            nationalityId: this.employee.nationality?.id,
+            nationalityId: optionId(this.employee.nationality),
             ssnNumber: this.showSsnField ? this.employee.ssnNumber : undefined,
             sinNumber: this.showSinField ? this.employee.sinNumber : undefined,
             nickname: this.showDeprecatedFields
@@ -366,12 +395,16 @@ export default {
     updateModel(response) {
       const {data} = response.data;
       this.employee = {...employeeModel, ...data};
-      this.employee.maritalStatus = this.maritalStatuses.find(
-        (item) => item.id === data.maritalStatus,
-      );
-      this.employee.nationality = this.nationalities.find(
-        (item) => item.id === data.nationality?.id,
-      );
+      this.employee.maritalStatus =
+        this.maritalStatuses.find((item) => item.id === data.maritalStatus) ||
+        null;
+      const nationalityId = data.nationality?.id;
+      this.employee.nationality =
+        nationalityId == null
+          ? null
+          : this.nationalityOptions.find(
+              (item) => Number(item.id) === Number(nationalityId),
+            ) || null;
     },
   },
 };

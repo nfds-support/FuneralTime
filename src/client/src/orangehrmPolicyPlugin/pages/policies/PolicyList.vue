@@ -26,12 +26,14 @@
         </oxd-text>
         <div>
           <oxd-button
+            v-if="$can.update('apiv2_policy_moodle_config')"
             :label="$t('policy.moodle_settings')"
             display-type="ghost"
             class="orangehrm-horizontal-margin"
             @click="onMoodleConfig"
           />
           <oxd-button
+            v-if="$can.create('apiv2_policy_policies')"
             :label="$t('policy.add_policy')"
             icon-name="plus"
             display-type="secondary"
@@ -40,6 +42,7 @@
         </div>
       </div>
       <table-header
+        v-if="$can.delete('apiv2_policy_policies')"
         :selected="checkedItems"
         :total="total"
         :loading="isLoading"
@@ -51,7 +54,7 @@
           v-model:order="sortDefinition"
           :items="items.data"
           :headers="headers"
-          :selectable="true"
+          :selectable="$can.delete('apiv2_policy_policies')"
           :clickable="false"
           :loading="isLoading"
           row-decorator="oxd-table-decorator-card"

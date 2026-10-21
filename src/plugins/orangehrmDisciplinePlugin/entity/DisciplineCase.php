@@ -162,6 +162,15 @@ class DisciplineCase
     private ?string $actionTaken = null;
 
     /**
+     * When true, the affected employee can view a limited version of this case.
+     *
+     * @var bool
+     *
+     * @ORM\Column(name="visible_to_employee", type="boolean", options={"default" : 0})
+     */
+    private bool $visibleToEmployee = false;
+
+    /**
      * @var DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
@@ -328,6 +337,21 @@ class DisciplineCase
     public function setActionTaken(?string $actionTaken): void
     {
         $this->actionTaken = $actionTaken;
+    }
+
+    public function isVisibleToEmployee(): bool
+    {
+        return $this->visibleToEmployee;
+    }
+
+    public function getVisibleToEmployee(): bool
+    {
+        return $this->visibleToEmployee;
+    }
+
+    public function setVisibleToEmployee(bool $visibleToEmployee): void
+    {
+        $this->visibleToEmployee = $visibleToEmployee;
     }
 
     public function getCreatedAt(): DateTime

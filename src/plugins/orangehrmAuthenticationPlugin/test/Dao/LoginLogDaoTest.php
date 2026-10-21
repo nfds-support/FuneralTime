@@ -66,4 +66,26 @@ class LoginLogDaoTest extends KernelTestCase
         $this->assertEquals(1, $result->getUserRolePredefined());
         $this->assertEquals('2022-07-04 10:56', $result->getLoginTime()->format('Y-m-d H:i'));
     }
+
+    public function testCountByUserId(): void
+    {
+        $dateTimeHelper = $this->getMockBuilder(DateTimeHelperService::class)
+            ->onlyMethods(['getNow'])
+            ->getMock();
+        $dateTimeHelper->expects($this->atLeastOnce())
+            ->method('getNow')
+            ->willReturn(new DateTime('2022-07-04 10:56:56'));
+        $this->getContainer()->set(Services::DATETIME_HELPER_SERVICE, $dateTimeHelper);
+
+        $this->assertSame(0, $this->loginLogDao->countByUserId(99999));
+
+        $loginLog = new LoginLog();
+        $loginLog->setUserId(42);
+        $loginLog->setUserName('FirstTimer');
+        $loginLog->setUserRoleName('ESS');
+        $loginLog->setUserRolePredefined(1);
+        $this->loginLogDao->saveLoginLog($loginLog);
+
+        $this->assertSame(1, $this->loginLogDao->countByUserId(42));
+    }
 }

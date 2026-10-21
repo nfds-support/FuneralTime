@@ -45,6 +45,7 @@ class PayrollPeriodAPI extends Endpoint implements CrudEndpoint
     public const PARAMETER_START_DATE = 'startDate';
     public const PARAMETER_END_DATE = 'endDate';
     public const PARAMETER_LABEL = 'label';
+    public const PARAMETER_TITLE = 'title';
     public const FILTER_PERIOD_NUMBER = 'periodNumber';
     public const FILTER_FROM_DATE = 'fromDate';
     public const FILTER_TO_DATE = 'toDate';
@@ -208,18 +209,50 @@ class PayrollPeriodAPI extends Endpoint implements CrudEndpoint
      */
     private function setParamsToPayrollPeriod(PayrollPeriod $payrollPeriod): void
     {
-        $payrollPeriod->setPeriodNumber(
-            $this->getRequestParams()->getInt(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_PERIOD_NUMBER)
+        $title = $this->getRequestParams()->getStringOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_TITLE
         );
-        $payrollPeriod->setStartDate(
-            $this->getRequestParams()->getDateTime(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_START_DATE)
+        if ($title === null || $title === '') {
+            $title = $this->getRequestParams()->getStringOrNull(
+                RequestParams::PARAM_TYPE_BODY,
+                self::PARAMETER_LABEL
+            );
+        }
+        if ($title === null || trim($title) === '') {
+            throw $this->getBadRequestException('Period title is required');
+        }
+        $title = trim($title);
+
+        $periodNumber = $this->getRequestParams()->getIntOrNull(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_PERIOD_NUMBER
         );
-        $payrollPeriod->setEndDate(
-            $this->getRequestParams()->getDateTime(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_END_DATE)
+        if ($periodNumber === null && preg_match('/(\d+)/', $title, $matches) === 1) {
+            $periodNumber = (int) $matches[1];
+        }
+        if ($periodNumber === null || $periodNumber < 1) {
+            throw $this->getBadRequestException(
+                'Period title must include a number (e.g. P20) or provide periodNumber'
+            );
+        }
+
+        $startDate = $this->getRequestParams()->getDateTime(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_START_DATE
         );
-        $payrollPeriod->setLabel(
-            $this->getRequestParams()->getStringOrNull(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_LABEL)
+        $endDate = $this->getRequestParams()->getDateTime(
+            RequestParams::PARAM_TYPE_BODY,
+            self::PARAMETER_END_DATE
         );
+        if ($endDate < $startDate) {
+            throw $this->getBadRequestException('End date must be on or after start date');
+        }
+
+        $payrollPeriod->setPeriodNumber($periodNumber);
+        $payrollPeriod->setStartDate($startDate);
+        $payrollPeriod->setEndDate($endDate);
+        $payrollPeriod->setLabel($title);
     }
 
     /**
@@ -228,9 +261,19 @@ class PayrollPeriodAPI extends Endpoint implements CrudEndpoint
     private function getBodyValidationRules(): array
     {
         return [
-            new ParamRule(self::PARAMETER_PERIOD_NUMBER, new Rule(Rules::POSITIVE)),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(self::PARAMETER_PERIOD_NUMBER, new Rule(Rules::POSITIVE))
+            ),
             new ParamRule(self::PARAMETER_START_DATE, new Rule(Rules::API_DATE)),
             new ParamRule(self::PARAMETER_END_DATE, new Rule(Rules::API_DATE)),
+            $this->getValidationDecorator()->notRequiredParamRule(
+                new ParamRule(
+                    self::PARAMETER_TITLE,
+                    new Rule(Rules::STRING_TYPE),
+                    new Rule(Rules::LENGTH, [1, self::PARAM_RULE_LABEL_MAX_LENGTH])
+                ),
+                true
+            ),
             $this->getValidationDecorator()->notRequiredParamRule(
                 new ParamRule(
                     self::PARAMETER_LABEL,

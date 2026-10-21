@@ -1,0 +1,41 @@
+langStrings:
+  -
+    unitId: dues_mode
+    value: 'Dues Mode'
+    note: ''
+  -
+    unitId: dues_mode_flat
+    value: 'Flat subscription'
+    note: ''
+  -
+    unitId: dues_mode_rate_weekly
+    value: 'Rate-based weekly'
+    note: ''
+  -
+    unitId: dues_hourly_multiplier
+    value: 'Hourly Rate Multiplier'
+    note: ''
+  -
+    unitId: dues_weekly_flat_fee
+    value: 'Weekly Flat Fee'
+    note: ''
+  -
+    unitId: initiation_fee_full_time
+    value: 'Initiation Fee (Full-time)'
+    note: ''
+  -
+    unitId: initiation_fee_part_time
+    value: 'Initiation Fee (Part-time)'
+    note: ''
+  -
+    unitId: initiation_weekly_max_full_time
+    value: 'Max Weekly Initiation (Full-time)'
+    note: ''
+  -
+    unitId: initiation_weekly_max_part_time
+    value: 'Max Weekly Initiation (Part-time)'
+    note: ''
+  -
+    unitId: help_membership_dues_formula
+    value: 'Weekly dues = (hourly rate × multiplier) + flat fee, for each week with approved hours. Initiation is deducted over the first pays using the caps below.'
+    note: ''

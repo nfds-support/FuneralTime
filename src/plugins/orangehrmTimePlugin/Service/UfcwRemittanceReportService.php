@@ -24,7 +24,9 @@ use OrangeHRM\Core\Service\EmailService;
 use OrangeHRM\Core\Service\UiLanguageService;
 use OrangeHRM\Core\Traits\ORM\EntityManagerHelperTrait;
 use OrangeHRM\Core\Traits\ServiceContainerTrait;
+use OrangeHRM\Admin\Service\MembershipService;
 use OrangeHRM\Entity\Employee;
+use OrangeHRM\Entity\Membership;
 use OrangeHRM\Entity\PayrollPeriod;
 use OrangeHRM\Entity\UfcwInitiationFee;
 use OrangeHRM\Framework\Services;
@@ -120,6 +122,7 @@ class UfcwRemittanceReportService
 
     private ?UfcwRemittanceDao $dao = null;
     private ?UfcwRemittanceSettingsService $settingsService = null;
+    private ?MembershipService $membershipService = null;
     private ?EmailService $emailService = null;
 
     public function getDao(): UfcwRemittanceDao
@@ -140,6 +143,16 @@ class UfcwRemittanceReportService
     public function setSettingsService(UfcwRemittanceSettingsService $settingsService): void
     {
         $this->settingsService = $settingsService;
+    }
+
+    public function getMembershipService(): MembershipService
+    {
+        return $this->membershipService ??= new MembershipService();
+    }
+
+    public function setMembershipService(MembershipService $membershipService): void
+    {
+        $this->membershipService = $membershipService;
     }
 
     public function getEmailService(): EmailService
@@ -173,6 +186,7 @@ class UfcwRemittanceReportService
     public function buildReport(DateTime $reportMonth, ?string $preparedBy = null, array $overrides = []): array
     {
         $settings = $this->getSettingsService()->getSettings();
+        $duesFormula = $this->resolveDuesFormula($settings);
         $monthStart = new DateTime($reportMonth->format('Y-m-01'));
         $monthEnd = (clone $monthStart)->modify('last day of this month');
         $payrollPeriods = $this->getDao()->getPayrollPeriodsOverlappingMonth($monthStart, $monthEnd);
@@ -186,7 +200,13 @@ class UfcwRemittanceReportService
 
         $rows = [];
         foreach ($employees as $employee) {
-            $row = $this->buildEmployeeRow($employee, $settings, $monthStart, $monthEnd, $payrollPeriods);
+            $row = $this->buildEmployeeRow(
+                $employee,
+                $duesFormula,
+                $monthStart,
+                $monthEnd,
+                $payrollPeriods
+            );
             $empNumber = $row->getEmpNumber();
             if (isset($overrides[$empNumber])) {
                 $row->applyOverride($overrides[$empNumber]);
@@ -227,6 +247,7 @@ class UfcwRemittanceReportService
                 ? 'Draft – complete highlighted fields'
                 : 'Draft – ready for review',
             'settings' => $settings->toArray(),
+            'duesFormula' => $duesFormula,
             'employees' => array_map(static fn (UfcwRemittanceEmployeeRow $r) => $r->toArray(), $rows),
             'totals' => [
                 'unionDues' => round($totalDues, 2),
@@ -262,7 +283,7 @@ class UfcwRemittanceReportService
 
         $instructions = $spreadsheet->createSheet();
         $instructions->setTitle('Instructions');
-        $this->buildInstructionsSheet($instructions, $settings);
+        $this->buildInstructionsSheet($instructions, $report, $settings);
 
         $spreadsheet->setActiveSheetIndex(0);
         return $this->spreadsheetToString($spreadsheet);
@@ -413,15 +434,88 @@ class UfcwRemittanceReportService
 
     /**
      * Weekly dues = (hourlyRate × multiplier) + flatFee
+     *
+     * @param array{
+     *   duesHourlyMultiplier: float,
+     *   duesWeeklyFlatFee: float,
+     *   initiationFeeFullTime: float,
+     *   initiationFeePartTime: float,
+     *   initiationWeeklyMaxFullTime: float,
+     *   initiationWeeklyMaxPartTime: float,
+     *   source: string
+     * }|UfcwRemittanceSettings $formulaOrSettings
      */
-    public function calculateWeeklyDues(float $hourlyRate, UfcwRemittanceSettings $settings): float
+    public function calculateWeeklyDues(float $hourlyRate, $formulaOrSettings): float
     {
-        return round(($hourlyRate * $settings->getDuesHourlyMultiplier()) + $settings->getDuesWeeklyFlatFee(), 2);
+        if ($formulaOrSettings instanceof UfcwRemittanceSettings) {
+            $multiplier = $formulaOrSettings->getDuesHourlyMultiplier();
+            $flatFee = $formulaOrSettings->getDuesWeeklyFlatFee();
+        } else {
+            $multiplier = (float) $formulaOrSettings['duesHourlyMultiplier'];
+            $flatFee = (float) $formulaOrSettings['duesWeeklyFlatFee'];
+        }
+        return round(($hourlyRate * $multiplier) + $flatFee, 2);
+    }
+
+    /**
+     * Prefer rate_weekly membership formula; fall back to remittance settings.
+     *
+     * @return array{
+     *   duesHourlyMultiplier: float,
+     *   duesWeeklyFlatFee: float,
+     *   initiationFeeFullTime: float,
+     *   initiationFeePartTime: float,
+     *   initiationWeeklyMaxFullTime: float,
+     *   initiationWeeklyMaxPartTime: float,
+     *   source: string
+     * }
+     */
+    public function resolveDuesFormula(UfcwRemittanceSettings $settings): array
+    {
+        $membership = $this->getMembershipService()->getMembershipByName($settings->getMembershipName());
+        if (
+            $membership instanceof Membership
+            && $membership->isRateWeekly()
+            && $membership->getDuesHourlyMultiplier() !== null
+            && $membership->getDuesWeeklyFlatFee() !== null
+        ) {
+            return [
+                'duesHourlyMultiplier' => (float) $membership->getDuesHourlyMultiplier(),
+                'duesWeeklyFlatFee' => (float) $membership->getDuesWeeklyFlatFee(),
+                'initiationFeeFullTime' => (float) ($membership->getInitiationFeeFullTime()
+                    ?? $settings->getInitiationFeeFullTime()),
+                'initiationFeePartTime' => (float) ($membership->getInitiationFeePartTime()
+                    ?? $settings->getInitiationFeePartTime()),
+                'initiationWeeklyMaxFullTime' => (float) ($membership->getInitiationWeeklyMaxFullTime()
+                    ?? $settings->getInitiationWeeklyMaxFullTime()),
+                'initiationWeeklyMaxPartTime' => (float) ($membership->getInitiationWeeklyMaxPartTime()
+                    ?? $settings->getInitiationWeeklyMaxPartTime()),
+                'source' => 'membership',
+            ];
+        }
+
+        return [
+            'duesHourlyMultiplier' => $settings->getDuesHourlyMultiplier(),
+            'duesWeeklyFlatFee' => $settings->getDuesWeeklyFlatFee(),
+            'initiationFeeFullTime' => $settings->getInitiationFeeFullTime(),
+            'initiationFeePartTime' => $settings->getInitiationFeePartTime(),
+            'initiationWeeklyMaxFullTime' => $settings->getInitiationWeeklyMaxFullTime(),
+            'initiationWeeklyMaxPartTime' => $settings->getInitiationWeeklyMaxPartTime(),
+            'source' => 'settings',
+        ];
     }
 
     /**
      * @param Employee $employee
-     * @param UfcwRemittanceSettings $settings
+     * @param array{
+     *   duesHourlyMultiplier: float,
+     *   duesWeeklyFlatFee: float,
+     *   initiationFeeFullTime: float,
+     *   initiationFeePartTime: float,
+     *   initiationWeeklyMaxFullTime: float,
+     *   initiationWeeklyMaxPartTime: float,
+     *   source: string
+     * } $duesFormula
      * @param DateTime $monthStart
      * @param DateTime $monthEnd
      * @param PayrollPeriod[] $payrollPeriods
@@ -429,7 +523,7 @@ class UfcwRemittanceReportService
      */
     private function buildEmployeeRow(
         Employee $employee,
-        UfcwRemittanceSettings $settings,
+        array $duesFormula,
         DateTime $monthStart,
         DateTime $monthEnd,
         array $payrollPeriods
@@ -482,11 +576,11 @@ class UfcwRemittanceReportService
 
         $unionDues = 0.0;
         if ($rate !== null && $weeksWithHours > 0) {
-            $unionDues = round($this->calculateWeeklyDues($rate, $settings) * $weeksWithHours, 2);
+            $unionDues = round($this->calculateWeeklyDues($rate, $duesFormula) * $weeksWithHours, 2);
         }
         $row->setUnionDuesDeducted($unionDues);
 
-        $initiation = $this->calculateInitiationDeduction($employee, $row, $settings, $weeksWithHours);
+        $initiation = $this->calculateInitiationDeduction($employee, $row, $duesFormula, $weeksWithHours);
         $row->setInitiationFeesDeducted($initiation['deducted']);
         $row->setInitiationFeeRequired($initiation['required']);
         $row->setInitiationFeePaidToDate($initiation['paidToDate']);
@@ -501,15 +595,21 @@ class UfcwRemittanceReportService
     }
 
     /**
+     * @param array{
+     *   initiationFeeFullTime: float,
+     *   initiationFeePartTime: float,
+     *   initiationWeeklyMaxFullTime: float,
+     *   initiationWeeklyMaxPartTime: float
+     * } $duesFormula
      * @return array{deducted: float, required: float, paidToDate: float, remainingAfter: float}
      */
     private function calculateInitiationDeduction(
         Employee $employee,
         UfcwRemittanceEmployeeRow $row,
-        UfcwRemittanceSettings $settings,
+        array $duesFormula,
         int $weeksWithHours
     ): array {
-        $required = $this->resolveRequiredInitiationFee($row->getFtPtDesignation(), $settings);
+        $required = $this->resolveRequiredInitiationFee($row->getFtPtDesignation(), $duesFormula);
         $fee = $this->getDao()->getInitiationFee($employee->getEmpNumber());
         $paidToDate = $fee ? (float) $fee->getAmountPaid() : 0.0;
         if ($fee && (float) $fee->getFeeRequired() > 0) {
@@ -519,7 +619,7 @@ class UfcwRemittanceReportService
         }
 
         $remaining = max(0.0, $required - $paidToDate);
-        $weeklyMax = $this->resolveInitiationWeeklyMax($row->getFtPtDesignation(), $settings);
+        $weeklyMax = $this->resolveInitiationWeeklyMax($row->getFtPtDesignation(), $duesFormula);
         $cap = $weeklyMax * max(0, $weeksWithHours);
         $deducted = $remaining > 0 && $weeksWithHours > 0
             ? round(min($remaining, $cap), 2)
@@ -533,35 +633,49 @@ class UfcwRemittanceReportService
         ];
     }
 
-    private function resolveRequiredInitiationFee(string $designation, UfcwRemittanceSettings $settings): float
+    /**
+     * @param array{initiationFeeFullTime: float, initiationFeePartTime: float} $duesFormula
+     */
+    private function resolveRequiredInitiationFee(string $designation, array $duesFormula): float
     {
         if ($designation === self::DESIGNATION_FULL_TIME) {
-            return $settings->getInitiationFeeFullTime();
+            return (float) $duesFormula['initiationFeeFullTime'];
         }
         if ($designation === self::DESIGNATION_PART_TIME) {
-            return $settings->getInitiationFeePartTime();
-        }
-        return 0.0;
-    }
-
-    private function resolveInitiationWeeklyMax(string $designation, UfcwRemittanceSettings $settings): float
-    {
-        if ($designation === self::DESIGNATION_FULL_TIME) {
-            return $settings->getInitiationWeeklyMaxFullTime();
-        }
-        if ($designation === self::DESIGNATION_PART_TIME) {
-            return $settings->getInitiationWeeklyMaxPartTime();
+            return (float) $duesFormula['initiationFeePartTime'];
         }
         return 0.0;
     }
 
     /**
+     * @param array{initiationWeeklyMaxFullTime: float, initiationWeeklyMaxPartTime: float} $duesFormula
+     */
+    private function resolveInitiationWeeklyMax(string $designation, array $duesFormula): float
+    {
+        if ($designation === self::DESIGNATION_FULL_TIME) {
+            return (float) $duesFormula['initiationWeeklyMaxFullTime'];
+        }
+        if ($designation === self::DESIGNATION_PART_TIME) {
+            return (float) $duesFormula['initiationWeeklyMaxPartTime'];
+        }
+        return 0.0;
+    }
+
+    /**
+     * Prefer the PIM job hourly rate. Salary components are a fallback only,
+     * because those amounts are often annual or monthly, not an hourly rate.
+     *
      * @return array{0: ?float, 1: string[]}
      */
     private function resolveHourlyRate(Employee $employee): array
     {
-        $salaries = $this->getDao()->getEmployeeSalaries($employee->getEmpNumber());
         $flags = [];
+        $pimRate = $employee->getHourlyRate();
+        if ($pimRate !== null && $pimRate !== '' && is_numeric($pimRate) && (float) $pimRate > 0) {
+            return [(float) $pimRate, $flags];
+        }
+
+        $salaries = $this->getDao()->getEmployeeSalaries($employee->getEmpNumber());
         if (count($salaries) === 0) {
             $flags[] = 'Missing rate of pay';
             return [null, $flags];
@@ -705,12 +819,13 @@ class UfcwRemittanceReportService
 
         $sheet->setCellValue('P3', $this->label('Reporting Rules'));
         $sheet->getStyle('P3')->getFont()->setBold(true);
+        $duesFormula = $report['duesFormula'] ?? $this->resolveDuesFormula($settings);
         $sheet->setCellValue(
             'P4',
             sprintf(
                 'Weekly dues = Hourly rate × %s + $%s',
-                rtrim(rtrim(number_format($settings->getDuesHourlyMultiplier(), 4, '.', ''), '0'), '.'),
-                number_format($settings->getDuesWeeklyFlatFee(), 2)
+                rtrim(rtrim(number_format((float) $duesFormula['duesHourlyMultiplier'], 4, '.', ''), '0'), '.'),
+                number_format((float) $duesFormula['duesWeeklyFlatFee'], 2)
             )
         );
         $sheet->setCellValue('P5', $this->label('Remittance deadline'));
@@ -882,12 +997,13 @@ class UfcwRemittanceReportService
         $sheet->setCellValue('A15', $this->label('Employee type'));
         $sheet->setCellValue('B15', $this->label('Total initiation fee'));
         $sheet->setCellValue('C15', $this->label('Maximum weekly deduction'));
+        $duesFormula = $report['duesFormula'] ?? $this->resolveDuesFormula($settings);
         $sheet->setCellValue('A16', $this->label('Full-time'));
-        $sheet->setCellValue('B16', $settings->getInitiationFeeFullTime());
-        $sheet->setCellValue('C16', $settings->getInitiationWeeklyMaxFullTime());
+        $sheet->setCellValue('B16', $duesFormula['initiationFeeFullTime']);
+        $sheet->setCellValue('C16', $duesFormula['initiationWeeklyMaxFullTime']);
         $sheet->setCellValue('A17', $this->label('Part-time'));
-        $sheet->setCellValue('B17', $settings->getInitiationFeePartTime());
-        $sheet->setCellValue('C17', $settings->getInitiationWeeklyMaxPartTime());
+        $sheet->setCellValue('B17', $duesFormula['initiationFeePartTime']);
+        $sheet->setCellValue('C17', $duesFormula['initiationWeeklyMaxPartTime']);
         $sheet->getStyle('B16:C17')->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_CURRENCY_USD_SIMPLE);
 
         $sheet->setCellValue('A19', $this->label('Submission Instructions'));
@@ -906,10 +1022,12 @@ class UfcwRemittanceReportService
 
     /**
      * @param \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet
+     * @param array<string, mixed> $report
      * @param UfcwRemittanceSettings $settings
      */
-    private function buildInstructionsSheet($sheet, UfcwRemittanceSettings $settings): void
+    private function buildInstructionsSheet($sheet, array $report, UfcwRemittanceSettings $settings): void
     {
+        $duesFormula = $report['duesFormula'] ?? $this->resolveDuesFormula($settings);
         $sheet->mergeCells('A1:F1');
         $sheet->setCellValue('A1', 'UFCW Monthly Remittance Report — Instructions');
         $sheet->getStyle('A1')->getFont()->setBold(true)->setSize(14);
@@ -927,23 +1045,23 @@ class UfcwRemittanceReportService
             13 => 'Total Deducted — Regular dues + initiation fees',
             14 => 'Reason No Deduction — Required when both deduction columns are zero',
             15 => 'Weekly dues formula — Hourly rate × '
-                . $settings->getDuesHourlyMultiplier()
+                . $duesFormula['duesHourlyMultiplier']
                 . ' + $'
-                . number_format($settings->getDuesWeeklyFlatFee(), 2)
-                . ' (configurable in UFCW Remittance Settings)',
+                . number_format((float) $duesFormula['duesWeeklyFlatFee'], 2)
+                . ' (from Admin membership when rate-based; otherwise UFCW Remittance Settings)',
             16 => 'Remittance deadline — 15th of the month following the report month',
             17 => 'Bargaining-unit membership — Employees assigned the configured Admin membership type',
             18 => 'Ambiguous cases (multiple rates, status changes, etc.) are flagged for human review',
             20 => 'Example calculation: $20.00/hr → weekly dues = (20 × '
-                . $settings->getDuesHourlyMultiplier()
+                . $duesFormula['duesHourlyMultiplier']
                 . ') + '
-                . number_format($settings->getDuesWeeklyFlatFee(), 2)
+                . number_format((float) $duesFormula['duesWeeklyFlatFee'], 2)
                 . ' = $'
-                . number_format($this->calculateWeeklyDues(20.0, $settings), 2),
-            21 => 'Full-time initiation fee: $' . number_format($settings->getInitiationFeeFullTime(), 2)
-                . ' (max $' . number_format($settings->getInitiationWeeklyMaxFullTime(), 2) . '/week)',
-            22 => 'Part-time initiation fee: $' . number_format($settings->getInitiationFeePartTime(), 2)
-                . ' (max $' . number_format($settings->getInitiationWeeklyMaxPartTime(), 2) . '/week)',
+                . number_format($this->calculateWeeklyDues(20.0, $duesFormula), 2),
+            21 => 'Full-time initiation fee: $' . number_format((float) $duesFormula['initiationFeeFullTime'], 2)
+                . ' (max $' . number_format((float) $duesFormula['initiationWeeklyMaxFullTime'], 2) . '/week)',
+            22 => 'Part-time initiation fee: $' . number_format((float) $duesFormula['initiationFeePartTime'], 2)
+                . ' (max $' . number_format((float) $duesFormula['initiationWeeklyMaxPartTime'], 2) . '/week)',
             26 => 'Privacy — SIN and personal contact details must be transmitted securely and only to authorized recipients.',
             27 => 'Do not post this workbook to shared drives without access controls.',
             31 => 'Source — Approved timesheets, PIM employee master data, Admin membership assignments, and UFCW remittance settings.',

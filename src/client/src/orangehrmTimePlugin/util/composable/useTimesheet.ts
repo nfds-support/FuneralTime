@@ -66,6 +66,7 @@ export default function useTimesheet(
             ...day,
             onCall: !!day.onCall,
             breakDuration: day.breakDuration || '00:00',
+            removalHours: day.removalHours || '00:00',
           }));
           data.length === 0 && noRecordsFound();
         } else {

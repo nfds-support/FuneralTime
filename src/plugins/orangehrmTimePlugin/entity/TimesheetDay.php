@@ -69,6 +69,15 @@ class TimesheetDay
     private int $breakDuration = 0;
 
     /**
+     * After-business-hours removal duration in seconds.
+     *
+     * @var int
+     *
+     * @ORM\Column(name="removal_hours", type="integer", options={"default" : 0})
+     */
+    private int $removalHours = 0;
+
+    /**
      * @return int
      */
     public function getId(): int
@@ -146,5 +155,21 @@ class TimesheetDay
     public function setBreakDuration(int $breakDuration): void
     {
         $this->breakDuration = max(0, $breakDuration);
+    }
+
+    /**
+     * @return int
+     */
+    public function getRemovalHours(): int
+    {
+        return $this->removalHours;
+    }
+
+    /**
+     * @param int $removalHours
+     */
+    public function setRemovalHours(int $removalHours): void
+    {
+        $this->removalHours = max(0, $removalHours);
     }
 }

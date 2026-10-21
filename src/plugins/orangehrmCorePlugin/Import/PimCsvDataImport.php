@@ -107,6 +107,20 @@ class PimCsvDataImport extends CsvDataImport
             case 'married':
                 $employee->setMaritalStatus(Employee::MARITAL_STATUS_MARRIED);
                 break;
+            case 'common-law':
+            case 'common law':
+                $employee->setMaritalStatus(Employee::MARITAL_STATUS_COMMON_LAW);
+                break;
+            case 'divorced':
+                $employee->setMaritalStatus(Employee::MARITAL_STATUS_DIVORCED);
+                break;
+            case 'separated':
+                $employee->setMaritalStatus(Employee::MARITAL_STATUS_SEPARATED);
+                break;
+            case 'widow':
+            case 'widowed':
+                $employee->setMaritalStatus(Employee::MARITAL_STATUS_WIDOW);
+                break;
             case 'other':
                 $employee->setMaritalStatus(Employee::MARITAL_STATUS_OTHER);
                 break;

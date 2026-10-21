@@ -18,7 +18,7 @@
  -->
 
 <template>
-  <oxd-form class="orangehrm-paper-container">
+  <oxd-form class="orangehrm-paper-container" @submit-valid="onFormSubmitValid">
     <div class="orangehrm-timesheet-header">
       <div class="orangehrm-timesheet-header--title">
         <slot name="header-title"></slot>
@@ -42,7 +42,11 @@
       ></oxd-alert>
     </div>
 
-    <div v-else class="orangehrm-timesheet-body">
+    <div
+      v-else
+      class="orangehrm-timesheet-body"
+      :class="{ '--editable': editable }"
+    >
       <table :class="tableClasses">
         <thead class="orangehrm-timesheet-table-header">
           <tr class="orangehrm-timesheet-table-header-row">
@@ -59,6 +63,11 @@
                 {{ day.holidayName || $t('time.statutory_holiday') }}
               </span>
             </th>
+            <th
+              class="orangehrm-timesheet-table-header-cell --center --freeze-right --period-total"
+            >
+              {{ $t('time.total_duration') }}
+            </th>
           </tr>
         </thead>
 
@@ -72,15 +81,16 @@
               :key="`start-${date}`"
               class="orangehrm-timesheet-table-body-cell --center --duration-input"
             >
-              <oxd-input-field
+              <timesheet-time-input
                 v-if="editable"
-                autocomplete="off"
-                :placeholder="'HH:MM'"
                 :model-value="getStartTime(date)"
                 @update:model-value="updateStartTime($event, date)"
               />
-              <span v-else>{{ getStartTime(date) || '—' }}</span>
+              <span v-else>{{ formatClockTime(getStartTime(date)) }}</span>
             </td>
+            <td
+              class="orangehrm-timesheet-table-body-cell --center --freeze-right"
+            ></td>
           </tr>
 
           <tr class="orangehrm-timesheet-table-body-row">
@@ -92,15 +102,16 @@
               :key="`end-${date}`"
               class="orangehrm-timesheet-table-body-cell --center --duration-input"
             >
-              <oxd-input-field
+              <timesheet-time-input
                 v-if="editable"
-                autocomplete="off"
-                :placeholder="'HH:MM'"
                 :model-value="getEndTime(date)"
                 @update:model-value="updateEndTime($event, date)"
               />
-              <span v-else>{{ getEndTime(date) || '—' }}</span>
+              <span v-else>{{ formatClockTime(getEndTime(date)) }}</span>
             </td>
+            <td
+              class="orangehrm-timesheet-table-body-cell --center --freeze-right"
+            ></td>
           </tr>
 
           <tr class="orangehrm-timesheet-table-body-row">
@@ -112,15 +123,20 @@
               :key="`break-${day.date}`"
               class="orangehrm-timesheet-table-body-cell --center --duration-input"
             >
-              <oxd-input-field
+              <input
                 v-if="editable"
+                class="timesheet-plain-input"
+                type="text"
                 autocomplete="off"
-                :placeholder="'HH:MM'"
-                :model-value="day.breakDuration || '00:00'"
-                @update:model-value="updateBreakDuration($event, index)"
+                placeholder="HH:MM"
+                :value="day.breakDuration || '00:00'"
+                @input="updateBreakDuration($event.target.value, index)"
               />
               <span v-else>{{ day.breakDuration || '00:00' }}</span>
             </td>
+            <td
+              class="orangehrm-timesheet-table-body-cell --center --freeze-right"
+            ></td>
           </tr>
 
           <tr class="orangehrm-timesheet-table-body-row --total">
@@ -133,6 +149,38 @@
               class="orangehrm-timesheet-table-body-cell --center --highlight"
             >
               {{ getTotalHours(date) }}
+            </td>
+            <td
+              class="orangehrm-timesheet-table-body-cell --center --highlight --freeze-right --period-total"
+            >
+              {{ periodTotal }}
+            </td>
+          </tr>
+
+          <tr class="orangehrm-timesheet-table-body-row --removal-hours">
+            <td class="orangehrm-timesheet-table-body-cell --freeze-left --label">
+              {{ $t('time.removal_hours') }}
+            </td>
+            <td
+              v-for="(day, index) in localDaysMeta"
+              :key="`removal-${day.date}`"
+              class="orangehrm-timesheet-table-body-cell --center --duration-input"
+            >
+              <input
+                v-if="editable"
+                class="timesheet-plain-input"
+                type="text"
+                autocomplete="off"
+                placeholder="HH:MM"
+                :value="day.removalHours || '00:00'"
+                @input="updateRemovalHours($event.target.value, index)"
+              />
+              <span v-else>{{ day.removalHours || '00:00' }}</span>
+            </td>
+            <td
+              class="orangehrm-timesheet-table-body-cell --center --freeze-right --period-total --highlight"
+            >
+              {{ removalHoursTotal }}
             </td>
           </tr>
 
@@ -148,17 +196,21 @@
               :key="`on-call-${day.date}`"
               class="orangehrm-timesheet-table-body-cell --center"
             >
-              <oxd-input-field
+              <input
                 v-if="editable"
-                v-model="localDaysMeta[index].onCall"
+                class="timesheet-plain-checkbox"
                 type="checkbox"
-                :true-value="true"
-                :false-value="false"
-                option-label=""
+                :checked="!!localDaysMeta[index].onCall"
+                @change="updateOnCall($event.target.checked, index)"
               />
               <oxd-text v-else tag="p">
                 {{ day.onCall ? $t('general.yes') : $t('general.no') }}
               </oxd-text>
+            </td>
+            <td
+              class="orangehrm-timesheet-table-body-cell --center --freeze-right --period-total --highlight"
+            >
+              {{ onCallYesCount }}
             </td>
           </tr>
         </tbody>
@@ -179,6 +231,7 @@
 <script>
 import {parseDate, parseTimeInSeconds} from '@ohrm/core/util/helper/datefns';
 import {OxdAlert, OxdSpinner} from '@ohrm/oxd';
+import TimesheetTimeInput from './TimesheetTimeInput.vue';
 
 export default {
   name: 'Timesheet',
@@ -186,6 +239,7 @@ export default {
   components: {
     'oxd-alert': OxdAlert,
     'oxd-loading-spinner': OxdSpinner,
+    'timesheet-time-input': TimesheetTimeInput,
   },
 
   props: {
@@ -225,53 +279,56 @@ export default {
     },
   },
 
-  emits: ['update:records', 'update:daysMeta'],
+  emits: ['update:records', 'update:daysMeta', 'submit-valid'],
 
   data() {
     return {
       localDaysMeta: [],
+      daysMetaFingerprint: null,
+      localRecords: [],
+      recordsFingerprint: null,
+      recordsEmitTimer: null,
+      daysMetaEmitTimer: null,
     };
   },
 
+  beforeUnmount() {
+    this.flushPendingEmits();
+  },
+
   watch: {
-    daysMeta: {
+    records: {
       immediate: true,
-      deep: true,
       handler(value) {
-        const dates = this.columns ? Object.keys(this.columns) : [];
-        if (value && value.length) {
-          this.localDaysMeta = JSON.parse(JSON.stringify(value)).map((day) => ({
-            date: day.date,
-            onCall: !!day.onCall,
-            breakDuration: day.breakDuration || '00:00',
-            isHoliday: !!day.isHoliday,
-            holidayName: day.holidayName || null,
-          }));
-        } else if (dates.length) {
-          this.localDaysMeta = dates.map((date) => ({
-            date,
-            onCall: false,
-            breakDuration: '00:00',
-            isHoliday: !!this.columns?.[date]?.isHoliday,
-            holidayName: null,
-          }));
-        } else {
-          this.localDaysMeta = [];
-        }
+        this.syncRecordsFromProp(value);
       },
     },
-    localDaysMeta: {
-      deep: true,
+    daysMeta: {
+      immediate: true,
       handler(value) {
-        if (!this.editable) return;
-        this.$emit('update:daysMeta', value);
+        this.syncDaysMetaFromProp(value);
       },
     },
     columns: {
       immediate: true,
       handler() {
+        if (this.loading) {
+          return;
+        }
+        if (
+          (!this.daysMeta || this.daysMeta.length === 0) &&
+          this.columns &&
+          Object.keys(this.columns).length
+        ) {
+          this.syncDaysMetaFromProp([]);
+        }
         this.ensureSingleRecord();
       },
+    },
+    loading(value) {
+      if (!value) {
+        this.ensureSingleRecord();
+      }
     },
   },
 
@@ -280,7 +337,7 @@ export default {
       return this.columns ? Object.keys(this.columns) : [];
     },
     clockRecord() {
-      return this.records?.[0] || {dates: {}};
+      return this.localRecords?.[0] || {dates: {}};
     },
     daysOfWeek() {
       const days = [
@@ -292,21 +349,26 @@ export default {
         this.$t('general.fri'),
         this.$t('general.sat'),
       ];
-      return this.days.map((day) => {
-        const date = parseDate(day, 'yyyy-MM-dd');
-        const meta = this.localDaysMeta.find((item) => item.date === day) || {};
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const dayNum = String(date.getDate()).padStart(2, '0');
-        return {
-          id: date.valueOf(),
-          day: date.getDate(),
-          dayLabel: day,
-          formattedDate: `${month}/${dayNum}`,
-          title: days[date.getDay()],
-          isHoliday: !!meta.isHoliday || !!this.columns?.[day]?.isHoliday,
-          holidayName: meta.holidayName || null,
-        };
-      });
+      return this.days
+        .map((day) => {
+          const date = parseDate(day, 'yyyy-MM-dd');
+          if (!date) {
+            return null;
+          }
+          const meta = this.localDaysMeta.find((item) => item.date === day) || {};
+          const month = String(date.getMonth() + 1).padStart(2, '0');
+          const dayNum = String(date.getDate()).padStart(2, '0');
+          return {
+            id: date.valueOf(),
+            day: date.getDate(),
+            dayLabel: day,
+            formattedDate: `${month}/${dayNum}`,
+            title: days[date.getDay()],
+            isHoliday: !!meta.isHoliday || !!this.columns?.[day]?.isHoliday,
+            holidayName: meta.holidayName || null,
+          };
+        })
+        .filter(Boolean);
     },
     tableClasses() {
       return {
@@ -315,23 +377,158 @@ export default {
         '--clock-layout': true,
       };
     },
+    periodTotal() {
+      if (this.editable || !this.subtotal) {
+        const seconds = this.days.reduce((sum, date) => {
+          return sum + Math.max(0, parseTimeInSeconds(this.getTotalHours(date)));
+        }, 0);
+        const hours = Math.floor(seconds / 3600)
+          .toString()
+          .padStart(2, '0');
+        const minutes = Math.floor((seconds % 3600) / 60)
+          .toString()
+          .padStart(2, '0');
+        return `${hours}:${minutes}`;
+      }
+      return this.subtotal;
+    },
+    onCallYesCount() {
+      return this.localDaysMeta.filter((day) => !!day.onCall).length;
+    },
+    removalHoursTotal() {
+      const seconds = this.localDaysMeta.reduce((sum, day) => {
+        return sum + Math.max(0, parseTimeInSeconds(day.removalHours || '00:00'));
+      }, 0);
+      const hours = Math.floor(seconds / 3600)
+        .toString()
+        .padStart(2, '0');
+      const minutes = Math.floor((seconds % 3600) / 60)
+        .toString()
+        .padStart(2, '0');
+      return `${hours}:${minutes}`;
+    },
   },
 
   methods: {
-    ensureSingleRecord() {
-      if (!this.editable || !this.columns) return;
-      if (this.records.length === 0) {
-        this.$emit('update:records', [{project: null, activity: null, dates: {}}]);
+    syncRecordsFromProp(value) {
+      const next = Array.isArray(value)
+        ? JSON.parse(JSON.stringify(value))
+        : [];
+      const fingerprint = JSON.stringify(next);
+      if (fingerprint === this.recordsFingerprint) {
+        return;
       }
+      this.recordsFingerprint = fingerprint;
+      this.localRecords = next;
+    },
+    syncDaysMetaFromProp(value) {
+      const dates = this.columns ? Object.keys(this.columns) : [];
+      let next = [];
+      if (value && value.length) {
+        next = value.map((day) => ({
+          date: day.date,
+          onCall: !!day.onCall,
+          breakDuration: day.breakDuration || '00:00',
+          removalHours: day.removalHours || '00:00',
+          isHoliday: !!day.isHoliday,
+          holidayName: day.holidayName || null,
+        }));
+      } else if (dates.length) {
+        next = dates.map((date) => ({
+          date,
+          onCall: false,
+          breakDuration: '00:00',
+          removalHours: '00:00',
+          isHoliday: !!this.columns?.[date]?.isHoliday,
+          holidayName: null,
+        }));
+      }
+      const fingerprint = JSON.stringify(next);
+      if (fingerprint === this.daysMetaFingerprint) {
+        return;
+      }
+      this.daysMetaFingerprint = fingerprint;
+      this.localDaysMeta = next;
+    },
+    emitDaysMeta() {
+      if (!this.editable) return;
+      const payload = this.localDaysMeta.map((day) => ({
+        date: day.date,
+        onCall: !!day.onCall,
+        breakDuration: day.breakDuration || '00:00',
+        removalHours: day.removalHours || '00:00',
+        isHoliday: !!day.isHoliday,
+        holidayName: day.holidayName || null,
+      }));
+      this.daysMetaFingerprint = JSON.stringify(payload);
+      if (this.daysMetaEmitTimer) {
+        clearTimeout(this.daysMetaEmitTimer);
+      }
+      this.daysMetaEmitTimer = setTimeout(() => {
+        this.daysMetaEmitTimer = null;
+        this.$emit('update:daysMeta', payload);
+      }, 120);
+    },
+    ensureSingleRecord() {
+      if (this.loading || !this.editable || !this.columns) return;
+      if (this.localRecords.length === 0) {
+        this.syncRecords([{project: null, activity: null, dates: {}}]);
+      }
+    },
+    flushPendingEmits() {
+      if (this.recordsEmitTimer) {
+        clearTimeout(this.recordsEmitTimer);
+        this.recordsEmitTimer = null;
+        this.$emit('update:records', this.localRecords);
+      }
+      if (this.daysMetaEmitTimer) {
+        clearTimeout(this.daysMetaEmitTimer);
+        this.daysMetaEmitTimer = null;
+        const payload = this.localDaysMeta.map((day) => ({
+          date: day.date,
+          onCall: !!day.onCall,
+          breakDuration: day.breakDuration || '00:00',
+          removalHours: day.removalHours || '00:00',
+          isHoliday: !!day.isHoliday,
+          holidayName: day.holidayName || null,
+        }));
+        this.$emit('update:daysMeta', payload);
+      }
+    },
+    onFormSubmitValid() {
+      this.flushPendingEmits();
+      this.$nextTick(() => {
+        this.$emit('submit-valid');
+      });
     },
     getEntry(date) {
       return this.clockRecord.dates?.[date] || null;
     },
     getStartTime(date) {
-      return this.getEntry(date)?.startTime ?? '';
+      return this.getEntry(date)?.startTime || null;
     },
     getEndTime(date) {
-      return this.getEntry(date)?.endTime ?? '';
+      return this.getEntry(date)?.endTime || null;
+    },
+    formatClockTime(value) {
+      if (!value || typeof value !== 'string') {
+        return '—';
+      }
+      const match = value.trim().match(/^(\d{1,2}):(\d{2})$/);
+      if (!match) {
+        return value;
+      }
+      let hour24 = Number(match[1]);
+      const minute = match[2];
+      if (Number.isNaN(hour24) || hour24 < 0 || hour24 > 23) {
+        return value;
+      }
+      const meridiem = hour24 >= 12 ? 'PM' : 'AM';
+      let hour12 = hour24 % 12;
+      if (hour12 === 0) {
+        hour12 = 12;
+      }
+      return `${hour12}:${minute} ${meridiem}`;
     },
     updateStartTime($value, date) {
       this.updateClockField('startTime', $value, date);
@@ -339,24 +536,56 @@ export default {
     updateEndTime($value, date) {
       this.updateClockField('endTime', $value, date);
     },
-    updateBreakDuration($value, index) {
+    updateOnCall($value, index) {
       const updated = [...this.localDaysMeta];
       updated[index] = {
         ...updated[index],
-        breakDuration: $value || '00:00',
+        onCall: !!$value,
       };
       this.localDaysMeta = updated;
+      this.emitDaysMeta();
+    },
+    updateBreakDuration($value, index) {
+      const nextBreak = $value || '00:00';
+      if ((this.localDaysMeta[index]?.breakDuration || '00:00') === nextBreak) {
+        return;
+      }
+      const updated = [...this.localDaysMeta];
+      updated[index] = {
+        ...updated[index],
+        breakDuration: nextBreak,
+      };
+      this.localDaysMeta = updated;
+      this.emitDaysMeta();
       this.recalculateDuration(updated[index].date);
     },
+    updateRemovalHours($value, index) {
+      const nextRemoval = $value || '00:00';
+      if ((this.localDaysMeta[index]?.removalHours || '00:00') === nextRemoval) {
+        return;
+      }
+      const updated = [...this.localDaysMeta];
+      updated[index] = {
+        ...updated[index],
+        removalHours: nextRemoval,
+      };
+      this.localDaysMeta = updated;
+      this.emitDaysMeta();
+    },
     updateClockField(field, $value, date) {
+      const nextValue = $value || null;
+      const previous = this.getEntry(date)?.[field] || null;
+      if (previous === nextValue) {
+        return;
+      }
       const current = {
         date,
         duration: this.getEntry(date)?.duration,
-        startTime: this.getEntry(date)?.startTime,
-        endTime: this.getEntry(date)?.endTime,
+        startTime: this.getEntry(date)?.startTime || null,
+        endTime: this.getEntry(date)?.endTime || null,
         id: this.getEntry(date)?.id,
         comment: this.getEntry(date)?.comment,
-        [field]: $value,
+        [field]: nextValue,
       };
       this.applyDuration(current);
       const dates = {...(this.clockRecord.dates || {}), [date]: current};
@@ -406,7 +635,15 @@ export default {
     },
     syncRecords(updated) {
       if (!this.editable) return;
-      this.$emit('update:records', updated);
+      this.localRecords = updated;
+      this.recordsFingerprint = JSON.stringify(updated);
+      if (this.recordsEmitTimer) {
+        clearTimeout(this.recordsEmitTimer);
+      }
+      this.recordsEmitTimer = setTimeout(() => {
+        this.recordsEmitTimer = null;
+        this.$emit('update:records', updated);
+      }, 120);
     },
   },
 };

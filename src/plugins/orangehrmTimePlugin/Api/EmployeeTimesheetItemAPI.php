@@ -218,10 +218,12 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
 
         $onCallByDate = [];
         $breakByDate = [];
+        $removalByDate = [];
         foreach ($this->getTimesheetService()->getTimesheetDao()->getTimesheetDaysByTimesheetId($timesheetId) as $day) {
             $ymd = $this->getDateTimeHelper()->formatDateTimeToYmd($day->getDate());
             $onCallByDate[$ymd] = $day->isOnCall();
             $breakByDate[$ymd] = $day->getBreakDuration();
+            $removalByDate[$ymd] = $day->getRemovalHours();
         }
 
         $daysMeta = [];
@@ -240,10 +242,12 @@ class EmployeeTimesheetItemAPI extends Endpoint implements CrudEndpoint
             ];
             $holiday = $this->getHolidayService()->getHolidayDao()->getHolidayByDate($column->getDate());
             $breakSeconds = $breakByDate[$date] ?? 0;
+            $removalSeconds = $removalByDate[$date] ?? 0;
             $daysMeta[] = [
                 'date' => $date,
                 'onCall' => $onCallByDate[$date] ?? false,
                 'breakDuration' => $this->getNormalizedTotalDuration($breakSeconds)['label'],
+                'removalHours' => $this->getNormalizedTotalDuration($removalSeconds)['label'],
                 'isHoliday' => $columns[$date]['isHoliday'],
                 'holidayName' => $holiday?->getName(),
             ];

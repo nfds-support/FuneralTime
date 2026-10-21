@@ -37,12 +37,18 @@ class MembershipModel implements Normalizable
             [
                 'id',
                 'name',
+                'duesMode',
+                'duesHourlyMultiplier',
+                'duesWeeklyFlatFee',
             ]
         );
         $this->setAttributeNames(
             [
                 'id',
-                'label'
+                'label',
+                'duesMode',
+                'duesHourlyMultiplier',
+                'duesWeeklyFlatFee',
             ]
         );
     }

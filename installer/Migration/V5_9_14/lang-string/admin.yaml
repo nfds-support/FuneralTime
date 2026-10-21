@@ -37,7 +37,7 @@ langStrings:
     value: 'Body (HTML)'
   -
     unitId: email_template_twig_hint
-    value: 'Use Twig placeholders such as {{ employeeName }} or {{ reportMonthLabel }}. Leave HTML tags intact for formatting.'
+    value: 'Use Twig placeholders such as ''{{ employeeName }}'' or ''{{ reportMonthLabel }}''. Leave HTML tags intact for formatting.'
   -
     unitId: reset_to_default
     value: 'Reset to Default'

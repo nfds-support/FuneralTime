@@ -51,7 +51,7 @@ class UiLanguageAPI extends Endpoint implements ResourceEndpoint
     {
         $service = $this->getUiLanguageService();
         return new EndpointResourceResult(ArrayModel::class, [
-            'language' => $service->resolveCurrentLanguage($this->getRequest()),
+            'language' => $service->resolveCurrentLanguage($this->getRequest()->getHttpRequest()),
             'languages' => $service->getSelectableLanguages(),
         ]);
     }
@@ -73,7 +73,7 @@ class UiLanguageAPI extends Endpoint implements ResourceEndpoint
     {
         $langCode = $this->getRequestParams()->getString(RequestParams::PARAM_TYPE_BODY, self::PARAMETER_LANGUAGE);
         $service = $this->getUiLanguageService();
-        $langCode = $service->setCurrentLanguage($langCode, $this->getRequest());
+        $langCode = $service->setCurrentLanguage($langCode);
 
         return new EndpointResourceResult(ArrayModel::class, [
             'language' => $langCode,

@@ -1,0 +1,9 @@
+langStrings:
+  -
+    unitId: payroll_period_create_hint
+    value: 'To add a period: enter the number (e.g. 19 or P19), the dates, then click Save Period. Select it above and click View.'
+    note: ''
+  -
+    unitId: save_payroll_period
+    value: 'Save Period'
+    note: ''

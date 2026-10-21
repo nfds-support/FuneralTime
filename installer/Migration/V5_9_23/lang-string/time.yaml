@@ -1,0 +1,5 @@
+langStrings:
+  -
+    unitId: dues_fallback_hint
+    value: 'These amounts apply only when the bargaining-unit membership has no formula (flat mode or empty fields). Prefer Admin → Memberships as the source of truth for letter rates.'
+    note: ''
