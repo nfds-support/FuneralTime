@@ -1,0 +1,41 @@
+apiv2_time_schedule_week:
+  description: 'API-v2 Time - Employee Schedule Week'
+  api: OrangeHRM\Time\Api\ScheduleWeekAPI
+  module: time
+  allowed: { read: true, create: false, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false } }
+
+apiv2_time_schedule_shift_types:
+  description: 'API-v2 Time - Employee Schedule Shift Types'
+  api: OrangeHRM\Time\Api\ScheduleShiftTypeAPI
+  module: time
+  allowed: { read: true, create: false, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: true, create: false, update: false, delete: false } }
+    - { role: Supervisor, permission: { read: true, create: false, update: false, delete: false } }
+
+apiv2_time_schedule_assignments:
+  description: 'API-v2 Time - Employee Schedule Assignments'
+  api: OrangeHRM\Time\Api\ScheduleAssignmentAPI
+  module: time
+  allowed: { read: false, create: false, update: true, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: false, create: false, update: true, delete: false } }
+
+apiv2_time_schedule_on_call:
+  description: 'API-v2 Time - Employee Schedule On-Call'
+  api: OrangeHRM\Time\Api\ScheduleOnCallAPI
+  module: time
+  allowed: { read: false, create: false, update: true, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: false, create: false, update: true, delete: false } }
+
+apiv2_time_schedule_copy_week:
+  description: 'API-v2 Time - Employee Schedule Copy Week'
+  api: OrangeHRM\Time\Api\ScheduleCopyWeekAPI
+  module: time
+  allowed: { read: false, create: true, update: false, delete: false }
+  permissions:
+    - { role: Admin, permission: { read: false, create: true, update: false, delete: false } }

@@ -424,3 +424,40 @@ time_employee_fuel_banked_time:
   path: /time/viewEmployeeFuelBankedTime
   controller: OrangeHRM\Time\Controller\EmployeeFuelBankedTimeController::handle
   methods: [ GET ]
+
+apiv2_time_schedule_week:
+  path: /api/v2/time/schedule/week
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET ]
+  defaults:
+    _api: OrangeHRM\Time\Api\ScheduleWeekAPI
+
+apiv2_time_schedule_shift_types:
+  path: /api/v2/time/schedule/shift-types
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ GET ]
+  defaults:
+    _api: OrangeHRM\Time\Api\ScheduleShiftTypeAPI
+
+apiv2_time_schedule_assignments:
+  path: /api/v2/time/schedule/assignments
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ PUT ]
+  defaults:
+    id: 0
+    _api: OrangeHRM\Time\Api\ScheduleAssignmentAPI
+
+apiv2_time_schedule_on_call:
+  path: /api/v2/time/schedule/on-call
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ PUT ]
+  defaults:
+    id: 0
+    _api: OrangeHRM\Time\Api\ScheduleOnCallAPI
+
+apiv2_time_schedule_copy_week:
+  path: /api/v2/time/schedule/copy-week
+  controller: OrangeHRM\Core\Controller\Rest\V2\GenericRestController::handle
+  methods: [ POST ]
+  defaults:
+    _api: OrangeHRM\Time\Api\ScheduleCopyWeekAPI

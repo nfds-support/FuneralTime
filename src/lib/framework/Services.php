@@ -332,6 +332,8 @@ final class Services
      */
     public const TIMESHEET_REMINDER_SERVICE = 'time.timesheet_reminder_service';
 
+    public const SCHEDULE_SERVICE = 'time.schedule_service';
+
     /**
      * @see \OrangeHRM\Leave\Service\LeaveEntitlementTransactionService
      */

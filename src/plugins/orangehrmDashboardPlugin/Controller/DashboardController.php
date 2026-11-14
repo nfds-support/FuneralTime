@@ -45,6 +45,7 @@ class DashboardController extends AbstractVueController
             'dashboard_time_widget',
             'dashboard_buzz_widget',
             'dashboard_employees_on_leave_today_config',
+            'time_schedule',
         ];
 
         $permissions = $this->getUserRoleManagerHelper()

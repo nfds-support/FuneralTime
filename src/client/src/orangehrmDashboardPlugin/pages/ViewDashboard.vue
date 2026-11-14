@@ -18,44 +18,49 @@
  -->
 
 <template>
-  <oxd-grid class="orangehrm-dashboard-grid" :cols="3">
-    <oxd-grid-item
-      v-if="$can.read('dashboard_time_widget')"
-      class="orangehrm-dashboard-widget"
-    >
-      <employee-attendance-widget></employee-attendance-widget>
-    </oxd-grid-item>
-    <oxd-grid-item class="orangehrm-dashboard-widget">
-      <my-action-summary-widget></my-action-summary-widget>
-    </oxd-grid-item>
-    <oxd-grid-item class="orangehrm-dashboard-widget">
-      <quick-launch-widget></quick-launch-widget>
-    </oxd-grid-item>
-    <oxd-grid-item
-      v-if="$can.read('dashboard_buzz_widget')"
-      class="orangehrm-dashboard-widget"
-    >
-      <buzz-latest-post-widget></buzz-latest-post-widget>
-    </oxd-grid-item>
-    <oxd-grid-item
-      v-if="$can.read('dashboard_leave_widget')"
-      class="orangehrm-dashboard-widget"
-    >
-      <employees-on-leave-widget></employees-on-leave-widget>
-    </oxd-grid-item>
-    <oxd-grid-item
-      v-if="$can.read('dashboard_subunit_widget')"
-      class="orangehrm-dashboard-widget"
-    >
-      <employee-subunit-widget></employee-subunit-widget>
-    </oxd-grid-item>
-    <oxd-grid-item
-      v-if="$can.read('dashboard_location_widget')"
-      class="orangehrm-dashboard-widget"
-    >
-      <employee-location-widget></employee-location-widget>
-    </oxd-grid-item>
-  </oxd-grid>
+  <div class="orangehrm-dashboard">
+    <schedule-calendar-widget
+      v-if="$can.read('time_schedule')"
+    ></schedule-calendar-widget>
+    <oxd-grid class="orangehrm-dashboard-grid" :cols="3">
+      <oxd-grid-item
+        v-if="$can.read('dashboard_time_widget')"
+        class="orangehrm-dashboard-widget"
+      >
+        <employee-attendance-widget></employee-attendance-widget>
+      </oxd-grid-item>
+      <oxd-grid-item class="orangehrm-dashboard-widget">
+        <my-action-summary-widget></my-action-summary-widget>
+      </oxd-grid-item>
+      <oxd-grid-item class="orangehrm-dashboard-widget">
+        <quick-launch-widget></quick-launch-widget>
+      </oxd-grid-item>
+      <oxd-grid-item
+        v-if="$can.read('dashboard_buzz_widget')"
+        class="orangehrm-dashboard-widget"
+      >
+        <buzz-latest-post-widget></buzz-latest-post-widget>
+      </oxd-grid-item>
+      <oxd-grid-item
+        v-if="$can.read('dashboard_leave_widget')"
+        class="orangehrm-dashboard-widget"
+      >
+        <employees-on-leave-widget></employees-on-leave-widget>
+      </oxd-grid-item>
+      <oxd-grid-item
+        v-if="$can.read('dashboard_subunit_widget')"
+        class="orangehrm-dashboard-widget"
+      >
+        <employee-subunit-widget></employee-subunit-widget>
+      </oxd-grid-item>
+      <oxd-grid-item
+        v-if="$can.read('dashboard_location_widget')"
+        class="orangehrm-dashboard-widget"
+      >
+        <employee-location-widget></employee-location-widget>
+      </oxd-grid-item>
+    </oxd-grid>
+  </div>
 </template>
 
 <script>
@@ -67,6 +72,7 @@ import MyActionSummaryWidget from '@/orangehrmDashboardPlugin/components/MyActio
 import EmployeeLocationWidget from '@/orangehrmDashboardPlugin/components/EmployeeLocationWidget.vue';
 import EmployeesOnLeaveWidget from '@/orangehrmDashboardPlugin/components/EmployeesOnLeaveWidget.vue';
 import EmployeeAttendanceWidget from '@/orangehrmDashboardPlugin/components/EmployeeAttendanceWidget.vue';
+import ScheduleCalendarWidget from '@/orangehrmDashboardPlugin/components/ScheduleCalendarWidget.vue';
 
 export default {
   components: {
@@ -77,6 +83,7 @@ export default {
     'employee-location-widget': EmployeeLocationWidget,
     'employees-on-leave-widget': EmployeesOnLeaveWidget,
     'employee-attendance-widget': EmployeeAttendanceWidget,
+    'schedule-calendar-widget': ScheduleCalendarWidget,
   },
   mounted() {
     const http = new APIService(window.appGlobal.baseUrl, '/events/push');
@@ -86,6 +93,10 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.orangehrm-dashboard {
+  width: 100%;
+}
+
 .orangehrm-dashboard-grid {
   margin: 0 auto;
   box-sizing: border-box;
