@@ -36,6 +36,7 @@ use OrangeHRM\Time\Service\CustomerService;
 use OrangeHRM\Time\Service\FuelBankedTimeService;
 use OrangeHRM\Time\Service\PayrollPeriodService;
 use OrangeHRM\Time\Service\ProjectService;
+use OrangeHRM\Time\Service\ScheduleService;
 use OrangeHRM\Time\Service\TimesheetReminderService;
 use OrangeHRM\Time\Service\TimesheetService;
 use OrangeHRM\Time\Service\UfcwRemittanceReportService;
@@ -64,6 +65,7 @@ class TimePluginConfiguration implements
         $this->getContainer()->register(Services::UFCW_REMITTANCE_REPORT_SERVICE, UfcwRemittanceReportService::class);
         $this->getContainer()->register(Services::UFCW_REMITTANCE_SETTINGS_SERVICE, UfcwRemittanceSettingsService::class);
         $this->getContainer()->register(Services::TIMESHEET_REMINDER_SERVICE, TimesheetReminderService::class);
+        $this->getContainer()->register(Services::SCHEDULE_SERVICE, ScheduleService::class);
 
         $this->getEventDispatcher()->addSubscriber(new TimesheetPeriodSubscriber());
     }
